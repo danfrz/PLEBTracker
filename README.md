@@ -1,6 +1,6 @@
 # PLEBTracker
 PLEBTracker is an ncurses based audio tracker program inspired by goattracker and milkytracker.
-It produces noise by piping raw unsigned bytes into aplay.
+![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/screenshot/plebtracker.png)
 
 PLEBTracker is something I wrote because I wanted to have some experience with audio,
 and wanted to implement what I've been learning by using other trackers.
