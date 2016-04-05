@@ -16,7 +16,8 @@ or some equivalent and run "./PLEBInterpreter song.plb | aplay".
 
 Update:
 There is now a bashscript `plebtrk` that allows for playback within the tracker,
-but I won't go into the details of that in this document.
+but I won't go into the details of that in this document, just know: run plebtrk,
+not plebtrkraw.
 
 
   --Navigating the tracker
@@ -52,7 +53,7 @@ structures:
   DIV,`segments`, or `inter-row resolution` subdivides each row into multiple
   segments, which effectively controls how fast instruments progress on the
   wave table and volume table. The higher DIV gets, tracks iterate through the
-  tables faster within a row.
+  tables faster within the duration of a single row.
 
 ///////////////////////////////////////////////////////////////////////////////
   --Pattern Editor
