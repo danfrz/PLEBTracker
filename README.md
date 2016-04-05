@@ -12,3 +12,5 @@ You can listen to some examples of (unfinished) songs written in this tracker in
 
 The most efficient and effective way to perform actions in the interface, outside of the pattern editor is by using the vim-like command bar, which is shown by pressing ':'.
 Those commands and other binds can be reviewed on the plebtrkraw(1) man page.
+
+If you're interested, look through the docs folder, the manual provides a good introduction to the tracker (I hope) and wavetable.svg details what synths/wave generators have been implemented so far.
