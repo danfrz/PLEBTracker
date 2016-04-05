@@ -8,6 +8,10 @@ and wanted to implement what I've been learning by using other trackers.
 With this program, like other trackers, you can compose music (.plb modules) and listen to them.
 All of the sounds produced in this tracker are synthesized, meaning there are no samples.
 
+To install, git pull this repo, cd to ./Tracker/src and ./Interpreter/src and run make, then the install bashscripts.
+To compile, you must have the ncurses library installed.
+In order to have playback you must have inotifywait (on Archlinux included in package inotify-tools) and aplay (alsa-utils.)
+
 You can listen to some examples of (unfinished) songs written in this tracker in the examples/render directory.
 
 The most efficient and effective way to perform actions in the interface, outside of the pattern editor is by using the vim-like command bar, which is shown by pressing ':'.
