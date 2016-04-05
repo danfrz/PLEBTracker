@@ -1,0 +1,59 @@
+|||||||||||||||General||||||||||||||||||||||||||||||||||||||||||||
+[TAB] +   Select...
+ ..q    Metadata window
+ ..w    Pattern window
+ ..a    Volume table
+ ..s    Instrument window
+ ..e/d  Wave table
+
+The number spinners support PGUP, PGDOWN, HOME, END
+The textboxes support HOME, END, INS, DEL
+
+To edit a UI element, press ENTER, to cancel press TAB
+
+SHIFT +
+ ..u    Save
+ ..o    Open
+ ..p    New
+
+ ..h    Quick Change Instrument
+ ..j    Quick Change Wave Index
+
+ ..k    Quick Change Order
+ ..l    Select Order operations
+ ..:    Decrement Order
+ .."    Increment Order
+
+ ..n    Quick Change Pattern
+ ..<    Select Pattern operations
+ ..>    Decrement Pattern
+ ..?    Increment Pattern
+
+
+||||||||||||Pattern Editor||||||||||||||||||||||||||||||||||||||||
+> Pattern Editor supports HOME, END, PGUP, PGDN
+
+SHIFT +
+ ..{1..7} to Select Octave {1..7}
+
+
+In pattern editor, press ENTER to copy an entry
+   When an entry is copied, that entry's instrument is selected and
+   the selected row of the Wave Table is set to the wave index
+   pointed to by that entry's instrument.
+   press SPACE to paste it.
+
+
+||||||||||||||Wave Table||||||||||||||||||||||||||||||||||||||||||
+> Wave Table supports HOME, END, PGUP, PGDN, INS, DEL
+
+In wave table, press 'n' to negate the right byte of selected row
+e.g. |0000|01 0C| -> |0000|01 F4|
+
+In wave table, press ENTER to copy an entry
+   press SPACE to paste it.
+
+
+|||||||||||||Volume Table||||||||||||||||||||||||||||||||||||||||||
+> Volume Table supports HOME, END, PGUP, PGDN, INST, DEL
+

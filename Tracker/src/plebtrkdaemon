@@ -1,0 +1,80 @@
+#!/bin/bash
+
+function stop_playback
+{
+    aplaypid=`ps | grep aplay`
+    aplaypid=${aplaypid%%p*aplay}
+    while [ $aplaypid ]
+    do
+        kill $aplaypid
+        aplaypid=`ps | grep aplay`
+        aplaypid=${aplaypid%%p*aplay}
+    done
+}
+
+function clean_plebtrk_temp
+{
+    #loop through the files in tmp plebtrk directory
+    #for old unused files
+    for f in /var/tmp/plebtrk/*
+    do
+        if [[ $f != *"signal" ]]
+        then
+            continue
+        fi
+        #substring the numbers in front of all signal files
+        NUMPATH=${f%signal}
+        NUM=${NUMPATH##/*/}
+        #check if there is a process using this PID
+        if [ $NUM ] &&  ! `ps -p $NUM > /dev/null` 
+        then 
+            rm -f $f
+            rm -f "$NUMPATH"playback.plb
+        fi
+
+    done
+}
+
+
+clean_plebtrk_temp
+
+if [[ ("$#" < 1) ]] ; then
+    TEMPDIR="/var/tmp/plebtrk/"
+else
+    TEMPDIR="/var/tmp/plebtrk/$1"
+fi
+
+echo "" > "$TEMPDIR"signal
+
+#make sure the process cleans up
+#catch termination call and break
+#from loop when caught
+#trap "rm -f $TEMPDIR""signal; rm -f $TEMPDIR""playback.plb;" SIGINT SIGTERM SIGHUP
+
+while inotifywait -qqe close_write "$TEMPDIR"signal ; do
+    FULLCMD=`tail "$TEMPDIR"signal --lines 1`
+    CMD=${FULLCMD:0:1}
+    
+    case "$CMD" in
+        p) #Play
+            stop_playback
+            #When plebitp is killed bash outputs "job killed! :D"
+            #so silence it by piping cerr to null
+            plebplay "$TEMPDIR"playback.plb $AMP $MUTE  2>/dev/null &
+            ;;
+        x) #Stop
+            stop_playback
+            ;;
+        m) #mute
+            MUTE=$FULLCMD
+            ;;
+        M) #unmute
+            MUTE=""
+            ;;
+        a) #amplify
+            AMP=$FULLCMD
+            ;;
+
+    esac
+done
+

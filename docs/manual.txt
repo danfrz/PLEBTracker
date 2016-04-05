@@ -1,0 +1,237 @@
+
+Thanks for checking out PLEBTracker! by Dan Frazier
+
+Inspired by demoscene and older trackers I decided to begin this project
+in January 2016. My goal for this was mostly just to get it to work as my
+first audio program, and I wanted some experience writing an audio program.
+
+///////////////////////////////////////////////////////////////////////////////
+/////////////////////       INTRODUCTION         //////////////////////////////
+
+  --Using the interpreter
+At this time PLEBTracker does not produce any sound, it produces a song (.plb)
+file. PLEBInterpreter reads the song file and outputs the raw data of the 
+interpretted song to stdout. To play the song you must have aplay (ALSA play)
+or some equivalent and run "./PLEBInterpreter song.plb | aplay".
+
+Update:
+There is now a bashscript `plebtrk` that allows for playback within the tracker,
+but I won't go into the details of that in this document.
+
+
+  --Navigating the tracker
+To select another window press TAB, then
+ + q   | Metadata window
+ + w   | Pattern editor
+ + a   | Instrument Volume table
+ + s   | Instrument window
+ + e/d | Wave table
+
+To change octave, hold SHIFT and press the number key according to the octave
+e.g. SHIFT + 1 = Octave 1
+
+
+
+
+
+  --Songs
+Songs contain the following
+fields:
+  | Bytes Per Row
+  | Inter-row Resolution
+  | 
+structures:
+  | Pattern list
+  | Order list
+  | Wave table
+  | Instrument list
+  |
+
+  BPR, Bytes per row determines the duration of one row in terms of bytes.
+
+  DIV,`segments`, or `inter-row resolution` subdivides each row into multiple
+  segments, which effectively controls how fast instruments progress on the
+  wave table and volume table. The higher DIV gets, tracks iterate through the
+  tables faster within a row.
+
+///////////////////////////////////////////////////////////////////////////////
+  --Pattern Editor
+Patterns contain the data used to determine what notes are played by what
+instruments at what time.
+
+note
+|   instrument
+|   |  volume
+|   |  |  effect
+v   v  v  v
+C-1 00 3F 303
+
+[HOME]/[END]  focusses the prev/next track
+[PGUP]/[PGDN] focusses 8 rows above/below
+
+The max volume in the pattern editor is 0x3F.
+
+///////////////////////////////////////////////////////////////////////////////
+  --Instrument
+fields:
+  | Wave index
+  |
+structures:
+  | Volume table
+  |
+
+  An instrument's Wave index points to the index
+  in the Wave table that this instrument corresponds to
+
+  --Volume Table
+  The volume table produces this instrument's volume envelope.
+
+     volume
+     |  segment duration 
+     v  v
+  00|VV DD|
+
+  The first entry in the volume table is the initial volume and has no duration
+  a volume of FF is reserved for jumps, so for instance a volume table like the following:
+
+  00|3f 00|
+  01|00 0F|
+  02|10 01|
+  03|06 01|
+  04|FF 02|
+
+  Would start out at 3F volume, decay to a volume of 0 after F segments,
+  (see BPR/DIV.) then it will loop...
+  02|10 01|
+  03|06 01|
+  forever, producing a Tremor effect
+
+  FA to FF are reserved for functions,
+  |FB XX| is Set loop counter
+  |FC XX| is Decrement loop counter, then jump if loop counter isn't 0
+  |FF XX| is Jump
+
+///////////////////////////////////////////////////////////////////////////////
+  --Wave Table
+  The wave table selects the sounds used by different instruments
+
+        Waveform
+        |  Semitone offset
+        v  v
+  |0000|WW TT|
+
+  progressing semitone offsets can produce an arpeggio effect:
+  |0000|01 00|
+  |0001|01 04|
+  |0002|01 07|
+  |0003|FF 00|
+
+  --Waveforms
+  00 - Silence
+  01 - Square (1/2 duty)
+  02 - Triangle
+  03 - Saw
+  04 - Sine
+  05 - Random
+
+  06 - Square (with duty)
+
+    These are the basic waveforms, as of now there are over 32 waveforms
+    all of which are detailed in the wavetable.svg vector graphic.
+
+The wave table also has functions:
+  FF - Jump
+
+  FB - Set loop counter
+  FC - Decrease loop counter, jump to location if loop counter != 0
+
+  FD - Set custom jump location
+  FE - Jump to custom jump location
+
+  F0 - Set pulse/duty cycle
+  F1 - Add to pulse/duty cycle
+
+  Note, that the wave table has 0x10000 indicies and the jump command
+  only goes from 00 to FF. To work around that, two adjacent FF or FD commands
+  can be used to jump to a higher index.
+
+  '>' signifies the entry point, where execution would begin (wave index)
+
+ >|0000|01 00|
+  |0001|FF 01| //jump to 0140
+  |0002|FF 40|
+  ...
+  |0140|01 03|
+  |0141|01 07|
+  |0142|FF 00|
+
+  FD command stores the provided index within a _track's_ parameters.
+  This is very powerful because that makes "procedures" possible.
+  Akin to a procedure in assembly programming.
+  Take for example this pulse procedure
+
+  Instrument with WaveIndex [0007]
+
+  |0002|F1 06| //Increment duty cycle
+  |0003|FE 00|
+  ...
+ >|0007|F0 20| //Set initial duty cycle
+  |0008|FD 08| //Set base to 08, instrument will return here after a procedure
+  |0009|01 00| //play arpeggio
+  |000A|01 03|
+  |000B|01 07|
+  |000C|FF 02|
+
+  --IMPORTANT--
+  Functions F0 - FF are evaluated instantly! So it is possible to make an
+  infinite loop that will freeze or crash the interpreter.
+  As long as a waveform is played, the wavetable won't get stuck.
+
+  This is no longer entirely true. Now instead of an infinite loop, if the interpreter goes through
+  upwards of some amount of jumps (30?) it will give up and choose waveform 0, silence.
+
+ >|0003|01 03| //Is safe
+  |0004|FF 03|
+
+ >|0003|FF 03| //Totally not safe
+
+ >|0003|FD 20| //Also not safe, FD is instantaneous
+  |0004|FF 03|
+
+  |0001|01 00| //Is safe, but weird.
+  |0002|FE 00|
+ >|0003|FD 00|
+  |0004|FF 01|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ --Wave Table
+
+
+
+
+
+
+
+

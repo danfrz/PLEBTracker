@@ -1,0 +1,27 @@
+#!/bin/bash
+
+song=$1
+songname=$(basename $song)
+songname="${songname%.*}"
+songfolder=$(dirname $song)
+renderfolder=$songfolder/render
+LOGPATH="/var/tmp/plebtrk/itplog.log"
+
+if [ ! -f "$song" ]
+then
+    echo "Song doesn't exist"
+    exit
+fi
+
+if [ ! -d "$renderfolder" ]
+then
+    mkdir $renderfolder
+    if [ ! -d "$renderfolder" ]
+    then
+        renderfolder=. #If you are a user you must at least have access to cwd
+        exit
+    fi
+fi
+
+plebitp "$@" 2>>$LOGPATH | flac -f -o "$renderfolder/$songname.flac" --sign=unsigned --endian=big --bps=8 --channels=1 --sample-rate=44100 -
+

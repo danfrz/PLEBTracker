@@ -1,0 +1,34 @@
+string[29]                     NAME
+short                          bytes_per_row
+short                          interrow_resolution
+byte                           tracks
+
+byte                           num_orders
+byte[0..num_orders]            orders
+
+short                          waveEntries
+short[0..waveEntries]          waveTable
+
+byte                           num_instruments
+Instrument[0..num_instruments] instruments
+   |--Instrument------------------------------
+   |string[23]          NAME
+   |short               waveIndex
+   |char                volRptStartIndex
+   |char                volRptEndIndex
+   |int                 volSustainIndex
+   |char                volEntries
+   |char[0..volEntries] volTable
+   |char[0..volEntries] volDurTable
+   |------------------------------------------
+
+byte                           num_patterns
+Pattern[0..num_patterns]       patterns
+   |--Pattern---------------------------------
+   |char                tracks
+   |char                rows
+   |int[0..tracks*rows] data
+   |------------------------------------------
+
+
+

@@ -1,0 +1,38 @@
+'\" t
+.\"     Title: plebitp
+.\"    Author: Dan Frazier
+.\"      Date: 04/03/2016
+.\"    Manual: PLEBTracker Manual
+.\"  Language: English
+.TH "PLEBITP" "1" "04/04/2016"
+.nh
+.ad l
+.SH "NAME"
+plebitp \- renders plb module and outputs raw bytes to stdout
+.SH "SYNOPSIS"
+.sp
+\fBplebitp\fR [\fIMODULE_PATH\fR]
+.sp
+.SH "DESCRIPTION"
+.sp
+\fBplebitp\fR reads a plb module and synthesizes waveforms to a buffer, mixes them together, then outputs them to stdout (unsigned 8 bit)\&.
+.SH "OPTIONS"
+\fBamp\fR|\fBamplify\fR|\fBgain\fR \fIAMP_RATE\fR
+.sp
+\fBorder\fR \fIORDER_START\fR 
+    plays from this order until the end of the song\&.
+.sp
+\fBendorder\fR \fIORDER_END\fR
+    plays from the first order to the end of this order\&.
+.sp
+\fBrow\fR \fIROW_START\fR 
+    starts at this row of the first order\&.
+.sp
+\fBendrow\fR \fIROW_END\fR 
+    ends on this row of the last order\&.
+.sp
+\fBmute\fR \fITRACK0,TRACK1,...,TRACKN\fR 
+    Mutes all of these tracks\&.
+.sp
+.SH "SEE ALSO"
+\fBplebplay\fR(1), \fBplebtrkdaemon\fR(1), \fBplebtrkraw\fR(1), \fBplebitp\fR(1), \fBplebrender\fR(1)

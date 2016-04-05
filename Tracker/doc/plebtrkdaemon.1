@@ -1,0 +1,25 @@
+'\" t
+.\"     Title: plebtrkdaemon
+.\"    Author: Dan Frazier
+.\"      Date: 04/03/2016
+.\"    Manual: PLEBTracker Manual
+.\"  Language: English
+.TH "PLEBTRKDAEMON" "1" "04/03/2016"
+.nh
+.ad l
+.SH "NAME"
+plebtrkdaemon \- Bashscript loop that responds to events fired from \fBplebtrkraw\fR
+.SH "SYNOPSIS"
+.sp
+\fBplebtrkdaemon\fR \fIPID\fR
+.sp
+.SH "DESCRIPTION"
+.sp
+\fBplebtrkdaemon\fR is responsible for audio playback from within PLEBTracker\&.
+.sp
+\fBplebtrkdaemon\fR waits for changes to /var/tmp/plebtrk/\fIPID\fRsignal and according to what the last line in that signal file is, it performs the appropriate action. If it is told to play a song it will play /var/tmp/plebtrk/\fIPID\fRplayback.plb\&.
+
+If no \fIPID\fR is provided (not recommended) it will use /var/tmp/{signal,playback.plb} but the daemon wont be tethered unless \fBplebtrkraw\fR also has no PID set.
+
+.SH "SEE ALSO"
+\fBplebplay\fR(1), \fBplebtrkraw\fR(1), \fBplebtrk\fR(1), \fBplebitp\fR(1), \fBplebrender\fR(1)

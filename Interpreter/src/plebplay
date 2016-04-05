@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [[ ("$#" < 1) ]] ; then
+    echo PLEBInterpreter requires at least one parameter
+    exit
+fi
+
+LOGPATH="/var/tmp/plebtrk/itplog.log"
+
+echo "" >"$LOGPATH"
+plebitp 2>>"$LOGPATH" "$@" | aplay --rate=44100 2>>"$LOGPATH"
+
+

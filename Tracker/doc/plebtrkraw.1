@@ -1,0 +1,236 @@
+'\" t
+.\"     Title: plebtrkraw
+.\"    Author: Dan Frazier
+.\"      Date: 04/03/2016
+.\"    Manual: PLEBTracker Manual
+.\"  Language: English
+.TH "PLEBTRKRAW" "1" "04/03/2016"
+.nh
+.ad l
+.SH "NAME"
+plebtrkraw \- Ncurses interface for PLEBTracker
+.SH "SYNOPSIS"
+.sp
+\fBplebtrkraw\fR 
+.sp
+.SH "DESCRIPTION"
+.sp
+\fBplebtrkraw\fR is the tracker program. It generally shouldn't be called directly by the user, instead \fBplebtrk\fR is called which starts the daemon and ties that daemon and this tracker together to enable audio playback\&.
+.sp
+If you do call this, pipe stderr somewhere otherwise it will go to the console and jumble the visual interface.
+.sp
+.SH "INTERFACE"
+There are 5 windows in the tracker. To focus one, press TAB and then another key to switch.
+Use arrow keys, HOME, END, PAGEUP, PAGEDN to maneuver.
+.sp
+Metadata Window (\fBTAB + q\fR)
+    Contains song title, order list, instrument selection, and other fields used to control operation of the tracker and song playback.
+.sp
+Pattern Editor (\fBTAB + w\fR)
+    Viewport and editor for the currently selected order's pattern.
+.sp
+Volume Table (\fBTAB + a\fR)
+    Volume envelope for the currently selected instrument.
+.sp
+Instrument Window (\fBTAB + s\fR)
+    Change an instrument's wave table index or manage instruments.
+.sp
+Wave Table (\fBTAB + d\fR || \fBTAB + e\fR)
+    Change the way instruments sound.
+.sp
+To edit a field, focus it and press ENTER. To cancel an edit, press TAB\&.
+.sp
+There are a couple of keybindings to keep in mind\&.
+.sp
+Change octaves quickly by holding shift and pressing the according number key (e.g. SHIFT+2 = Octave 1)
+.sp
+Previous Instrument (\fB_\fR)
+    Selects the previous instrument in the song's instrument list\&.
+.sp
+Next Instrument (\fB+\fR)
+    Selects the next instrument in the song's instrument list\&.
+.sp
+Quick Change Pattern (\fBJ\fR)
+    Edit the order's currently selected pattern index\&.
+.sp
+Quick Change Instrument (\fBK\fR)
+    Edit the instrument index\&.
+.sp
+Quick Change Wave Index (\fBL\fR)
+    Edit the currently selected instrument's wave index\&.
+.sp
+Some are only available in the Pattern Editor\&:
+.sp
+Previous Order (\fB{\fR)
+    Selects the previous order in the song's order list\&.
+.sp
+Next Order (\fB}\fR)
+    Selects the next order in the song's order list\&.
+.sp
+Previous Pattern (\fB>\fR)
+    Decrements the currently selected order's pattern\&.
+.sp
+Next Pattern (\fB?\fR)
+    Increments the currently selected order's pattern\&.
+.sp
+Set Playback Mark (\fBM\fR)
+    Sets the playback mark to the row at the pattern editor cursor\&.
+    The playback mark marks where automatic playback begins or ends\&.
+.sp
+
+.SH "COMMAND LINE"
+There are many commands available in PLEBTracker and you use them by typing ':'.
+.sp
+\fBSONG COMMANDS\fR
+.sp
+Quit ( :\fBq\fR )
+    Prompts to close the tracker\&.
+.sp
+Save ( :\fBw\fR [\fIPATH\fR] )
+    Prompts to save to the last used song path or the provided path\&.
+.sp
+Save and Quit ( :\fBwq\fR [\fIPATH\fR] )
+    Prompts to save and quit\&.
+.sp
+Open ( :\fBo\fR [\fIPATH\fR] )
+    If no parameter, the song is reloaded. Otherwise, the provided song is openned\&.
+.sp
+Reload ( :\fBe\fR )
+    Reloads the last song openned\&.
+.sp
+New ( :\fBn\fR [inst|order|ptrn] )
+    With no parameter, prompts to zap the song. Otherwise creates a new instrument, order or pattern\&.
+.sp
+\fBPATTERN EDITOR COMMANDS\fR
+.sp
+Delete ( :\fBd\fR [inst|order|ptrn|track [\fIWHICH\fR] ] | [row [\fILENGTH\fR [\fISTART_ROW\fR] ] ] )
+    With no parameter, deletes the selected row in the selected track\&.
+    The rest of the parameters remove the currently selected element\&,
+    unless a parameter telling which to remove is provided\&.
+    :\fBd\fR track only clears the track\&.
+.sp
+Delete Track ( :\fBdd\fR )
+    Clears all data in the selected track\&.
+.sp
+Clear Pattern ( :\fBddd\fR )
+    Clears all data in the selected pattern\&.
+.sp
+Copy ( :\fBy\fR [inst|order|ptrn|track] )
+    Clones the currently selected element of that type\&.
+    :\fBy track\fR refers to yy\&.
+.sp
+Copy Track Region ( :\fByy\fR \fITRACK\fR [\fIROW_BEGIN\fR [\fIROW_END\fR [\fIAMP_RATE\fR] ] ] )
+    Copies a region of entries of another track to the currently selected position in the pattern editor\&.
+    Can amplify the newly pasted region by a rate (1.0 amplifies nothing) which is useful for echo tracks\&.
+.sp
+Insert Row into Track ( :\fBins\fR|:\fBentryins\fR [\fITRACK\fR [\fIROW\fR] ] )
+    Insert a row into the track in the pattern at the pattern editor cursor, or the specified location\&.
+.sp
+Insert Row ( :\fBrowins\fR [\fIROW\fR] )
+    Insert a row into the pattern at the pattern editor cursor, or the specified location\&.
+.sp
+Entry Delete ( :\fBentrydel\fR [\fITRACK\fR [\fIROW\fR [\fINUM_ROWS\fR] ] ] )
+    Deletes a number of rows (default: 1) from a track\&.
+.sp
+Row Delete ( :\fBrowdel\fR [\fIROW\fR [\fINUM_ROWS\fR] ] )
+    Deletes a number of rows from all tracks\&.
+.sp
+Set Edit Step ( :\fBstep\fR \fISTEP\fR )
+    Sets the interval the pattern editor cursor jumps after a note is enterred\&.
+.sp
+Set Octave ( :\fBoct\fR \fIOCTAVE\fR )
+    Sets the octave [0 to 6]\&.
+.sp
+Set Instrument's Wave Index ( :\fBwave\fR \fIINDEX\fR )
+    Sets the currently selected instrument's wave index\&.
+.sp
+Set Key Signature ( :\fBkey\fR [\fIKEY\fR] )
+    Sets the editor's key signature, enter no parameter to turn it off\&.
+.sp
+Select Instrument ( :\fBinst\fR \fIINSTRUMENT\fR )
+    Selects the provided instrument\&.
+.sp
+View Order ( :\fBorder\fR \fIORDER\fR )
+    Views/Selects the provided order\&.
+.sp
+Change Order's Pattern ( :\fBptrn\fR \fIPATTERN\fR )
+    Changes the currently selected order's pattern to this pattern\&.
+.sp
+Select Row ( :\fBrow\fR \fIROW\fR )
+    Selects the row in the pattern editor\&.
+.sp
+Select Track ( :\fBtrack\fR \fITRACK\fR )
+    Selects the track in the pattern editor\&.
+.sp
+Instrument Set ( :\fBinstset\fR \fIINSTRUMENT\fR [\fIROW_START\fR [\fIROW_END\fR] ] )
+    Change the instruments of an intveral in the selected track to this instrument\&.
+.sp
+\fBVOLUME COMMANDS\fR
+.sp
+Amplify Track ( :\fBamp\fR \fIAMP_RATE\fR [\fIROW_BEGIN\fR [\fIROW_END\fR] ] )
+    Amplifies the currently selected track (between ROW_BEGIN and ROW_END, if no ROW_END is specified the whole track after ROW_BEGIN) is amplified by the amplification rate\&.
+.sp
+Amplify Instrument ( :\fBampinst\fR \fIAMP_RATE\fR [\fIWHICH\fR...] )
+    Amplifies all of the volumes in each of the instruments volume tables. Can be given a list of which instruments\&.
+.sp
+Amplify Mark Interval ( :\fBampmark\fR \fIAMP_RATE\fR [\fITRACK_START\fR [\fITRACK_END\fR] ] )
+    Amplifies the interval between the playback mark and the pattern editor cursor\&.
+    Optionally, you can provide a range of tracks to amplify between that interval\&.
+    If no \fITRACK_END\fR is specified, it only amplifies the track at \fITRACK_START\fR\&.
+.sp
+Amplify Linearly ( :\fBamplin\fR \fIAMP_RATE\fR \fIFADE_IN\fR [\fIROW_START\fR [\fIROW_END\fR] ] )
+    Amplifies an interval in the selected track, fading inward or outward to the specified amplification rate\&.
+.sp
+\fBNOTE COMMANDS\fR
+.sp
+Transpose Region ( :\fBtrans\fR \fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
+    Transpose a region in the selected pattern up or down some semitones\&.
+.sp
+Transpose Song ( :\fBtransall\fR \fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
+    Tranpose a region in all patterns up or down some semitones\&.
+.sp
+Transpose to Key ( :\fBtranskey\fR \fIKEY\fR \fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
+    Transpose a region in the selected pattern up or down some semitones, then round to the nearest notes in the specified key signature\&.
+    Keys are Major: \fBC C# D D# E F F# G G# A A# B\fR, Minor: \fBCM Cm DM Dm EM FM Fm GM Gm AM Am BM\fR
+.sp
+Transpose Song to Key ( :\fBtranskeyall\fR \fIKEY\fR \fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
+    Transpose a region in all patterns up or down some semitones, then round to the nearest notes in the specified key signature\&.
+    Keys are Major: \fBC C# D D# E F F# G G# A A# B\fR, Minor: \fBCM Cm DM Dm EM FM Fm GM Gm AM Am BM\fR
+.sp
+
+
+\fBPLAYBACK COMMANDS\fR
+.sp
+Set Playback Mark ( :\fBmark\fR [\fIROW\fR] )
+    Sets the mark where song playback begins\&.
+.sp
+Set Playback Length ( :\fBplaylen\fR \fIROWS\fR )
+    Sets the number of rows that automatic playback plays.
+    0 rows silences automatic playback.
+.sp
+Render Song ( :\fBrender\fR )
+    Calls \fBplebrender\fR on this song
+.sp
+Mute Track ( :\fBmute\fR [\fITRACK\fR...] )
+    Unmutes all with no parameters, otherwise mutes the specified tracks\&.
+.sp
+Unmute Track ( :\fBunmute\fR [\fITRACK\fR...] )
+    Unmutes all with no parameters, otherwise unmutes the specified tracks\&.
+.sp
+Play Song ( :\fBplay\fR [\fIORDER_START\fR [\fIORDER_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
+    Plays the whole song or an excerpt\&. If \fIORDER_START\fR is provided and \fIORDER_END\fR isn't\&,
+    only the order at \fIORDER_START\fR is played.
+.sp
+Set Playback Amplification ( :\fBplayamp\fR \fIAMPLIFICATION_RATE\fR )
+    Sets the rate at which playback is amplified. A warning is made if the user tries to amplify by a lot.
+.sp
+
+
+
+
+
+
+
+
+.SH "SEE ALSO"
+\fBplebtrkdaemon\fR(1), \fBplebtrk\fR(1), \fBplebplay\fR(1), \fBplebitp\fR(1), \fBplebrender\fR(1)

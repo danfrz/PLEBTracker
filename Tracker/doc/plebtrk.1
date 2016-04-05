@@ -1,0 +1,29 @@
+'\" t
+.\"     Title: plebtrk
+.\"    Author: Dan Frazier
+.\"      Date: 04/03/2016
+.\"    Manual: PLEBTracker Manual
+.\"  Language: English
+.TH "PLEBTRK" "1" "04/03/2016"
+.nh
+.ad l
+.SH "NAME"
+plebtrk \- Ncurses based audio tracker inspired by goattracker and milkytracker
+.SH "SYNOPSIS"
+.sp
+\fBplebtrk\fR [\fIMODULE_PATH\fR]
+.sp
+.SH "DESCRIPTION"
+.sp
+\fBplebtrk\fR is an interactive interface for creating and editing plb modules\&. For details on how to use the interface see \fBplebtrkraw\fR(1)\&.
+.sp
+This script wraps around \fBplebtrkraw\fR, and starts a \fBplebtrkdaemon\fR in the background\&.
+.sp
+Temporary files within /var/tmp/plebtrk/ are generated that tether the new instances of \fBplebtrkdaemon\fR and \fBplebtrkraw\fR together by \fBplebtrk\fR's process ID that enable sound playback and control from within the tracker\&.
+
+stderr from both \fBplebtrkraw\fR and \fBplebtrkdaemon\fR are piped to /var/tmp/plebtrk/itplog.log and /var/tmp/plebtrk/trklog.log 
+
+If no \fIMODULE_PATH\fR is provided, the tracker's default module path is ./song.plb
+
+.SH "SEE ALSO"
+\fBplebplay\fR(1), \fBplebtrkdaemon\fR(1), \fBplebtrkraw\fR(1), \fBplebitp\fR(1), \fBplebrender\fR(1)

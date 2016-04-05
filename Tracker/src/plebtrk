@@ -1,0 +1,18 @@
+#!/bin/bash
+
+TEMPDIR="/var/tmp/plebtrk"
+LOGPATH="$TEMPDIR/trklog.log"
+
+echo "" > "$LOGPATH"
+plebtrkdaemon $$ 2>"$LOGPATH" & #Run the daemon in the background
+sleep 0.1 # the daemon do its thing for a moment
+plebtrkraw 2>"$LOGPATH" "$@"
+
+#kill plebtrkdaemon's aplay process so it stops
+aplaypid=`ps | grep aplay`
+aplaypid=${aplaypid%%p*aplay}
+if [ $aplaypid ]
+then
+    kill $aplaypid
+fi
+
