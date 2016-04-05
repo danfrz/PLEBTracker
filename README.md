@@ -1,5 +1,5 @@
 # PLEBTracker
-Ncurses based audio tracker program inspired by goattracker and milkytracker
+Ncurses based audio tracker program inspired by goattracker and milkytracker.
 PLEBTracker is something I wrote because I wanted to have some experience with audio,
 and wanted to implement what I've been learning by using other trackers.
 
