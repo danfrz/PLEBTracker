@@ -1,3 +1,8 @@
+This document is currently out of date.
+To see a more exhaustive and descriptive list, see the plebtrkraw(1) man page.
+In the manual is also a list of commands that you can run in the
+vim-bar/command line.
+
 |||||||||||||||General||||||||||||||||||||||||||||||||||||||||||||
 [TAB] +   Select...
  ..q    Metadata window
@@ -12,22 +17,12 @@ The textboxes support HOME, END, INS, DEL
 To edit a UI element, press ENTER, to cancel press TAB
 
 SHIFT +
- ..u    Save
- ..o    Open
- ..p    New
-
- ..h    Quick Change Instrument
- ..j    Quick Change Wave Index
-
- ..k    Quick Change Order
- ..l    Select Order operations
- ..:    Decrement Order
- .."    Increment Order
-
- ..n    Quick Change Pattern
- ..<    Select Pattern operations
- ..>    Decrement Pattern
- ..?    Increment Pattern
+ .._    Previous Instrument
+ ..+    Next Instrument
+ ..k    Quick Change Instrument
+ ..l    Quick Change Wave Index
+ ..j    Quick Change Pattern
+ 
 
 
 ||||||||||||Pattern Editor||||||||||||||||||||||||||||||||||||||||
@@ -36,12 +31,17 @@ SHIFT +
 SHIFT +
  ..{1..7} to Select Octave {1..7}
 
+ ..{    Previous Order
+ ..}    Next Order
+ ..>    Previous Pattern
+ ..?    Next Pattern
+ ..m    Set Playback Mark
 
 In pattern editor, press ENTER to copy an entry
    When an entry is copied, that entry's instrument is selected and
-   the selected row of the Wave Table is set to the wave index
+   the selected row of the Wave Table is changed to the wave index
    pointed to by that entry's instrument.
-   press SPACE to paste it.
+   Press SPACE to paste the entry.
 
 
 ||||||||||||||Wave Table||||||||||||||||||||||||||||||||||||||||||
@@ -56,4 +56,10 @@ In wave table, press ENTER to copy an entry
 
 |||||||||||||Volume Table||||||||||||||||||||||||||||||||||||||||||
 > Volume Table supports HOME, END, PGUP, PGDN, INST, DEL
+
+In volume table, press ENTER to copy an entry
+   press SPACE to paste it.
+
+
+
 
