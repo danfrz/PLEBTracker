@@ -115,8 +115,10 @@ Delete Track ( :\fBdd\fR )
 Clear Pattern ( :\fBddd\fR )
     Clears all data in the selected pattern\&.
 .sp
-Copy ( :\fBy\fR [inst|order|ptrn|track] )
+Copy ( :\fBy\fR [inst|order|ptrn|track|optrn] )
     Clones the currently selected element of that type\&.
+    optrn option copies the order, then the pattern,
+        which creates a new order with a new pattern.
     :\fBy track\fR refers to yy\&.
 .sp
 Copy Track Region ( :\fByy\fR \fITRACK\fR [\fIROW_BEGIN\fR [\fIROW_END\fR [\fIAMP_RATE\fR] ] ] )
@@ -162,9 +164,27 @@ Select Row ( :\fBrow\fR \fIROW\fR )
 Select Track ( :\fBtrack\fR \fITRACK\fR )
     Selects the track in the pattern editor\&.
 .sp
-Instrument Set ( :\fBinstset\fR \fIINSTRUMENT\fR [\fIROW_START\fR [\fIROW_END\fR] ] )
-    Change the instruments of an intveral in the selected track to this instrument\&.
+Instrument Set ( :\fBinstset\fR [\fIINSTRUMENT\fR] [\fIROW_START\fR [\fIROW_END\fR] ] )
+    Change the instruments of an interval in the selected track to this instrument\&.
+    If no instrument is provided, set to the selected instrument\&.
 .sp
+Instrument Set Mark ( :\fBinstsetmark\fR [\fIINSTRUMENT\fR] )
+    Change the instruments of an interval in the selected track to this instrument\&.
+    The range of the interval is between the playback mark and the selected row\&.
+    If no instrument is provided, set to the selected instrument\&.
+.sp
+
+Effect Set ( :\fBfxset\fR [\fIEFFECT\fR] [\fIROW_START\fR [\fIROW_END\fR] ] )
+    Change the effect of an interval in the selected track to this effect\&.
+    If no effect is provided, unset the effects (000)
+
+.sp
+Effect Set Mark ( :\fBfxsetmark\fR [\fIEFFECT\fR ] )
+    Change the effects of an interval in the selected track to this effect\&.
+    The range of the interval is between the playback mark and the selected row\&.
+    If no effect is provided, unsets the effect for the interval\&.
+.sp
+
 \fBVOLUME COMMANDS\fR
 .sp
 Amplify Track ( :\fBamp\fR \fIAMP_RATE\fR [\fIROW_BEGIN\fR [\fIROW_END\fR] ] )
