@@ -125,11 +125,22 @@ void editor::stopPlayback()
 
 void editor::renderSong()
 {
-    std::ofstream signal(signalpath, std::ofstream::out | std::ofstream::app);
-    if(signal.is_open())
+    std::ofstream playfile(playbackpath);
+    //std::cerr << "playbackpath " << editor::playbackpath << " signal: " << editor::signalpath << '\n';
+    if(playfile.is_open())
     {
-        signal << "r" << std::endl;
-        signal.close();
+        //std::cerr << "Openned Playback ofstream\n";
+        song->output(playfile);
+        //std::cerr << "Outputted to playback\n";
+        playfile.close();
+
+
+        std::ofstream signal(signalpath, std::ofstream::out | std::ofstream::app);
+        if(signal.is_open())
+        {
+            signal << "r" << std::endl;
+            signal.close();
+        }
     }
 }
 
