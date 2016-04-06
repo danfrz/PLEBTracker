@@ -1,5 +1,8 @@
 #include "tables.h"
 
+/*This information was previously in main but was moved out to make test programs
+ */
+
 ///////////////INITIALIZIING////////////////
 ////////////////////////////////////////////
 namespace editor
