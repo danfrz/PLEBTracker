@@ -149,10 +149,13 @@ Description:
     //Playback 
     void handle_mark(std::vector<char*> &params);
     void handle_playlen(std::vector<char*> &params);
-    void handle_render(std::vector<char*> &params);
+
     void handle_mute(std::vector<char*> &params);
     void handle_unmute(std::vector<char*> &params);
+
     void handle_play(std::vector<char*> &params);
+    void handle_stop(std::vector<char*> &params);
+    void handle_render(std::vector<char*> &params);
     void handle_playamp(std::vector<char *> &params);
 
 
