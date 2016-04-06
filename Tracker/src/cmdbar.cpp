@@ -1573,17 +1573,17 @@ void editor::handle_playlen(std::vector<char*> &params)
         editor::playback_length = 8;
     }
 }
-void editor::handle_render(std::vector<char*> &params)
+
+
+void editor::handle_stop(std::vector<char *> &params)
 {
-    if(params.size() == 0)
-    {
-        editor::renderSong();
-    }
-    else
-    {
-        inform("render accepts no arguments");
-    }
+    editor::stopPlayback();
 }
+void editor::handle_render(std::vector<char *> &params)
+{
+    editor::renderSong();
+}
+
 void editor::handle_mute(std::vector<char*> &params)
 {
     if(params.size() > 0)
