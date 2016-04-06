@@ -165,8 +165,13 @@ Description:
 
     void handle_amplin(std::vector<char*> &params);
 
-    //Set instrument of all in region
+    //Set instrument of all in interval
     void handle_instset(std::vector<char *> &params);
+    void handle_instsetmark(std::vector<char *> &params);
+
+    //Set effect of all in interval
+    void handle_fxset(std::vector<char *> &params);
+    void handle_fxsetmark(std::vector<char *> &params);
 
     //Insert empty rows [into track of pattern] calls entryins
     void handle_ins(std::vector<char*> &params);
