@@ -74,6 +74,10 @@ while inotifywait -qqe close_write "$TEMPDIR"signal ; do
         a) #amplify
             AMP=$FULLCMD
             ;;
+        r) #render
+            plebrender "$TEMPDIR"playback.plb $AMP $MUTE 2>/dev/null &
+            mv "/var/tmp/plebtrk/render/$1"playback.flac .
+            ;;
 
     esac
 done
