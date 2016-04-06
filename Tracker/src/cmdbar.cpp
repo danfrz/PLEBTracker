@@ -25,6 +25,10 @@ void editor::populateCmdMap()
     cmdbar_cmdmap["amplin"] = handle_amplin;
 
     cmdbar_cmdmap["instset"] = handle_instset;
+    cmdbar_cmdmap["instsetmark"] = handle_instsetmark;
+
+    cmdbar_cmdmap["fxset"] = handle_fxset;
+    cmdbar_cmdmap["fxsetmark"] = handle_fxsetmark;
 
     cmdbar_cmdmap["ins"] = handle_ins;
     cmdbar_cmdmap["entryins"] = handle_entryins;
@@ -732,51 +736,213 @@ void editor::handle_instset(std::vector<char *> &params)
     {
         unsigned char inst;
         unsigned char begin=0, end=patternedtr::selptrn->numRows()-1;
-        inst = parseUnsigned(params.at(0));
+
+        if(params.size() == 3)
+        {
+            inst = parseUnsigned(params.at(0));
+            begin = parseUnsigned(params.at(1));
+            end = parseUnsigned(params.at(2));
+
+        }
+        else if(params.size() == 2)
+        {
+            inst = patternedtr::selinstrument;
+            begin = parseUnsigned(params.at(0));
+            end = parseUnsigned(params.at(1));
+
+        }
+        else
+        {
+            inform("Instrument Set(instset): requires 2 to 3 params.");
+            return;
+        }
 
         if(inst >= editor::song->numInstruments())
         {
-            inform("Instrument Set(instset) that instrument doesnt exist");
+            inform("Instrument Set(instset): that instrument doesnt exist.");
             return;
         }
-        if(params.size() > 1)
-        {
-            begin = parseUnsigned(params.at(1));
-            if(params.size() > 2)
-            {
-                end = parseUnsigned(params.at(2));
 
-                if(params.size() > 3)
-                {
-                    inform("Instrument Set(instset) requires 1 to 3 params");
-                    return;
-                }
-            }
+        if(begin >=patternedtr::selptrn->numRows())
+        {
+            inform("Instrument Set(instset): Beginning row too high.");
+            return;
         }
 
         if(end >= patternedtr::selptrn->numRows())
             end = patternedtr::selptrn->numRows() - 1;
 
         unsigned int entry;
-        unsigned char volume;
         unsigned int mask = int(inst) << RI_INSTRUMENT; 
-        for(int i = begin; i < end; i++)
+        for(int i = begin; i <= end; i++)
         {
-            entry = patternedtr::selptrn->at(patternedtr::seltrack, begin+i);
+            entry = patternedtr::selptrn->at(patternedtr::seltrack, i);
             if((entry & R_INSTRUMENT) != R_INSTRUMENT)
             {
                 entry &= ~R_INSTRUMENT;
                 entry |= mask;
-                patternedtr::selptrn->setAt(patternedtr::seltrack, begin+i, entry);
+                patternedtr::selptrn->setAt(patternedtr::seltrack, i, entry);
             }
             
         }
 
     }
     else
-        inform("Amplify Track(amp) requires 1 to 3 params");
+        inform("Instrument Set(instset) requires 1 to 3 params");
 }
 
+
+
+
+void editor::handle_instsetmark(std::vector<char *> &params)
+{
+
+    if(editor::playback_mark >= patternedtr::selptrn->numRows())
+    {
+        inform("Instrument Set Mark(fxsetmark): No playback mark set");
+        return;
+    }
+    unsigned int inst = 0;
+    unsigned char begin, end;
+    if(patternedtr::selrow > editor::playback_mark)
+    {
+        begin = editor::playback_mark;
+        end = patternedtr::selrow;
+    }
+    else
+    {
+        begin = patternedtr::selrow;
+        end = editor::playback_mark;
+    }
+
+    if(params.size() > 0)
+        inst = (parseUnsigned(params.at(0)) & 0xFF) << RI_INSTRUMENT;
+
+
+    if(begin >= patternedtr::selptrn->numRows())
+        return;
+
+    if(end >= patternedtr::selptrn->numRows())
+        end = patternedtr::selptrn->numRows()-1;
+
+
+    unsigned int entry;
+    for(int i = begin; i <= end; i++)
+    {
+        entry = patternedtr::selptrn->at(patternedtr::seltrack, i);
+
+        if((entry & R_INSTRUMENT) != R_INSTRUMENT)
+        {
+            entry &= ~R_INSTRUMENT;
+            entry |= inst;
+            patternedtr::selptrn->setAt(patternedtr::seltrack, i, entry);
+        }
+    }
+
+}
+
+
+
+
+
+
+
+void editor::handle_fxset(std::vector<char *> &params)
+{
+
+    if(params.size() > 1)
+    {
+
+        unsigned int effect = 0;
+        unsigned char begin, end;
+        if(params.size() == 3)
+        {
+            effect = parseUnsigned(params.at(0)) & R_EFFECTSEG;
+            begin = parseUnsigned(params.at(1));
+            end = parseUnsigned(params.at(2));
+
+        }
+        else if(params.size() == 2)
+        {
+            effect = 0;
+            begin = parseUnsigned(params.at(0));
+            end = parseUnsigned(params.at(1));
+        }
+        else
+        {
+            inform("Effect Set(fxset): Requires 2 or 3 parameters");
+            return;
+        }
+
+        if(begin >= patternedtr::selptrn->numRows())
+        {
+            inform("Effect Set(fxset): Beginning row too high.");
+            return;
+        }
+
+        if(end >= patternedtr::selptrn->numRows())
+            end = patternedtr::selptrn->numRows()-1;
+
+
+        unsigned int entry;
+        for(int i = begin; i <= end; i++)
+        {
+            entry = patternedtr::selptrn->at(patternedtr::seltrack, i);
+            entry &= R_EMPTY;
+            entry |= effect;
+            patternedtr::selptrn->setAt(patternedtr::seltrack, i, entry);
+        }
+    }
+    else
+        inform("Effect Set(fxset): Requires at least 2 parameters");
+
+}
+
+
+void editor::handle_fxsetmark(std::vector<char *> &params)
+{
+
+    if(editor::playback_mark >= patternedtr::selptrn->numRows())
+    {
+        inform("Effect Set Mark(fxsetmark): No playback mark set");
+        return;
+    }
+    unsigned int effect = 0;
+    unsigned char begin, end;
+    if(patternedtr::selrow > editor::playback_mark)
+    {
+        begin = editor::playback_mark;
+        end = patternedtr::selrow;
+    }
+    else
+    {
+        begin = patternedtr::selrow;
+        end = editor::playback_mark;
+    }
+
+    if(params.size() > 0)
+    {
+        effect = parseUnsigned(params.at(0)) & R_EFFECTSEG;
+    }
+
+
+    if(begin >= patternedtr::selptrn->numRows())
+        return;
+
+    if(end >= patternedtr::selptrn->numRows())
+        end = patternedtr::selptrn->numRows()-1;
+
+
+    unsigned int entry;
+    for(int i = begin; i <= end; i++)
+    {
+        entry = patternedtr::selptrn->at(patternedtr::seltrack, i);
+        entry &= R_EMPTY;
+        entry |= effect;
+        patternedtr::selptrn->setAt(patternedtr::seltrack, i, entry);
+    }
+
+}
 
 
 void editor::handle_amp(std::vector<char *> &params)
@@ -809,10 +975,10 @@ void editor::handle_amp(std::vector<char *> &params)
 
         unsigned int entry;
         unsigned char volume;
-        for(int i = begin; i < end; i++)
+        for(int i = begin; i <= end; i++)
         {
-            entry = patternedtr::selptrn->at(patternedtr::seltrack, begin+i);
-            if(entry != R_EMPTY)
+            entry = patternedtr::selptrn->at(patternedtr::seltrack, i);
+            if((entry & R_EMPTY) != R_EMPTY) //effectseg can be set without a volume needing to be defined
             {
                 volume = (entry & R_VOLUME) >> RI_VOLUME;
                 volume*= amp;
@@ -820,7 +986,7 @@ void editor::handle_amp(std::vector<char *> &params)
                     volume = 0x3F;
                 entry &= ~R_VOLUME;
                 entry |= (volume << RI_VOLUME);
-                patternedtr::selptrn->setAt(patternedtr::seltrack, begin+i, entry);
+                patternedtr::selptrn->setAt(patternedtr::seltrack, i, entry);
             }
         }
 
@@ -999,6 +1165,11 @@ void editor::handle_y(std::vector<char*> &params)
             patternedtr::cloneOrder(patternedtr::selorder);
         else if(strcmp(p, "ptrn") == 0)
             patternedtr::clonePattern(editor::song->getPatternIndexByOrder(patternedtr::selorder));
+        else if(strcmp(p, "optrn") == 0)
+        {
+            patternedtr::cloneOrder(patternedtr::selorder);
+            patternedtr::clonePattern(editor::song->getPatternIndexByOrder(patternedtr::selorder));
+        }
         else 
             inform("Copy(y) Param not understood");
 
