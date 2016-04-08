@@ -1100,7 +1100,7 @@ void patternedtr::entryInput(int in)
                     }
 
                     //Copy the last volume used in the track
-                    unsigned int prevvolmask = 0x3f;
+                    unsigned int prevvolmask = R_VOLUME;
                     for(int i = patternedtr::selrow; i >= 0; i--)
                     {
                         if((selptrn->at(seltrack,i) & ~R_EFFECTSEG) != R_EMPTY)
@@ -1110,7 +1110,7 @@ void patternedtr::entryInput(int in)
                         }
                     }
                     if(prevvolmask == 0)
-                        prevvolmask = 0x3f;
+                        prevvolmask = R_VOLUME;
 
                     entry &= ~(R_PITCHSEG | R_VOLUME);
                     entry += note;
@@ -1148,7 +1148,7 @@ void patternedtr::entryInput(int in)
                 unsigned int entry = selptrn->at(seltrack, selrow);
                 unsigned char inst = (entry & R_INSTRUMENT) >> RI_INSTRUMENT;
                 val = editor::charHex(in);
-                entry &= ~R_INSTRUMENT;
+                entry &= ~(R_INSTRUMENT | R_VOLUME);
                 inst *= 0x10;
 
                 if(inst >= editor::song->numInstruments())
@@ -1159,6 +1159,20 @@ void patternedtr::entryInput(int in)
                 if(inst >= editor::song->numInstruments())
                     inst = editor::song->numInstruments()-1;
 
+                //Copy the last volume used in the track
+                unsigned int prevvolmask = 0x3f;
+                for(int i = patternedtr::selrow; i >= 0; i--)
+                {
+                    if((selptrn->at(seltrack,i) & ~R_EFFECTSEG) != R_EMPTY)
+                    {
+                        prevvolmask = selptrn->at(seltrack,i) & R_VOLUME;
+                        break;
+                    }
+                }
+                if(prevvolmask == 0)
+                    prevvolmask = 0x3f;
+
+                entry |= prevvolmask;
                 entry |= inst << RI_INSTRUMENT;
                 selptrn->setAt(seltrack,selrow,entry);
                 resolved=true;
