@@ -203,10 +203,10 @@ Amplify Linearly ( :\fBamplin\fR \fIAMP_RATE\fR \fIFADE_IN\fR [\fIROW_START\fR [
 .sp
 \fBNOTE COMMANDS\fR
 .sp
-Transpose Region ( :\fBtrans\fR \fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
+Transpose Region ( :\fBtrans\fR [\fI±SEMITONES\fR] [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
     Transpose a region in the selected pattern up or down some semitones\&.
 .sp
-Transpose Song ( :\fBtransall\fR \fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
+Transpose Song ( :\fBtransall\fR [\fI±SEMITONES\fR] [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
     Tranpose a region in all patterns up or down some semitones\&.
 .sp
 Transpose to Key ( :\fBtranskey\fR \fIKEY\fR \fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
@@ -217,7 +217,12 @@ Transpose Song to Key ( :\fBtranskeyall\fR \fIKEY\fR \fI±SEMITONES\fR [\fITRACK
     Transpose a region in all patterns up or down some semitones, then round to the nearest notes in the specified key signature\&.
     Keys are Major: \fBC C# D D# E F F# G G# A A# B\fR, Minor: \fBCM Cm DM Dm EM FM Fm GM Gm AM Am BM\fR
 .sp
-
+Scale pattern ( :\fBscale\fR \fIrate\fR )
+    Scales a pattern to a new size.
+.sp
+Scale Song ( :\fBscalesong\fR \fIrate\fR )
+    Scales all patterns to a new size.
+.
 
 \fBPLAYBACK COMMANDS\fR
 .sp
