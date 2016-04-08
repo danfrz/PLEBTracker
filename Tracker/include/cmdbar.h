@@ -170,7 +170,7 @@ Description:
 
 
     void handle_scale(std::vector<char *> &params);
-    void handle_scaleall(std::vector<char *> &params);
+    void handle_scalesong(std::vector<char *> &params);
 
     //Set instrument of all in interval
     void handle_instset(std::vector<char *> &params);
@@ -200,13 +200,13 @@ Description:
     void handle_trans(std::vector<char*> &params);
 
     //transpose whole song +/- semitones
-    void handle_transall(std::vector<char*> &params);
+    void handle_transsong(std::vector<char*> &params);
 
     //transpose region +/- semitones then round to nearest notes of key signature
     void handle_transkey(std::vector<char*> &params);
 
     //transpose whole song +/- semitones then round to nearest notes of key signature
-    void handle_transkeyall(std::vector<char*> &params);
+    void handle_transkeysong(std::vector<char*> &params);
     void handle_key(std::vector<char*> &params);
 
     
