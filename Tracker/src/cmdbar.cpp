@@ -24,6 +24,9 @@ void editor::populateCmdMap()
     cmdbar_cmdmap["ampmark"] =  handle_ampmark;
     cmdbar_cmdmap["amplin"] = handle_amplin;
 
+    cmdbar_cmdmap["scale"] =  handle_scale;
+    cmdbar_cmdmap["scaleall"] =  handle_scaleall;
+    
     cmdbar_cmdmap["instset"] = handle_instset;
     cmdbar_cmdmap["instsetmark"] = handle_instsetmark;
 
@@ -60,6 +63,7 @@ void editor::populateCmdMap()
     cmdbar_cmdmap["mute"] = handle_mute;
     cmdbar_cmdmap["unmute"] = handle_unmute;
     cmdbar_cmdmap["play"] = handle_play;
+    cmdbar_cmdmap["stop"] = handle_stop;
     cmdbar_cmdmap["playamp"] = handle_playamp;
     cmdbar_cmdmap["pid"] = handle_pid;
 
@@ -993,6 +997,72 @@ void editor::handle_amp(std::vector<char *> &params)
     }
     else
         inform("Amplify Track(amp) requires 1 to 3 params");
+}
+
+void editor::handle_scaleall(std::vector<char *> &params)
+{
+    Pattern *bup = patternedtr::selptrn;
+    for(int i = 0; i < editor::song->numPatterns(); i++)
+    {
+        patternedtr::selptrn = editor::song->getPattern(i);
+        handle_scale(params);
+    }
+    patternedtr::selptrn = bup;
+}
+
+void editor::handle_scale(std::vector<char *> &params)
+{
+    if(params.size() > 0)
+    {
+        float scale;
+        scale = parseFloat(params.at(0));
+        if(scale <= 0)
+        {
+            inform("Please.");
+            return;
+        }
+        if(scale == 1)
+            return;
+
+        unsigned char begin, end;
+        unsigned int entry;
+        if(scale < 1)
+        {
+            begin=(patternedtr::selptrn->numRows()-1)*scale;
+            end=0;
+            for(int trk = 0; trk < patternedtr::selptrn->numTracks(); trk++)
+            {
+                for(int i = begin; i >= end; i--)
+                {
+                    entry = patternedtr::selptrn->at(trk, i/scale);
+                    patternedtr::selptrn->setAt(trk, i, entry);
+                }
+                for(int i = begin+1; i < patternedtr::selptrn->numRows(); i++)
+                    patternedtr::selptrn->setAt(trk, i, R_EMPTY);
+            }
+            patternedtr::selptrn->setRowNum(patternedtr::selptrn->numRows()*scale);
+        }
+        else
+        {
+            patternedtr::selptrn->setRowNum(patternedtr::selptrn->numRows()*scale);
+            begin=(patternedtr::selptrn->numRows()-1)/scale;
+            end=0;
+            for(int trk = 0; trk < patternedtr::selptrn->numTracks(); trk++)
+            {
+                for(int i = begin; i >= end; i--)
+                {
+                    entry = patternedtr::selptrn->at(trk, i);
+                    patternedtr::selptrn->setAt(trk, i*scale, entry);
+                    for(int j = 1; j < scale; j++)
+                        patternedtr::selptrn->setAt(trk, i*scale+j, R_EMPTY);
+                }
+            }
+
+        }
+
+    }
+    else
+        inform("Scale Pattern(scale) requires 1 param");
 }
 
 void editor::handle_ampmark(std::vector<char *> &params)
