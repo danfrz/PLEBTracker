@@ -1349,6 +1349,14 @@ void editor::handle_transkeysong(std::vector<char*> &params)
 {
     if(params.size() > 0)
     {
+
+        unsigned char key = parseKeySignature(params.at(0));
+        if (key == 0xFF)//-1
+        {
+            inform("Transpose To Key(transkey): key signature doesn't exist");
+            return;
+        }
+
         Pattern *selection = patternedtr::selptrn;
 
         unsigned char numpats = editor::song->numPatterns();
@@ -1370,6 +1378,7 @@ void editor::handle_transsong(std::vector<char*> &params)
 {
     if(params.size() > 0)
     {
+
         Pattern *selection = patternedtr::selptrn;
 
         unsigned char numpats = editor::song->numPatterns();
@@ -1395,6 +1404,12 @@ void editor::handle_transkey(std::vector<char*> &params)
     if(params.size() > 0)
     {
 
+        unsigned char key = parseKeySignature(params.at(0));
+        if (key == 0xFF)//-1
+        {
+            inform("Transpose To Key(transkey): key signature doesn't exist");
+            return;
+        }
         unsigned char trkbegin=0, trkend=patternedtr::selptrn->numTracks()-1;
         unsigned char begin=0, end=patternedtr::selptrn->numRows()-1;
         unsigned char semitones = 0;
@@ -1450,7 +1465,6 @@ void editor::handle_transkey(std::vector<char*> &params)
         }
 
 
-        unsigned char key = parseKeySignature(params.at(0));
 
         int len = end-begin+1;
         int trklen = trkend-trkbegin+1;
