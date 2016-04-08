@@ -168,6 +168,10 @@ Description:
 
     void handle_amplin(std::vector<char*> &params);
 
+
+    void handle_scale(std::vector<char *> &params);
+    void handle_scaleall(std::vector<char *> &params);
+
     //Set instrument of all in interval
     void handle_instset(std::vector<char *> &params);
     void handle_instsetmark(std::vector<char *> &params);
