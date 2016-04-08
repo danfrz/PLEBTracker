@@ -25,7 +25,7 @@ void editor::populateCmdMap()
     cmdbar_cmdmap["amplin"] = handle_amplin;
 
     cmdbar_cmdmap["scale"] =  handle_scale;
-    cmdbar_cmdmap["scaleall"] =  handle_scaleall;
+    cmdbar_cmdmap["scalesong"] =  handle_scalesong;
     
     cmdbar_cmdmap["instset"] = handle_instset;
     cmdbar_cmdmap["instsetmark"] = handle_instsetmark;
@@ -40,9 +40,9 @@ void editor::populateCmdMap()
     cmdbar_cmdmap["rowdel"] = handle_rowdel;
 
     cmdbar_cmdmap["trans"] = handle_trans;
-    cmdbar_cmdmap["transall"] = handle_transall;
+    cmdbar_cmdmap["transsong"] = handle_transsong;
     cmdbar_cmdmap["transkey"] = handle_transkey;
-    cmdbar_cmdmap["transkeyall"] = handle_transkeyall;
+    cmdbar_cmdmap["transkeysong"] = handle_transkeysong;
     cmdbar_cmdmap["key"] = handle_key;
 
     cmdbar_cmdmap["step"] = handle_step;
@@ -999,7 +999,7 @@ void editor::handle_amp(std::vector<char *> &params)
         inform("Amplify Track(amp) requires 1 to 3 params");
 }
 
-void editor::handle_scaleall(std::vector<char *> &params)
+void editor::handle_scalesong(std::vector<char *> &params)
 {
     Pattern *bup = patternedtr::selptrn;
     for(int i = 0; i < editor::song->numPatterns(); i++)
@@ -1345,34 +1345,44 @@ void editor::handle_trans(std::vector<char*> &params)
 }
 
 
-void editor::handle_transkeyall(std::vector<char*> &params)
+void editor::handle_transkeysong(std::vector<char*> &params)
 {
-    Pattern *selection = patternedtr::selptrn;
-
-    unsigned char numpats = editor::song->numPatterns();
-    for(int i = 0; i < numpats; i++)
+    if(params.size() > 0)
     {
-        patternedtr::selptrn = editor::song->getPattern(i);
-        handle_transkey(params);
-    }
+        Pattern *selection = patternedtr::selptrn;
 
-    patternedtr::selptrn = selection;
+        unsigned char numpats = editor::song->numPatterns();
+        for(int i = 0; i < numpats; i++)
+        {
+            patternedtr::selptrn = editor::song->getPattern(i);
+            handle_transkey(params);
+        }
+
+        patternedtr::selptrn = selection;
+    }
+    else
+        inform("Tanspose Song To Key(transkeysong) requires 1 to 7 params");
 }
 
 
 
-void editor::handle_transall(std::vector<char*> &params)
+void editor::handle_transsong(std::vector<char*> &params)
 {
-    Pattern *selection = patternedtr::selptrn;
-
-    unsigned char numpats = editor::song->numPatterns();
-    for(int i = 0; i < numpats; i++)
+    if(params.size() > 0)
     {
-        patternedtr::selptrn = editor::song->getPattern(i);
-        handle_trans(params);
-    }
+        Pattern *selection = patternedtr::selptrn;
 
-    patternedtr::selptrn = selection;
+        unsigned char numpats = editor::song->numPatterns();
+        for(int i = 0; i < numpats; i++)
+        {
+            patternedtr::selptrn = editor::song->getPattern(i);
+            handle_trans(params);
+        }
+
+        patternedtr::selptrn = selection;
+    }
+    else
+        inform("Tanspose Song(transsong) requires 1 to 6 params");
 }
 
 
@@ -1382,30 +1392,35 @@ void editor::handle_transkey(std::vector<char*> &params)
 
     //transpose x semitones
     //parameters :trans semitone trkstart trkend start end
-    if(params.size() > 1)
+    if(params.size() > 0)
     {
 
         unsigned char trkbegin=0, trkend=patternedtr::selptrn->numTracks()-1;
         unsigned char begin=0, end=patternedtr::selptrn->numRows()-1;
-        if(params.size() > 2)
+        unsigned char semitones = 0;
+        if(params.size() > 1)
         {
-            trkbegin = parseUnsigned(params.at(2));
-            trkend = trkbegin;
-            if(params.size() > 3)
+            semitones = parseSigned(params.at(1));
+            if(params.size() > 2)
             {
-                trkend = parseUnsigned(params.at(3));
-                if(params.size() > 4)
+                trkbegin = parseUnsigned(params.at(2));
+                trkend = trkbegin;
+                if(params.size() > 3)
                 {
-                    begin = parseUnsigned(params.at(4));
-
-                    if(params.size() > 5)
+                    trkend = parseUnsigned(params.at(3));
+                    if(params.size() > 4)
                     {
-                        end = parseUnsigned(params.at(5));
+                        begin = parseUnsigned(params.at(4));
 
-                        if(params.size() > 6)
+                        if(params.size() > 5)
                         {
-                            inform("Tanspose(trans) requires 1 to 5 params");
-                            return;
+                            end = parseUnsigned(params.at(5));
+
+                            if(params.size() > 6)
+                            {
+                                inform("Tanspose To Key(trans) requires 1 to 6 params");
+                                return;
+                            }
                         }
                     }
                 }
@@ -1414,7 +1429,7 @@ void editor::handle_transkey(std::vector<char*> &params)
 
         if(trkbegin >= patternedtr::selptrn->numTracks())
         {
-            inform("Transpose Key(trans) param 3(trkstart) >= tracks");
+            inform("Transpose To Key(transkey) param 3(trkstart) >= tracks");
             return;
         }
 
@@ -1425,7 +1440,7 @@ void editor::handle_transkey(std::vector<char*> &params)
 
         if(begin >=  patternedtr::selptrn->numRows())
         {
-            inform("Transpose Key(trans) param 5(rowstart) >= rows");
+            inform("Transpose To Key(transkey) param 5(rowstart) >= rows");
             return;
         }
 
@@ -1436,7 +1451,6 @@ void editor::handle_transkey(std::vector<char*> &params)
 
 
         unsigned char key = parseKeySignature(params.at(0));
-        unsigned char semitones = parseSigned(params.at(1));
 
         int len = end-begin+1;
         int trklen = trkend-trkbegin+1;
@@ -1471,7 +1485,7 @@ void editor::handle_transkey(std::vector<char*> &params)
 
     }
     else
-        inform("Transpose Key(trans) requires 2 to 6 params");
+        inform("Transpose To Key(trans) requires 1 to 6 params");
 
 }
 
