@@ -1098,9 +1098,24 @@ void patternedtr::entryInput(int in)
                         entry &= ~R_INSTRUMENT;
                         entry |= selinstrument << RI_INSTRUMENT;
                     }
-                    entry &= ~(R_PITCHSEG);
+
+                    //Copy the last volume used in the track
+                    unsigned int prevvolmask = 0x3f;
+                    for(int i = patternedtr::selrow; i >= 0; i--)
+                    {
+                        if((selptrn->at(seltrack,i) & ~R_EFFECTSEG) != R_EMPTY)
+                        {
+                            prevvolmask = selptrn->at(seltrack,i) & R_VOLUME;
+                             break;
+                        }
+                    }
+                    if(prevvolmask == 0)
+                        prevvolmask = 0x3f;
+
+                    entry &= ~(R_PITCHSEG | R_VOLUME);
                     entry += note;
                     entry += patternedtr::octave << RI_OCTAVE;
+                    entry |= prevvolmask; 
 
                     selptrn->setAt(seltrack,selrow,entry);
                     editor::playExcerptImplicit();
