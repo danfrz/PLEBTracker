@@ -422,10 +422,6 @@ bool isJumpFunc(const unsigned short &wave)
 
 void Song::fixWaveJumps(const unsigned short &index, short difference)
 {
-    //I can't help but think this isn't robust
-    //so many potential off by one errors
-    //but even if there is one it won't result in destroyed data
-    //TODO: Check later
 
     if(difference == 0) return;
 
@@ -492,7 +488,6 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
                                 waveTable[i] &= 0xFF00;
                                 waveTable[i] |= ((dest & 0xFF00) >> 8);
                                 insertWaveEntry(i+1,jumptype | (dest & 0xFF));
-                                //TODO: confirm this works!
                             }
                         }
                         else
@@ -538,6 +533,45 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
             }
         }
     }
+
+    Pattern *p;
+    for(int i = 0; i < num_patterns; i++)
+    {
+        p = patterns[i];
+        for(int trk = 0; trk < p->numTracks(); trk++)
+        {
+            for(int row = 0; row < p->numRows(); row++)
+            {
+                unsigned int entry = p->at(trk,row);
+                if((entry & 0xF00) == 0x900)
+                {
+                    unsigned char wavejump = entry & 0xFF;
+
+                    if(difference > 0)
+                    {
+                        if(wavejump > 0 &&wavejump >= index && wavejump < 0xFF-difference)
+                        {
+                            wavejump +=difference;
+                        }
+                    }
+                    else
+                    {
+                        if(wavejump >= index)
+                        {
+                            if(wavejump >= -difference)
+                                wavejump +=difference;
+                            else
+                                wavejump = 0;
+                        }
+                    }
+                    entry &= ~0xFF;
+                    entry |= wavejump;
+                    p->setAt(trk,row,entry);
+                }
+            }
+        }
+    }
+
 }
 
 bool Song::removeWaveEntry(unsigned short index)
