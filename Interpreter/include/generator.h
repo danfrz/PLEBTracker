@@ -10,10 +10,13 @@
 #define PARAM_WAVE2 6
 #define PARAM_CHAIN 7
 #define PARAM_LAST 8
+#define PARAM_PULSE2 5
 
 //Form of a wave generator function 
 typedef void (*generator)(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
 
+//Two generator functions are used for multiplexing
+extern generator GEN_MUX1, GEN_MUX2;
 
 
 //|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -117,6 +120,8 @@ void genNoise3(unsigned char *bfr, unsigned char *ptbl, const float &period, con
 
 
 void genBongo(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+
+void genMux(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 
 
 #endif
