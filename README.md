@@ -1,6 +1,6 @@
 # PLEBTracker
 PLEBTracker is an console based audio tracker program inspired by goattracker and milkytracker.
-![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/screenshot/plebtracker.png)
+![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/images/plebtracker.png)
 
 PLEBTracker is something I wrote because I wanted to have some experience with audio,
 and wanted to implement what I've been learning by using other trackers and studying music theory with the help of my piano teacher.
