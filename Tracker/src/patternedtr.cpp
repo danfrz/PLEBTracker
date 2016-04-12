@@ -1017,6 +1017,14 @@ void patternedtr::processPatternInput(int in)
                     if(patternedtr::octave > 7)
                         patternedtr::octave = 0;
                 }
+                if((patternedtr::entryclipboard & 0xF00) == 0x900)
+                {
+                    if((patternedtr::entryclipboard & 0xFF) < editor::song->numWaveEntries())
+                    {
+                        instedtr::selwavrow = patternedtr::entryclipboard & 0xFF; 
+                    }
+
+                }
             }
             break;
         case ' ':
@@ -1094,7 +1102,7 @@ void patternedtr::entryInput(int in)
                     if(entry == R_EMPTY)
                     {
                         //If it was an empty note, set to
-                        //selected instrument
+                        //selected 
                         entry &= ~R_INSTRUMENT;
                         entry |= selinstrument << RI_INSTRUMENT;
                     }
