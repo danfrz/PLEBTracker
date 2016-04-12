@@ -1,5 +1,9 @@
 #include "generator.h"
 
+
+generator GEN_MUX1 = genSilence;
+generator GEN_MUX2 = genSilence;
+
 void genSaw(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
 {
     if(period == 0 || amplitude == 0)
@@ -403,7 +407,7 @@ void genSinePulse(unsigned char *bfr, unsigned char *ptbl,  const float &period,
 {
     if(period == 0 || amplitude == 0)
         return;
-    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000 ;
+    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1.0) / 0x10000 ;
 
     const float tau = (2*M_PI);
 
@@ -817,6 +821,16 @@ void genNoise_Pink(unsigned char *bfr, unsigned char *ptbl,  const float &period
 
 void genNoise_Blue(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &height, float &phase, const unsigned long &len)
 {
+
+}
+
+void genMux(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len)
+{
+    float diff = (ptbl[PARAM_WAVE1]/255.0) * period;
+    float ampratio = (ptbl[PARAM_WAVE2]/255.0);
+    float phase2 = phase + diff;
+    GEN_MUX1(bfr, ptbl, period, height*ampratio, phase, len);
+    GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
 
 }
 
