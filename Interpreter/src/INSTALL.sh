@@ -21,6 +21,8 @@ sudo cp ./plebrender /usr/bin/plebrender
 echo "/usr/bin/plebrender"
 echo ""
 
+mkdir /usr/local/man/man1 2>/dev/null
+
 echo "Copying man pages into /usr/local/man/man1/..."
 sudo cp ../doc/plebitp.1 /usr/local/man/man1/
 echo "/usr/local/man/man1/plebitp.1"
