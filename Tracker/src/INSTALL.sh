@@ -1,5 +1,20 @@
 #!/bin/bash
 
+if [[ $EUID -eq 0 ]]; then
+echo "Unless you only want to run the tracker as root" 1>&2
+echo "don't run this script as root." 1>&2
+echo "This script will prompt with sudo." 1>&2
+echo "" 1>&2
+
+read -p "Continue anyway [not recommended] y/n: " answer
+case $answer in
+[nN]* ) exit;;
+esac
+
+fi
+
+
+
 mkdir /var/tmp/plebtrk 2>/dev/null
 
 echo "Dependencies include:"
