@@ -250,15 +250,16 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
                 
-            } else if(cmd == 0x4) //F4, ADD MISC WAVE PARAM 1
+            } else if(cmd == 0x4) //F4, SET MULTIPLEX WAVE GENERATOR 1
             {
-                seltrk->ptbl[PARAM_WAVE1] += (char)_wav; 
+                GEN_MUX1 = generators[_wav & 0x00FF];
+
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
 
-            } else if(cmd == 0x5) //F5, ADD MISC WAVE PARAM 2
+            } else if(cmd == 0x5) //F5, SET MULTIPLEX WAVE GENERATOR 2
             {
-                seltrk->ptbl[PARAM_WAVE2] += (char)_wav; 
+                GEN_MUX2 = generators[_wav & 0x00FF];
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
             } else if(cmd == 0x6) //F6, Fine Tune
@@ -271,7 +272,22 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 //Count F6 as a note
                 break;
 
-            } else if(cmd == 0xD) //FD, SET CUSTOM JUMP
+            } else if(cmd == 0x7) //F0, SET PULSE2 
+            {
+                ((unsigned short*)seltrk->ptbl)[PARAM_PULSE2] = (_wav & 0x00FF) << 8;
+
+                seltrk->wavei++;
+                _wav = song->getWaveEntry(seltrk->wavei);
+            } else if(cmd == 0x8) //F1, ADD PULSE2
+            {
+                ((short*)seltrk->ptbl)[PARAM_PULSE2] += static_cast<char>(_wav & 0x00FF)*0x10; //shift once to the left
+
+                seltrk->wavei++;
+                _wav = song->getWaveEntry(seltrk->wavei);
+
+            }
+            
+            else if(cmd == 0xD) //FD, SET CUSTOM JUMP
             {
                 if(seltrk->wavei < 0xFFFF)
                 {
@@ -535,13 +551,15 @@ void itrp::initializeWaveTable()
     generators[0x1e] = genNHalfSine;
     generators[0x1f] = genNHalfSinePulse;
 
+    generators[0x20] = genMux;
+
 
     //PERCUSSION
-    generators[0x20] = genBongo;
-    generators[0x21] = genNoise0;
-    generators[0x22] = genNoise1;
-    generators[0x23] = genNoise2;
-    generators[0x24] = genNoise3;
+    generators[0x60] = genBongo;
+    generators[0x61] = genNoise0;
+    generators[0x62] = genNoise1;
+    generators[0x63] = genNoise2;
+    generators[0x64] = genNoise3;
 
     
 }
@@ -586,7 +604,7 @@ void itrp::initializeRender()
         tracks[i].fx = (firstrow & R_EFFECT) >> RI_EFFECT;
         tracks[i].fxparam = firstrow & R_FXPARAM;
         tracks[i].segments = 0;
-        tracks[i].ptbl = new unsigned char[15];
+        tracks[i].ptbl = new unsigned char[32];
 
 
         tracks[i].ptbl[0] = 0x00; //Pulse param (part 1)
@@ -598,7 +616,7 @@ void itrp::initializeRender()
 
         tracks[i].ptbl[4] = 0; //loop counter
         tracks[i].ptbl[5] = 127; //Wave misc param 1
-        tracks[i].ptbl[6] = 0; //Wave misc param 2
+        tracks[i].ptbl[6] = 0x80; //Wave misc param 2
         tracks[i].ptbl[7] = 127; //Chain
         tracks[i].ptbl[8] = 127; //Track Interp
 
