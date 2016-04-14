@@ -1200,9 +1200,9 @@ void instedtr::setWaveAttribs(unsigned short waverow, unsigned char waveseg)
     }
     else
         if(waverow == selwavrow)
-            attron(COLOR_PAIR(patternedtr::COL_META_US));
-        else
             attron(COLOR_PAIR(patternedtr::COL_META_UU));
+        else
+            attron(COLOR_PAIR(patternedtr::COL_META_US));
 }
 
 
@@ -1227,9 +1227,9 @@ void instedtr::setPulseAttribs(unsigned short pulserow, unsigned char pulseseg)
     }
     else
         if(pulserow == selpulrow)
-            attron(COLOR_PAIR(patternedtr::COL_META_US));
-        else
             attron(COLOR_PAIR(patternedtr::COL_META_UU));
+        else
+            attron(COLOR_PAIR(patternedtr::COL_META_US));
 }
 
 
