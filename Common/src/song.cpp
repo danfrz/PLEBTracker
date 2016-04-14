@@ -40,6 +40,10 @@ Song::Song()
     for(int i = 0; i < waveEntries; i++)
         waveTable[i] = 0;
 
+    pulseEntries = 0;
+    pulseTable = new unsigned short[256];
+    for(int i = 0; i < pulseEntries; i++)
+        pulseTable[i] = 0;
 }
 
 Song::Song(std::istream &in)
@@ -48,6 +52,9 @@ Song::Song(std::istream &in)
     instruments = NULL;
     orders = new unsigned char[256];
     waveTable = new unsigned short[256];
+    pulseTable = new unsigned short[256];
+
+    pulseEntries = 0;
 
     input(in);
 }
@@ -58,6 +65,7 @@ Song::~Song()
     delete [] patterns;
     delete [] orders;
     delete [] waveTable;
+    delete [] pulseTable;
 
 }
 
@@ -77,6 +85,9 @@ std::ostream &Song::output(std::ostream &out) const
     out.write((char*)&waveEntries, sizeof(short));
     out.write((char*)waveTable, waveEntries*sizeof(short));
 
+    out.write((char*)&pulseEntries, sizeof(short));
+    out.write((char*)pulseTable, pulseEntries*sizeof(short));
+
     out.write((char*)&num_instruments, 1);
     for(int i = 0; i < num_instruments; i++)
         (instruments[i])->output(out);
@@ -93,6 +104,7 @@ std::istream &Song::input(std::istream &in)
     delete [] instruments;
     delete [] patterns;
 
+
     in.read(songname, 29);
     in.read((char*)&bytes_per_row, sizeof(short));
     in.read((char*)&interrow_resolution, 1);
@@ -103,9 +115,18 @@ std::istream &Song::input(std::istream &in)
 
 
     in.read((char*)&waveEntries, sizeof(short));
+    std::cout << "WaveEntries " << waveEntries << "\n";
     in.read((char*)waveTable, waveEntries*sizeof(short));
     for(int i = waveEntries; i < 256; i++)
         waveTable[i] = 0;
+
+    
+    in.read((char*)&pulseEntries, sizeof(short));
+    std::cout << "PulseEntries " << pulseEntries << "\n";
+    in.read((char*)pulseTable, pulseEntries*sizeof(short));
+    for(int i = pulseEntries; i < 256; i++)
+        pulseTable[i] = 0;
+        
 
     instruments = new Instrument*[256];
     in.read((char*)&num_instruments, 1);
@@ -129,6 +150,10 @@ void Song::copyCommutable(Song *other)
     unsigned short *otrwavebl = other->getWaveTable();
     for(int i = 0; i < waveEntries; i++)
         other->insertWaveEntry(i,waveTable[i]);
+
+    unsigned short *otrpulsebl = other->getPulseTable();
+    for(int i = 0; i < pulseEntries; i++)
+        other->insertPulseEntry(i,pulseTable[i]);
 
     other->setInterRowResolution(interrow_resolution);
     other->setBytesPerRow(bytes_per_row);
@@ -587,3 +612,183 @@ bool Song::removeWaveEntry(unsigned short index)
 }
 
 
+bool Song::insertPulseEntry(unsigned short index, unsigned short entry)
+{
+    if(pulseEntries == 0xFFFF)
+        return false;
+    for(unsigned short last = ++pulseEntries; last > index; last--)
+        pulseTable[last] = pulseTable[last-1];
+
+    fixPulseJumps(index, 1);
+    
+    pulseTable[index] = entry;
+    return true;
+}
+
+void Song::fixPulseJumps(const unsigned short &index, short difference)
+{
+
+    if(difference == 0) return;
+
+    //Fix instrument pulse index references
+    unsigned char instpls;
+    if(difference > 0)
+    {
+        for(unsigned char i = 0; i < num_instruments; i++)
+        {
+            instpls = instruments[i]->getPulseIndex();
+            // > 0 because the first instrument's wave pointer shouldn't
+            // realistically change due to insertions at index 0
+            if(instpls > 0 && instpls >= index && instpls < 0xFFFF-difference)
+            {
+                instruments[i]->setPulseIndex(instpls+difference);
+            }
+        }
+    }
+    else
+    {
+        for(unsigned char i = 0; i < num_instruments; i++)
+        {
+            instpls = instruments[i]->getPulseIndex();
+            if(instpls >= index)
+            {
+                if(instpls >= -difference)
+                    instruments[i]->setPulseIndex(instpls +difference);
+                else
+                    instruments[i]->setPulseIndex(0);
+            }
+        }
+    }
+
+    //Fix Pulse jumps
+    unsigned short jumptype;
+    unsigned short dest;
+    if(difference > 0)
+    {
+        for(unsigned short i = 0; i < pulseEntries; i++)
+        {
+            if( isJumpFunc(pulseTable[i]))//is jump, correct it
+            {
+                jumptype = pulseTable[i] & 0xFF00;
+                if( (i < pulseEntries-1) && ((pulseTable[i+1]&0xFF00) == jumptype))//Long jump
+                {
+                    dest = ((pulseTable[i] & 0xFF) << 8) | (pulseTable[i+1] & 0xFF);
+                    if(dest >= index && dest < 0xFFFF-difference) 
+                    {
+                        dest += difference;
+                        pulseTable[i] = jumptype | ((dest & 0xFF00) >> 8);
+                        pulseTable[i+1] = jumptype | (dest & 0xFF);
+                    }
+                    i++;
+                }
+                else
+                {
+                    dest = pulseTable[i] & 0xFF;
+                    if(dest >= index)
+                    {
+                        if(dest >= 0xFF - difference)
+                        {
+
+                            if(waveEntries < 0xFFFF)
+                            {
+                                dest += difference;
+                                pulseTable[i] &= 0xFF00;
+                                pulseTable[i] |= ((dest & 0xFF00) >> 8);
+                                insertPulseEntry(i+1,jumptype | (dest & 0xFF));
+                            }
+                        }
+                        else
+                            pulseTable[i]+=difference;
+                    }
+                }
+            }
+        }
+    }
+
+    else //difference negative
+    {
+        for(unsigned short i = 0; i < pulseEntries; i++)
+        {
+            if( isJumpFunc(pulseTable[i]))//is jump, correct it
+            {
+                jumptype = pulseTable[i] & 0xFF00;
+            
+                if( (i < pulseEntries-1) && ((pulseTable[i+1] & 0xFF00) == jumptype) )//Long jump
+                {
+                    dest = ((pulseTable[i] & 0xFF) << 8) | (pulseTable[i+1] & 0xFF);
+                    if(dest >= index && dest >= -difference) 
+                    {
+                        dest +=  difference;
+
+                        pulseTable[i] = jumptype | ((dest & 0xFF00) >> 8);
+                        pulseTable[i+1] = jumptype | (dest & 0xFF);
+                    }
+                    i++;
+                }
+                else
+                {
+                    dest = pulseTable[i] & 0xFF;
+                    if(dest >= index)
+                    {
+                        if(dest >= -difference)
+                            pulseTable[i]+= difference;
+                        else
+                            pulseTable[i] &= 0xFF00;
+                    }
+                }
+
+            }
+        }
+    }
+
+    Pattern *p;
+    for(int i = 0; i < num_patterns; i++)
+    {
+        p = patterns[i];
+        for(int trk = 0; trk < p->numTracks(); trk++)
+        {
+            for(int row = 0; row < p->numRows(); row++)
+            {
+                unsigned int entry = p->at(trk,row);
+                if((entry & 0xF00) == 0xC00)
+                {
+                    unsigned char plsjump = entry & 0xFF;
+
+                    if(difference > 0)
+                    {
+                        if(plsjump > 0 &&plsjump >= index && plsjump < 0xFF-difference)
+                        {
+                            plsjump +=difference;
+                        }
+                    }
+                    else
+                    {
+                        if(plsjump >= index)
+                        {
+                            if(plsjump >= -difference)
+                                plsjump +=difference;
+                            else
+                                plsjump = 0;
+                        }
+                    }
+                    entry &= ~0xFF;
+                    entry |= plsjump;
+                    p->setAt(trk,row,entry);
+                }
+            }
+        }
+    }
+
+}
+
+bool Song::removePulseEntry(unsigned short index)
+{
+    if(pulseEntries == 0)
+        return false;
+
+    for(unsigned short i = index+1; i < pulseEntries; i++)
+        pulseTable[i-1] = pulseTable[i];
+    pulseTable[--pulseEntries] = 0;
+    fixPulseJumps(index, -1);
+    return true;
+}
