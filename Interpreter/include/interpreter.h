@@ -33,6 +33,7 @@ namespace itrp
         Instrument *inst;
 
         unsigned short wavei;
+        unsigned short pulsei;
         unsigned char lastwave;
         unsigned char waveduracc;
 
