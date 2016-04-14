@@ -200,9 +200,9 @@ bool patternedtr::setMetaAttribs(unsigned char objmeta, unsigned char rowmeta)
     {
         //Window not selected
         if(objmeta == selobjmeta && rowmeta == selrowmeta)
-            attron(COLOR_PAIR(COL_META_US));//But obj focussed
+            attron(COLOR_PAIR(COL_META_UU));//But obj focussed
         else
-            attron(COLOR_PAIR(COL_META_UU));//just unselected
+            attron(COLOR_PAIR(COL_META_US));//just unselected
     }
     return false;
 }
