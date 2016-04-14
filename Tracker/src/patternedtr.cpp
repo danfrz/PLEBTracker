@@ -798,15 +798,14 @@ void patternedtr::displayPattern()
     attroff(-1);
 
     int w, h;
-    getmaxyx(editor::ptrnwin, h, w); //TODO: confirm this works
+    getmaxyx(editor::ptrnwin, h, w); 
     int tracks_visible = w/TRACK_WIDTH;
-
 
 
     unsigned char minrow = viewportrow;
     unsigned char maxrow = viewportrow+h - 1;
     unsigned char mintrack = viewporttrack;
-    unsigned char maxtrack = viewporttrack + tracks_visible ;
+    unsigned char maxtrack = viewporttrack + tracks_visible;
     if(selptrn != NULL)
     {
         if(maxrow > selptrn->numRows())
@@ -816,6 +815,7 @@ void patternedtr::displayPattern()
     }
     tracks_visible = maxtrack - mintrack;
 
+    //std::cerr << "DISPLAYING PATTERN  mintrack=" << (int)mintrack << " maxtrack =" << (int)maxtrack << "tracksvis=" << tracks_visible <<  "\n";
 
     char name[4];
     name[2] = 0;
@@ -912,6 +912,7 @@ void patternedtr::displayPattern()
             j++;
         }
     }
+    //std::cerr << "PRINTING SPACER maxtracksviewport=" << maxtracksviewport << " w=" << w << '\n';
 
 
 
@@ -941,6 +942,7 @@ void patternedtr::displayPattern()
 
         delete [] spacebuffer;
     }//End Print Spacer
+    //std::cerr << "DISPLAYED PATTERN\n";
 }
 
 void patternedtr::display()
@@ -950,6 +952,7 @@ void patternedtr::display()
     displayPattern();
     
     instedtr::displayWav();
+    instedtr::displayPulse();
     
     //print meta after pattern so that meta tooltipts overlap pattern
     displayMeta();
@@ -1291,6 +1294,8 @@ void patternedtr::processInput(int in)
         processPatternInput(in);
     else if(editor::inputwin == editor::wavewin)
         instedtr::processInputWav(in);
+    else if(editor::inputwin == editor::pulsewin)
+        instedtr::processInputPulse(in);
 
 }
 
