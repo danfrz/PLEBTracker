@@ -39,6 +39,9 @@ Description:
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void chgSelWavSeg(int i);
 
+    void chgSelPulSeg(int i);
+
+    void chgSelPulRow(int i);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void chgSelVolRow(int i)
@@ -106,6 +109,13 @@ Description:
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
+Function: void displayPulse()
+Description:
+   Render the Pulse Table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void displayPulse();
+
+/***\//////////////////////////////////////////////////////////////////////////    
 Function: void displayInst()
 
 Description:
@@ -145,6 +155,15 @@ Description:
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void setWaveAttribs(unsigned short waverow, unsigned char waveseg);
 
+
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: void setPulseAttribs(unsigned short pulserow, unsigned char pulseseg)
+Description:
+   Set ncurses attributes for this UI element of the pulse table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void setPulseAttribs(unsigned short pulserow, unsigned char pulseseg);
+
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void setVolAttribs(unsigned char volrow, unsigned char volseg)
 
@@ -175,6 +194,13 @@ Description:
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void processInputWav(int in);
 
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: void processInputPulse(int in)
+Description:
+   Process keyboard input for the wave table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void processInputPulse(int in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void processInputVol(int in)
