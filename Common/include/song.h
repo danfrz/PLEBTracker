@@ -27,6 +27,9 @@ class Song{
         unsigned short waveEntries;
         unsigned short *waveTable;
 
+        unsigned short pulseEntries;
+        unsigned short *pulseTable;
+
 
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: void copyCommutable(Song *other)
@@ -140,6 +143,7 @@ Description:
         inline unsigned int getBytesPerRow() const {return bytes_per_row;}
         inline unsigned char getInterrowRes() const {return interrow_resolution;}
         inline unsigned short numWaveEntries() const {return waveEntries;}
+        inline unsigned short numPulseEntries() const {return pulseEntries;}
 
         inline void setPatternIndexByOrder(unsigned const char &order, const unsigned char &pattern){orders[order] = pattern;}
 
@@ -260,6 +264,39 @@ Description:
     Fired after rows are inserted or removed from the wave table
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         void fixWaveJumps(const unsigned short &index, short difference);
+
+
+
+
+        inline unsigned short *getPulseTable() {return pulseTable;}
+        inline unsigned short getPulseEntry(unsigned short index) {return pulseTable[index];}
+        inline void setPulseEntry(unsigned short index, unsigned short entry){pulseTable[index] = entry;}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: bool insertPulseEntry(unsigned short index, unsigned short entry)
+Description:
+   Insert a new pulse entry at the specified location.
+   Pushed back entries that come after index
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        bool insertPulseEntry(unsigned short index, unsigned short entry);
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: bool removePulseEntry(unsigned short index)
+Description:
+    Remove a pulse entry at the specified location
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        bool removePulseEntry(unsigned short index);
+
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void fixPulseJumps(const unsigned short &index, short difference)
+Description:
+    Fixes indicies that point to positions in the pusle table.
+    Fired after rows are inserted or removed from the pulse table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        void fixPulseJumps(const unsigned short &index, short difference);
+
+
 
 
 };
