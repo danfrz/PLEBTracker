@@ -422,13 +422,13 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                         _pulse = song->getPulseEntry(seltrk->pulsei);
                     }
 
-                } else if(cmd == 0x7) //F0, SET PULSE2 
+                } else if(cmd == 0x0) //F0, SET PULSE2 
                 {
                     ((unsigned short*)seltrk->ptbl)[PARAM_PULSE2] = (_pulse & 0x00FF) << 8;
 
                     seltrk->pulsei++;
                     _pulse = song->getPulseEntry(seltrk->pulsei);
-                } else if(cmd == 0x8) //F1, ADD PULSE2
+                } else if(cmd == 0x1) //F1, ADD PULSE2
                 {
                     ((short*)seltrk->ptbl)[PARAM_PULSE2] += static_cast<char>(_pulse & 0x00FF)*0x10; //shift once to the left
 
