@@ -9,6 +9,7 @@ class Instrument
     private:
         char name[23]{0};
         unsigned short waveIndex;
+        unsigned short pulseIndex;
 
         
         unsigned char volEntries;
@@ -49,6 +50,8 @@ Description:
         std::istream &input(std::istream &in);
 
         inline void setWaveIndex(short i){waveIndex = i;}
+        inline void setPulseIndex(short i){pulseIndex = i;}
+        
 
         inline void setVolEntry(unsigned char index, unsigned short entry){volTable[index] = entry;}
 
@@ -61,6 +64,7 @@ Description:
         inline char *getName(){return name;}
 
         inline unsigned short getWaveIndex() const{return waveIndex;}
+        inline unsigned short getPulseIndex() const{return pulseIndex;}
         inline unsigned short getVolEntry(unsigned char index) const {return volTable[index];}
         inline unsigned char numVolEntries() const {return volEntries;}
         inline unsigned short *getVolTable() const {return volTable;}
