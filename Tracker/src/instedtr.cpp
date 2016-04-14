@@ -1085,10 +1085,22 @@ void instedtr::processInputPulse(int in)
             case 'N':
                 {
                     unsigned short entry = song->getPulseEntry(selpulrow);
-                    char right = (entry & 0xFF);
-                    right = -right;
-                    entry = (entry & 0xFF00) | (unsigned char)right;
-                    song->setPulseEntry(selpulrow, entry);
+                    char left = (entry & 0xFF00);
+                    if(left < 0xE000)
+                    {
+                        if(left >= 0x7000)
+                        {
+                            entry += 0x2000;
+                            entry = -entry;
+                        }
+                        else
+                        {
+                            entry = -entry;
+                            entry -= 0x2000;
+                        }
+                        song->setPulseEntry(selpulrow, entry);
+                    }
+                    
                 }
                 return;
             default:
