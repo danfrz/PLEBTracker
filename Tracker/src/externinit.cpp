@@ -13,6 +13,7 @@ namespace editor
     WINDOW *metawin;
     WINDOW *volwin;
     WINDOW *wavewin;
+    WINDOW *pulsewin;
     WINDOW *dialog;
 
     WINDOW *wingroup;
@@ -80,14 +81,20 @@ namespace patternedtr
 namespace instedtr
 {
     unsigned short waveclipboard;
+    unsigned short pulseclipboard;
     unsigned short volclipboard;
 
     bool instobjedit;
     unsigned char selinstrow;
     unsigned char selinstobj;
     unsigned short selwavrow;
+    unsigned short selpulrow;
+    unsigned char selpulseg;
+
+
     unsigned char selwavseg;
     unsigned short viewportwave;
+    unsigned short viewportpulse;
     unsigned char viewportvol;
 
 
