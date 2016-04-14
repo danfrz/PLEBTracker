@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
         init_pair(COL_META_SSSE, COLOR_YELLOW, COLOR_MAGENTA);
         init_pair(COL_META_SSU, COLOR_BLACK, COLOR_CYAN);
         init_pair(COL_META_SU , COLOR_WHITE , COLOR_BLACK);
-        init_pair(COL_META_US , COLOR_CYAN  , COLOR_BLACK);
-        init_pair(COL_META_UU , COLOR_WHITE  , COLOR_BLUE);
+        init_pair(COL_META_US , COLOR_WHITE  , COLOR_BLUE);
+        init_pair(COL_META_UU , COLOR_CYAN  , COLOR_BLACK);
 
 
         init_pair(COL_META_ERR, COLOR_MAGENTA, COLOR_BLUE);

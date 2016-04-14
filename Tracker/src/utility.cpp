@@ -77,12 +77,12 @@ void editor::inform(const char *message)
     if(length < 64)
         length = 64;
     attroff(-1);
-    attron(COLOR_PAIR(patternedtr::COL_META_SSS));
+    attron(COLOR_PAIR(patternedtr::COL_META_SSU));
     mvprintw(3,4,"+--------------------------------------------------------------+",stdscr);
 
     mvprintw(8,4,"+--------------------------------------------------------------+",stdscr);
     attroff(-1);
-    attron(COLOR_PAIR(patternedtr::COL_META_UU));
+    attron(COLOR_PAIR(patternedtr::COL_META_US));
     mvprintw(4,4,"                                                                ",stdscr);
     mvprintw(5,4,message,stdscr);
     if(msglen < 64)
@@ -102,12 +102,12 @@ bool editor::confirm(const char *message)
     if(length < 64)
         length = 64;
     attroff(-1);
-    attron(COLOR_PAIR(patternedtr::COL_META_SSS));
+    attron(COLOR_PAIR(patternedtr::COL_META_SSU));
     //modify these to output to the length
     mvprintw(3,4,"+--------------------------------------------------------------+",stdscr);
     mvprintw(8,4,"+--------------------------------------------------------------+",stdscr);
     attroff(-1);
-    attron(COLOR_PAIR(patternedtr::COL_META_UU));
+    attron(COLOR_PAIR(patternedtr::COL_META_US));
     mvprintw(4,4,"                                                                ",stdscr);
     mvprintw(5,4,message,stdscr);
     if(msglen < 64)
@@ -126,11 +126,11 @@ bool editor::confirm(const char *message)
 void editor::displayAbout()
 {
     attroff(-1);
-    attron(COLOR_PAIR(patternedtr::COL_META_SSS));
+    attron(COLOR_PAIR(patternedtr::COL_META_SSU));
     mvprintw(3,4, "+---------------------------------+",stdscr);
     mvprintw(15,4,"+---------------------------------+",stdscr);
     attroff(-1);
-    attron(COLOR_PAIR(patternedtr::COL_META_UU));
+    attron(COLOR_PAIR(patternedtr::COL_META_US));
     mvprintw(4,4, "  Welcome to PLEBTracker!       v1 ",stdscr);
     mvprintw(5,4, "                                   ",stdscr);
     mvprintw(6,4, "Press TAB to switch windows        ",stdscr);
