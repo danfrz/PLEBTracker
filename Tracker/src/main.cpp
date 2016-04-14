@@ -151,9 +151,10 @@ int main(int argc, char *argv[])
     //INITIALIZE EXTERNAL IDENTIFIERS
     getmaxyx(stdscr, editor::WIN_HEIGHT, editor::WIN_WIDTH);
     editor::metawin = newwin(3, editor::WIN_WIDTH,                       0, 0);
-    editor::ptrnwin = newwin(editor::WIN_HEIGHT-3, editor::WIN_WIDTH-11, 3, 0);
+    editor::ptrnwin = newwin(editor::WIN_HEIGHT-3, editor::WIN_WIDTH-11*2, 3, 0);
     editor::instwin = newwin(editor::WIN_HEIGHT, editor::WIN_WIDTH,      0, 0);
-    editor::wavewin = newwin(editor::WIN_HEIGHT-5, 10,                   3, editor::WIN_WIDTH-10);
+    editor::wavewin = newwin(editor::WIN_HEIGHT-5, 10,                   3, editor::WIN_WIDTH-20);
+    editor::pulsewin = newwin(editor::WIN_HEIGHT-5, 10,                   3, editor::WIN_WIDTH-10);
     editor::dialog  = newwin(8, 60,             editor::WIN_HEIGHT/3, editor::WIN_WIDTH/3); //good enough
     editor::selinst = editor::song->getInstrument(0);
 
@@ -179,7 +180,7 @@ int main(int argc, char *argv[])
     patternedtr::viewporttrack = 0;
     patternedtr::viewportrow = 0;
 
-    patternedtr::maxtracksviewport = (editor::WIN_WIDTH-11) / 15;
+    patternedtr::maxtracksviewport = (editor::WIN_WIDTH-11*2 - 3) / 15;
     patternedtr::maxrowsviewport = (editor::WIN_HEIGHT-3);
 
     patternedtr::selrow = 0;
@@ -219,6 +220,7 @@ int main(int argc, char *argv[])
     keypad(editor::ptrnwin, 1);
     keypad(editor::instwin, 1);
     keypad(editor::wavewin, 1);
+    keypad(editor::pulsewin, 1);
     keypad(editor::dialog, 1);
 
     //Show the tracker
@@ -293,6 +295,27 @@ int main(int argc, char *argv[])
                     case 'D':
                         //Wave : Pattern View -- Wave : Instrument View
                         inputwin = wavewin;
+                        if(wingroup == ptrnwin)
+                        {
+                            patternedtr::display();
+                        }
+                        else if(wingroup == instwin)
+                        {
+                            instedtr::display();
+                        }
+                        else
+                        {
+                            wingroup = instwin;
+                            instedtr::display();
+                        }
+
+                        break;
+                    case 'r':
+                    case 'f':
+                    case 'R':
+                    case 'F':
+                        //Pulse : Pattern View -- Pulse : Instrument View
+                        inputwin = pulsewin;
                         if(wingroup == ptrnwin)
                         {
                             patternedtr::display();
