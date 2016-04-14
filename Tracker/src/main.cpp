@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     noecho();
 
     clear();
-    printw("PLEBTracker [Press any key to continue] 20160114-20160402");
+    printw("Welcome to PLEBTracker!  [Press any key to continue]  20160114-20160414");
     curs_set(0);
     getch();
     clear();
