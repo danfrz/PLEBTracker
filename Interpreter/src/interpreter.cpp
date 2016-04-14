@@ -115,7 +115,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 {
     //std::cerr << "renderTick0\n";
     Track *seltrk = &tracks[track];
-    //std::cerr << "renderTick1 voli=" << std::hex << int(seltrk->voli) << " volduracc=" << int(seltrk->volduracc) << " lastvol=" << int(seltrk->lastvol) <<  "\n";
+    std::cerr << "renderTick1 voli=" << std::hex << int(seltrk->voli) << " volduracc=" << int(seltrk->volduracc) << " lastvol=" << int(seltrk->lastvol) <<  "\n";
     if(seltrk->inst == NULL)
         return;
     unsigned char amp = seltrk->inst->getVolume(seltrk->voli, seltrk->volduracc, seltrk->voljump, seltrk->lastvol);
@@ -126,6 +126,11 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
     
     float frq = seltrk->frq;
     unsigned char depth = 0;
+
+    ///////////////////////////////////////////////////////
+    ///// WAVE TABLE FUNCTION IMPLEMENTATION///////////////
+    ///////////////////////////////////////////////////////
+
 
     unsigned short _wav = song->getWaveEntry(seltrk->wavei);
     //Check if the wave entry is a function
@@ -221,20 +226,6 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                     _wav = song->getWaveEntry(seltrk->wavei);
                 }
             
-            } else if(cmd == 0x0) //F0, SET PULSE 
-            {
-                ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] = (_wav & 0x00FF) << 8;
-
-                seltrk->wavei++;
-                _wav = song->getWaveEntry(seltrk->wavei);
-            } else if(cmd == 0x1) //F1, ADD PULSE 
-            {
-                ((short*)seltrk->ptbl)[PARAM_PULSE] += static_cast<char>(_wav & 0x00FF)*0x10; //shift once to the left
-
-                seltrk->wavei++;
-                _wav = song->getWaveEntry(seltrk->wavei);
-
-
             } else if(cmd == 0x2) //F2, SET MISC WAVE PARAM 1
             {
                 if(((_wav & 0xFF) != seltrk->ptbl[PARAM_WAVE1]) && resetsPhaseOnWave1Set(seltrk->lastwave))
@@ -272,42 +263,32 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 //Count F6 as a note
                 break;
 
-            } else if(cmd == 0x7) //F0, SET PULSE2 
-            {
-                ((unsigned short*)seltrk->ptbl)[PARAM_PULSE2] = (_wav & 0x00FF) << 8;
-
-                seltrk->wavei++;
-                _wav = song->getWaveEntry(seltrk->wavei);
-            } else if(cmd == 0x8) //F1, ADD PULSE2
-            {
-                ((short*)seltrk->ptbl)[PARAM_PULSE2] += static_cast<char>(_wav & 0x00FF)*0x10; //shift once to the left
-
-                seltrk->wavei++;
-                _wav = song->getWaveEntry(seltrk->wavei);
-
-            }
-            
-            else if(cmd == 0xD) //FD, SET CUSTOM JUMP
+            } else if(cmd == 0xD) //FD, SET CUSTOM JUMP
             {
                 if(seltrk->wavei < 0xFFFF)
                 {
                     unsigned short nxtwav = song->getWaveEntry(seltrk->wavei + 1);
                     if((nxtwav & 0xFF00) == 0xFD00)
                     {
-                        ((unsigned short*)seltrk->ptbl)[1] = ((_wav & 0x00FF) << 8) | (nxtwav & 0x00FF);
+                        ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP] = ((_wav & 0x00FF) << 8) | (nxtwav & 0x00FF);
                         seltrk->wavei++;
                     }
                     else
-                        ((unsigned short*)seltrk->ptbl)[1] = (_wav & 0x00FF);
+                        ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP] = (_wav & 0x00FF);
                 }
                 else
-                    ((unsigned short*)seltrk->ptbl)[1] = (_wav & 0x00FF);
+                    ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP] = (_wav & 0x00FF);
 
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
             } else if(cmd == 0xE) //FE, JUMP CUSTOM JUMP
             {
-                seltrk->wavei = ((unsigned short*)seltrk->ptbl)[1] + (_wav & 0xFF);
+                seltrk->wavei = ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP] + (_wav & 0xFF);
+                _wav = song->getWaveEntry(seltrk->wavei);
+            }
+            else
+            {
+                seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
             }
 
@@ -327,8 +308,182 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
     if(waveform == 0xF4)
         waveform = seltrk->lastwave;
 
+    //////////////////////////////////////////
+    //////PULSE TABLE IMPLEMENTATION//////////
+    //////////////////////////////////////////
 
-    //Effect set
+    if(seltrk->pulsei != 0xFFFF)
+    {
+        unsigned short _pulse = song->getPulseEntry(seltrk->pulsei);
+
+        if(_pulse < 0xE000) //0x0000 to 0xDFFF add pulse
+        {
+            if(_pulse >= 0x7000) //Negative
+            {
+                unsigned short offset = _pulse + 0x2000; // this would make 0xDFFF into 0xFFFF which is -1
+                ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] += static_cast<short>(offset);
+            }
+            else
+                ((short*)seltrk->ptbl)[PARAM_PULSE] += _pulse; //shift once to the left
+        }
+        else if(_pulse < 0xF000) // 0xE___, set pulse
+        {
+            ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] = (_pulse & 0x0FFF) << 4;
+
+        }
+        else //0xF___, function
+        {
+            while((_pulse & 0xF000) == 0xF000)
+            {
+                depth++;
+                if(depth > 64)
+                {
+                    std::cerr << "Oh dear! Infinite loop! Pulse set to 0.\n";
+                    seltrk->pulsei--;
+                    ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] = 0;
+                    break;
+                }
+
+                //Get which wave function it is
+                unsigned char cmd = (_pulse & 0x0F00) >> 8;
+                if(cmd == 0xF) //FF, JUMP
+                {
+                    //If there is a Jump instruction immediately following this wave
+                    //entry then concatenate the destinations of these wave entries
+                    if(seltrk->pulsei < 0xFFFF) //edge case
+                    {
+                        unsigned short nxtpls = song->getPulseEntry(seltrk->pulsei + 1);
+                        if((nxtpls & 0xFF00) == 0xFF00)
+                        {
+                            seltrk->pulsei = ((_pulse & 0x00FF) << 8) | (nxtpls & 0x00FF);
+                            _pulse = song->getPulseEntry(seltrk->pulsei);
+                        }
+                        else
+                        {
+                            //Next entry wasn't the FF function
+                            seltrk->pulsei = _pulse & 0x00FF;
+                            _pulse = song->getPulseEntry(seltrk->pulsei);
+                        }
+                    }
+                    else
+                    {
+                        //Just jump to where it says
+                        seltrk->pulsei = _pulse & 0x00FF;
+                        _pulse = song->getPulseEntry(seltrk->pulsei);
+                    }
+
+                } else if(cmd == 0xB) //Set loop Counter
+                {
+                    seltrk->ptbl[PARAM_LOOP2] = _pulse & 0xFF;
+                    seltrk->pulsei++;
+                    _pulse = song->getPulseEntry(seltrk->pulsei);
+                } else if(cmd == 0xC) //decrement loop ctr, jump if != 0
+                {
+                    seltrk->ptbl[PARAM_LOOP2]--;
+                    if(seltrk->ptbl[PARAM_LOOP2]!=0)
+                    {
+
+                        //jump 
+                        if(seltrk->pulsei < 0xFFFF)
+                        {
+
+                            unsigned short nxtpls = song->getPulseEntry(seltrk->pulsei + 1);
+                            if((nxtpls & 0xFF00) == 0xFC00)
+                            {
+                                seltrk->pulsei = ((_pulse & 0x00FF) << 8) | (nxtpls & 0x00FF);
+                                _pulse = song->getPulseEntry(seltrk->pulsei);
+                            }
+                            else
+                            {
+                                seltrk->pulsei = _pulse & 0x00FF;
+                                _pulse = song->getPulseEntry(seltrk->pulsei);
+                            }
+                        }
+                        else
+                        {
+                            seltrk->pulsei = _pulse & 0x00FF;
+                            _pulse = song->getPulseEntry(seltrk->pulsei);
+                        }
+                    }
+                    else
+                    {
+                        //Concatenate destinations if adjacent to another FC function
+                        if(seltrk->pulsei < 0xFFFF)
+                        {
+                            unsigned short nxtpls = song->getPulseEntry(seltrk->pulsei + 1);
+                            if((nxtpls & 0xFF) == 0xFC)
+                                seltrk->pulsei+=2;
+                            else
+                                seltrk->pulsei++;
+                        }
+                        else
+                            seltrk->pulsei++;
+
+                        _pulse = song->getPulseEntry(seltrk->pulsei);
+                    }
+
+                } else if(cmd == 0x7) //F0, SET PULSE2 
+                {
+                    ((unsigned short*)seltrk->ptbl)[PARAM_PULSE2] = (_pulse & 0x00FF) << 8;
+
+                    seltrk->pulsei++;
+                    _pulse = song->getPulseEntry(seltrk->pulsei);
+                } else if(cmd == 0x8) //F1, ADD PULSE2
+                {
+                    ((short*)seltrk->ptbl)[PARAM_PULSE2] += static_cast<char>(_pulse & 0x00FF)*0x10; //shift once to the left
+
+                    seltrk->pulsei++;
+                    _pulse = song->getPulseEntry(seltrk->pulsei);
+
+                }
+                else if(cmd == 0xD) //FD, SET CUSTOM JUMP
+                {
+                    if(seltrk->pulsei < 0xFFFF)
+                    {
+                        unsigned short nxtpls = song->getPulseEntry(seltrk->pulsei + 1);
+                        if((nxtpls & 0xFF00) == 0xFD00)
+                        {
+                            ((unsigned short*)seltrk->ptbl)[1] = ((_pulse & 0x00FF) << 8) | (nxtpls & 0x00FF);
+                            seltrk->pulsei++;
+                        }
+                        else
+                            ((unsigned short*)seltrk->ptbl)[1] = (_pulse & 0x00FF);
+                    }
+                    else
+                        ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP2] = (_pulse & 0x00FF);
+
+                    seltrk->pulsei++;
+                    _pulse = song->getPulseEntry(seltrk->pulsei);
+                } else if(cmd == 0xE) //FE, JUMP CUSTOM JUMP
+                {
+                    seltrk->pulsei = ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP2] + (_pulse & 0xFF);
+                    _pulse = song->getPulseEntry(seltrk->pulsei);
+                }
+                else
+                {
+                    seltrk->pulsei++;
+                    _pulse = song->getPulseEntry(seltrk->pulsei);
+                }
+
+
+            }
+            seltrk->pulsei++;
+
+        }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    }
+
+    ////////////////////////////////////////////////
+    //////APPLY ON-SEGMENT EFFECTS TO WAVEFORM//////
+    ////////////////////////////////////////////////
     if(!(seltrk->fx == seltrk->fxparam && seltrk->fx == 0))
     {
 
@@ -484,7 +639,10 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
     //at the moment
     if(seltrk->lastwave != waveform)
         seltrk->phase = 0;
-    //std::cerr << "renderTick 3 amp=" << int(amp) << ", wav="  << _wav << "h frq=" << frq <<  " bytes=" << bytes << " phase=" << seltrk->phase << " pos=" << (int*)buffer << "\n" ;
+
+    //DEBUG OUTPUT
+    //std::cerr << "renderTick 3 amp=" << std::hex << int(amp) << ", wav="  << _wav << "h frq=" << frq <<  " bytes=" << bytes << " phase=" << seltrk->phase << " pos=" << (int*)buffer;
+    //if(seltrk->pulsei != 0xFFFF) std::cerr << " pulse=" << (unsigned short)song->getPulseEntry(seltrk->pulsei) << '\n';
 
 
     //Generate the actual sound
@@ -598,6 +756,7 @@ void itrp::initializeRender()
         if(tracks[i].inst != NULL)
         {
             tracks[i].wavei = tracks[i].inst->getWaveIndex();
+            tracks[i].wavei = tracks[i].inst->getPulseIndex();
             tracks[i].voli = tracks[i].inst->getVolEntry(0);
         }
 
@@ -703,6 +862,7 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                         seltrk->inst = song->getInstrument(_inst);
                         _wav = seltrk->inst->getWaveIndex();
                         seltrk->wavei = _wav;
+                        seltrk->pulsei = seltrk->inst->getPulseIndex();
                         seltrk->waveduracc = 0;
                         seltrk->voli = 0;
                         seltrk->volduracc = 0;
