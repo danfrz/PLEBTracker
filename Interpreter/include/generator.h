@@ -3,14 +3,16 @@
 #include <cmath>
 #include <random>
 
-#define PARAM_PULSE 0
-#define PARAM_CUSTOM_JUMP 2
-#define PARAM_LOOP 4
-#define PARAM_WAVE1 5
-#define PARAM_WAVE2 6
-#define PARAM_CHAIN 7
-#define PARAM_LAST 8
-#define PARAM_PULSE2 5
+#define PARAM_PULSE 0       //use index to param[] casted as short[]
+#define PARAM_CUSTOM_JUMP 1 //short
+#define PARAM_LOOP 4        //byte
+#define PARAM_WAVE1 5       //byte
+#define PARAM_WAVE2 6       //byte
+#define PARAM_CHAIN 7       //byte
+#define PARAM_LAST 8        //byte
+#define PARAM_PULSE2 5       //short
+#define PARAM_CUSTOM_JUMP2 6 //short
+#define PARAM_LOOP2 0xE      //byte
 
 //Form of a wave generator function 
 typedef void (*generator)(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
