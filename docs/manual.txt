@@ -171,12 +171,11 @@ The wave table also has functions:
   Akin to a procedure in assembly programming.
   Take for example this pulse procedure
 
-  Instrument with WaveIndex [0007]
+  Instrument with WaveIndex [0008]
 
-  |0002|F1 06| //Increment duty cycle
-  |0003|FE 00|
+  |0002|.. ..| //Run something here
+  |0003|FE 00| //Jumps back to wherever custom jump was set 
   ...
- >|0007|F0 20| //Set initial duty cycle
   |0008|FD 08| //Set base to 08, instrument will return here after a procedure
   |0009|01 00| //play arpeggio
   |000A|01 03|
