@@ -13,6 +13,7 @@ Instrument::Instrument()
     for(int i = 0; i < 256; i++)
         volTable[i]=0;
     volTable[0] = 0x3F00;
+    pulseIndex = -1;
 }
 
 Instrument::~Instrument()
@@ -40,10 +41,10 @@ std::ostream &Instrument::output(std::ostream &out) const
 {
     out.write(name, 23);
     out.write((char*)&waveIndex, sizeof(short));
+    out.write((char*)&pulseIndex, sizeof(short));
 
     out.write((char*)&volEntries,1);
     out.write((char*)volTable, volEntries*2);
-    //out.write((char*)volDurTable, volEntries);
 
     return out;	
 }
@@ -55,6 +56,7 @@ std::istream &Instrument::input(std::istream &in)
 
     in.read(name,23);
     in.read((char*)&waveIndex, sizeof(short));
+    in.read((char*)&pulseIndex, sizeof(short));
     in.read((char*)&volEntries, 1);
     volTable = new unsigned short[256];
     in.read((char*)volTable, volEntries*2);
