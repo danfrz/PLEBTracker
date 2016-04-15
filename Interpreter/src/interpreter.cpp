@@ -316,22 +316,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
     {
         unsigned short _pulse = song->getPulseEntry(seltrk->pulsei);
 
-        if(_pulse < 0xE000) //0x0000 to 0xDFFF add pulse
-        {
-            if(_pulse >= 0x7000) //Negative
-            {
-                unsigned short offset = _pulse + 0x2000; // this would make 0xDFFF into 0xFFFF which is -1
-                ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] += static_cast<short>(offset);
-            }
-            else
-                ((short*)seltrk->ptbl)[PARAM_PULSE] += _pulse; //shift once to the left
-        }
-        else if(_pulse < 0xF000) // 0xE___, set pulse
-        {
-            ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] = (_pulse & 0x0FFF) << 4;
-
-        }
-        else //0xF___, function
+        if(_pulse > 0xEFFF)
         {
             while((_pulse & 0xF000) == 0xF000)
             {
@@ -467,15 +452,28 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 
 
             }
+
+            
             seltrk->pulsei++;
 
         }
 
-    
-    
-    
-    
-    
+        if(_pulse < 0xE000) //0x0000 to 0xDFFF add pulse
+        {
+            if(_pulse >= 0x7000) //Negative
+            {
+                unsigned short offset = _pulse + 0x2000; // this would make 0xDFFF into 0xFFFF which is -1
+                ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] += static_cast<short>(offset);
+            }
+            else
+                ((short*)seltrk->ptbl)[PARAM_PULSE] += _pulse; //shift once to the left
+        }
+        else if(_pulse < 0xF000) // 0xE___, set pulse
+        {
+            ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] = (_pulse & 0x0FFF) << 4;
+
+        }
+        if(seltrk->pulsei != 0xFFFF) std::cerr << " pulse=" <<  ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] << '\n';
     
     
     
@@ -713,11 +711,11 @@ void itrp::initializeWaveTable()
 
 
     //PERCUSSION
-    generators[0x60] = genBongo;
-    generators[0x61] = genNoise0;
-    generators[0x62] = genNoise1;
-    generators[0x63] = genNoise2;
-    generators[0x64] = genNoise3;
+    generators[0x60] = genNoise0;
+    generators[0x61] = genNoise1;
+    generators[0x62] = genNoise2;
+    generators[0x63] = genNoise3;
+    generators[0x64] = genBongo;
 
     
 }
@@ -862,7 +860,8 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                         seltrk->inst = song->getInstrument(_inst);
                         _wav = seltrk->inst->getWaveIndex();
                         seltrk->wavei = _wav;
-                        seltrk->pulsei = seltrk->inst->getPulseIndex();
+                        if (seltrk->inst->getPulseIndex() < song->numPulseEntries())
+                            seltrk->pulsei = seltrk->inst->getPulseIndex();
                         seltrk->waveduracc = 0;
                         seltrk->voli = 0;
                         seltrk->volduracc = 0;
