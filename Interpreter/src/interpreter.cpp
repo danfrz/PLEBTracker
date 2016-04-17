@@ -115,7 +115,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 {
     //std::cerr << "renderTick0\n";
     Track *seltrk = &tracks[track];
-    std::cerr << "renderTick1 voli=" << std::hex << int(seltrk->voli) << " volduracc=" << int(seltrk->volduracc) << " lastvol=" << int(seltrk->lastvol) <<  "\n";
+    //std::cerr << "renderTick1 voli=" << std::hex << int(seltrk->voli) << " volduracc=" << int(seltrk->volduracc) << " lastvol=" << int(seltrk->lastvol) <<  "\n";
     if(seltrk->inst == NULL)
         return;
     unsigned char amp = seltrk->inst->getVolume(seltrk->voli, seltrk->volduracc, seltrk->voljump, seltrk->lastvol);
@@ -473,7 +473,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
             ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] = (_pulse & 0x0FFF) << 4;
 
         }
-        if(seltrk->pulsei != 0xFFFF) std::cerr << " pulse=" <<  ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] << '\n';
+        //if(seltrk->pulsei != 0xFFFF) std::cerr << " pulse=" <<  ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] << " " << seltrk->pulsei << "pulseval=" << song->getPulseEntry(seltrk->pulsei ) <<'\n';
     
     
     
@@ -707,7 +707,9 @@ void itrp::initializeWaveTable()
     generators[0x1e] = genNHalfSine;
     generators[0x1f] = genNHalfSinePulse;
 
-    generators[0x20] = genMux;
+    generators[0x20] = genMuxShared;
+    generators[0x21] = genMuxSwap;
+    generators[0x22] = genMuxSwap2;
 
 
     //PERCUSSION
@@ -747,6 +749,10 @@ void itrp::initializeRender()
     {
         unsigned int firstrow = curpattern->at(i,0);
         tracks[i].frq = 1;
+        tracks[i].lastfrq = 1;
+        tracks[i].nextfrq = 1;
+        tracks[i].phase = 0;
+
         if(((firstrow & R_INSTRUMENT) >> RI_INSTRUMENT) < song->numInstruments())
             tracks[i].inst = song->getInstrument((firstrow & R_INSTRUMENT) >> RI_INSTRUMENT);
         else
@@ -754,14 +760,22 @@ void itrp::initializeRender()
         if(tracks[i].inst != NULL)
         {
             tracks[i].wavei = tracks[i].inst->getWaveIndex();
-            tracks[i].wavei = tracks[i].inst->getPulseIndex();
+            tracks[i].pulsei = tracks[i].inst->getPulseIndex();
             tracks[i].voli = tracks[i].inst->getVolEntry(0);
+        }
+        else
+        {
+            tracks[i].wavei = 0;
+            tracks[i].pulsei = 0;
+            tracks[i].voli = 0;
+
         }
 
         tracks[i].fx = (firstrow & R_EFFECT) >> RI_EFFECT;
         tracks[i].fxparam = firstrow & R_FXPARAM;
         tracks[i].segments = 0;
         tracks[i].ptbl = new unsigned char[32];
+        tracks[i].lastwave = 0;
 
 
         tracks[i].ptbl[0] = 0x00; //Pulse param (part 1)
@@ -861,7 +875,10 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                         _wav = seltrk->inst->getWaveIndex();
                         seltrk->wavei = _wav;
                         if (seltrk->inst->getPulseIndex() < song->numPulseEntries())
+                        {
                             seltrk->pulsei = seltrk->inst->getPulseIndex();
+                            //std::cerr << "INSTSET pulsei " << seltrk->pulsei << '\n';
+                        }
                         seltrk->waveduracc = 0;
                         seltrk->voli = 0;
                         seltrk->volduracc = 0;
@@ -891,6 +908,7 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
             //TODO: handle more effects
             if(row & R_EFFECTSEG) // Handle effects seperately
             {
+                //std::cerr << "Effect " << std::hex << (row & 0xFFF) << '\n';
 
                 //  0 FRQ Arpeggio    ||per seg
                 //  1 FRQ Slide up    ||per seg
@@ -922,6 +940,10 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                 else if(_fx == 9)
                 { 
                     seltrk->wavei = row & R_FXPARAM;
+                }
+                else if(_fx == 0xC)
+                { 
+                    seltrk->pulsei = row & R_FXPARAM;
                 }
 
             }
