@@ -821,10 +821,23 @@ void genNoise_Pink(unsigned char *bfr, unsigned char *ptbl,  const float &period
 
 void genNoise_Blue(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &height, float &phase, const unsigned long &len)
 {
+}
+
+
+
+void genNoise_Test(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &height, float &phase, const unsigned long &len)
+{
 
 }
 
-void genMux(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len)
+void swapPulseParams(unsigned char *ptbl)
+{
+    unsigned short swap = (((unsigned short*)ptbl)[PARAM_PULSE]);
+    (((unsigned short*)ptbl)[PARAM_PULSE]) = (((unsigned short*)ptbl)[PARAM_PULSE2]);
+    (((unsigned short*)ptbl)[PARAM_PULSE2]) = swap;
+}
+
+void genMuxShared(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len)
 {
     float diff = (ptbl[PARAM_WAVE1]/255.0) * period;
     float ampratio = (ptbl[PARAM_WAVE2]/255.0);
@@ -834,4 +847,25 @@ void genMux(unsigned char *bfr, unsigned char *ptbl, const float &period, const 
 
 }
 
+void genMuxSwap(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len)
+{
+    float diff = (ptbl[PARAM_WAVE1]/255.0) * period;
+    float ampratio = (ptbl[PARAM_WAVE2]/255.0);
+    float phase2 = phase + diff;
+    GEN_MUX1(bfr, ptbl, period, height*ampratio, phase, len);
+    swapPulseParams(ptbl);
+    GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
+    swapPulseParams(ptbl);
 
+}
+void genMuxSwap2(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len)
+{
+    float diff = (ptbl[PARAM_WAVE1]/255.0) * period;
+    float ampratio = (ptbl[PARAM_WAVE2]/255.0);
+    float phase2 = phase + diff;
+    swapPulseParams(ptbl);
+    GEN_MUX1(bfr, ptbl, period, height*ampratio, phase, len);
+    swapPulseParams(ptbl);
+    GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
+
+}
