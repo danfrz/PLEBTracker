@@ -59,4 +59,4 @@ Most importantly, see the plebitp and plebtrkraw manual pages.
 The most efficient and effective way to perform actions in the tracker's interface is by using the vim-like command bar, which is shown by pressing ':'.
 Those commands and other binds can be reviewed on the plebtrkraw(1) man page.
 
-If you're interested, look through the docs folder, the manual provides a good introduction to the tracker (I hope) and wavetable.svg details what synths/wave generators have been implemented so far.
+If you're interested, look through the docs folder, the manual provides a good introduction to the tracker (I hope) and wavetable.pdf details what synths/wave generators have been implemented so far.
