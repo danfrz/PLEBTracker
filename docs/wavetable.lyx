@@ -894,7 +894,7 @@ Multiplexed Waves (20-3F)
 \begin_layout Plain Layout
 
 \size footnotesize
-Mux Wave
+Mux Wave (Shared)
 \end_layout
 
 \end_inset
@@ -915,6 +915,8 @@ Mux Wave
 
 \begin_layout Plain Layout
 
+\size footnotesize
+Mux Wave (Swap)
 \end_layout
 
 \end_inset
@@ -935,6 +937,8 @@ Mux Wave
 
 \begin_layout Plain Layout
 
+\size footnotesize
+Mux Wave (Swap2)
 \end_layout
 
 \end_inset
@@ -6684,7 +6688,7 @@ Does the same as N Sine W, but with only the top half of a sine wave in
 \begin_layout Plain Layout
 
 \emph on
-20
+20-22
 \end_layout
 
 \end_inset
