@@ -1,5 +1,5 @@
 #include "song.h"
-#include <iostream>
+//#include <iostream>
 
 Song::Song()
 {
@@ -115,14 +115,12 @@ std::istream &Song::input(std::istream &in)
 
 
     in.read((char*)&waveEntries, sizeof(short));
-    std::cout << "WaveEntries " << waveEntries << "\n";
     in.read((char*)waveTable, waveEntries*sizeof(short));
     for(int i = waveEntries; i < 256; i++)
         waveTable[i] = 0;
 
     
     in.read((char*)&pulseEntries, sizeof(short));
-    std::cout << "PulseEntries " << pulseEntries << "\n";
     in.read((char*)pulseTable, pulseEntries*sizeof(short));
     for(int i = pulseEntries; i < 256; i++)
         pulseTable[i] = 0;
