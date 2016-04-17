@@ -123,7 +123,9 @@ void genNoise3(unsigned char *bfr, unsigned char *ptbl, const float &period, con
 
 void genBongo(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 
-void genMux(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genMuxShared(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genMuxSwap(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genMuxSwap2(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 
 
 #endif
