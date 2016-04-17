@@ -13,7 +13,7 @@ Instrument::Instrument()
     for(int i = 0; i < 256; i++)
         volTable[i]=0;
     volTable[0] = 0x3F00;
-    pulseIndex = -1;
+    pulseIndex = 0xFFFF;
 }
 
 Instrument::~Instrument()
@@ -29,6 +29,7 @@ Instrument::Instrument(std::istream &in)
 Instrument::Instrument(const Instrument &other)
 {
     waveIndex        = other.waveIndex;
+    pulseIndex       = other.pulseIndex;
     volEntries       = other.volEntries;
     volTable = new unsigned short[256];//64 integers worth
     for(int i = 0; i < 255; i++)
@@ -108,7 +109,7 @@ unsigned char Instrument::getVolume(unsigned char &cur, unsigned char &seg, unsi
                 cur++;
             else
                 cur = desttime;
-        } else if (dest == 0xFE)
+} else if (dest == 0xFE)
         {
             cur = desttime+jump;
         }
