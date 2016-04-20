@@ -603,13 +603,17 @@ void editor::handle_d(std::vector<char*> &params)
     {
         char *p = params.at(0);
         if(strcmp(p, "track") == 0)
+        {
+            unsigned char track = patternedtr::seltrack;
             if(params.size() > 1)
             {
-                unsigned char track = parseUnsigned(params.at(1));
-                patternedtr::clearTrack(track);
+                track = parseUnsigned(params.at(1));
+                //patternedtr::clearTrack(track);
             }
-            else
-                patternedtr::clearTrack(patternedtr::seltrack);
+            for(int i = 0; i < editor::song->numPatterns(); i++)
+                editor::song->getPattern(i)->removeTracks(track, track);
+            editor::song->setTrackNum(editor::song->numTracks()-1);
+        }
         else if(strcmp(p, "inst") == 0)
             if(params.size() > 1)
             {
@@ -663,6 +667,38 @@ void editor::handle_d(std::vector<char*> &params)
                 }
             }
             patternedtr::selptrn->deleteRow(row, len);
+        }
+        else if(strcmp(p, "mark") == 0)
+        {
+            if(playback_mark == 0xFF)
+            {
+                inform("Delete Mark (d mark) playback mark not set.");
+                return;
+            }
+            unsigned char len;
+            unsigned char row = patternedtr::selrow;
+            if(row < editor::playback_mark)
+            { 
+                len = editor::playback_mark - row + 1;
+            }
+            else
+            {
+                len = row - editor::playback_mark + 1;
+                row = editor::playback_mark;
+            }
+
+            unsigned char trkbegin = patternedtr::seltrack, trkend = trkbegin;
+            if(params.size() > 1)
+            {
+                trkbegin = parseUnsigned(params.at(1));
+                if(params.size() > 2)
+                {
+                    trkend = parseUnsigned(params.at(2));
+                }
+            }
+            for(; trkbegin <= trkend; trkbegin++)
+                patternedtr::selptrn->deleteRow(trkbegin, row, len);
+
         }
         else
             inform("Delete (d) parameter 1 not recognized.");
