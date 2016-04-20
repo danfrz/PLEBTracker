@@ -451,8 +451,7 @@ void patternedtr::chgSelRow(int i)
     }
     else
     {
-        int w,h;
-        getmaxyx(editor::ptrnwin, h, w); 
+        int w = editor::ptrnwin->width,h = editor::ptrnwin->height;
 
         if(selptrn->numRows() > h && (selptrn->numRows()-selrow) < 4)
             viewportrow = selptrn->numRows() - maxrowsviewport + 1;
@@ -797,8 +796,7 @@ void patternedtr::displayPattern()
     using namespace editor;
     attroff(-1);
 
-    int w, h;
-    getmaxyx(editor::ptrnwin, h, w); 
+    int w = editor::ptrnwin->width, h = editor::ptrnwin->height;
     int tracks_visible = w/TRACK_WIDTH;
 
 
@@ -1025,6 +1023,14 @@ void patternedtr::processPatternInput(int in)
                     if((patternedtr::entryclipboard & 0xFF) < editor::song->numWaveEntries())
                     {
                         instedtr::selwavrow = patternedtr::entryclipboard & 0xFF; 
+                    }
+
+                }
+                else if((patternedtr::entryclipboard & 0xF00) == 0xC00)
+                {
+                    if((patternedtr::entryclipboard & 0xFF) < editor::song->numPulseEntries())
+                    {
+                        instedtr::selpulrow = patternedtr::entryclipboard & 0xFF; 
                     }
 
                 }
