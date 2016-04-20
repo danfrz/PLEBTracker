@@ -40,9 +40,11 @@ Song::Song()
     for(int i = 0; i < waveEntries; i++)
         waveTable[i] = 0;
 
-    pulseEntries = 0;
+    pulseEntries = 2;
     pulseTable = new unsigned short[256];
-    for(int i = 0; i < pulseEntries; i++)
+    pulseTable[0] = 0x0000;
+    pulseTable[1] = 0xFF00;
+    for(int i = 2; i < pulseEntries; i++)
         pulseTable[i] = 0;
 }
 
