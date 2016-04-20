@@ -281,6 +281,27 @@ void Pattern::insertRow(const unsigned char &row, const unsigned int *entry)
 
 }
 
+void Pattern::copyTrack(const unsigned char &srctrk, const unsigned char &desttrk)
+{
+    for(int j = 0; j < rows; j++)
+        data[desttrk][j] = data[srctrk][j];
+}
+
+
+void Pattern::removeTracks(const unsigned char &srctrk, const unsigned char &endtrk)
+{
+    int dif = endtrk - srctrk + 1;
+    for(int i = srctrk; i < tracks-dif; i++)
+    {
+        for(int j = 0; j < rows; j++)
+        {
+            data[i][j] = data[i+dif][j];
+        }
+    }
+
+}
+
+
 void Pattern::insertRow(const unsigned char &row, const unsigned int &entry)
 {
 
