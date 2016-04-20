@@ -1061,9 +1061,6 @@ void patternedtr::processPatternInput(int in)
         case '&':
             octave = 6;
             break;
-        case '*':
-            octave = 7;
-            break;
 
         case '{'://Decrement Order
             patternedtr::chgSelOrder(-1);
