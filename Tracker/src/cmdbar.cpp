@@ -1850,6 +1850,7 @@ void editor::handle_key(std::vector<char*> &params)
     }
     else
         patternedtr::key = -1;
+    patternedtr::populateNoteMap();
 
 }
 
