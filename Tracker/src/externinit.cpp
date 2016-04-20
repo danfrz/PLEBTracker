@@ -8,17 +8,17 @@
 namespace editor
 {
     int WIN_HEIGHT, WIN_WIDTH;
-    WINDOW *ptrnwin;
-    WINDOW *instwin;
-    WINDOW *metawin;
-    WINDOW *volwin;
-    WINDOW *wavewin;
-    WINDOW *pulsewin;
-    WINDOW *dialog;
+    WIN *ptrnwin;
+    WIN *instwin;
+    WIN *metawin;
+    WIN *volwin;
+    WIN *wavewin;
+    WIN *pulsewin;
+    WIN *dialog;
 
-    WINDOW *wingroup;
-    WINDOW *inputwin;
-    WINDOW *lastwin;
+    WIN *wingroup;
+    WIN *inputwin;
+    WIN *lastwin;
 
     bool running;
 
@@ -103,5 +103,3 @@ namespace instedtr
 }
 /////////////DONE INITIALIZING/////////////
 ///////////////////////////////////////////
-
-
