@@ -11,6 +11,7 @@
 
 #include <iostream>
 
+
 bool parseParams(int argc, char *argv[])
 {
     bool songset = false;
@@ -150,12 +151,12 @@ int main(int argc, char *argv[])
 
     //INITIALIZE EXTERNAL IDENTIFIERS
     getmaxyx(stdscr, editor::WIN_HEIGHT, editor::WIN_WIDTH);
-    editor::metawin = newwin(3, editor::WIN_WIDTH,                       0, 0);
-    editor::ptrnwin = newwin(editor::WIN_HEIGHT-3, editor::WIN_WIDTH-11*2, 3, 0);
-    editor::instwin = newwin(editor::WIN_HEIGHT, editor::WIN_WIDTH,      0, 0);
-    editor::wavewin = newwin(editor::WIN_HEIGHT-5, 10,                   3, editor::WIN_WIDTH-20);
-    editor::pulsewin = newwin(editor::WIN_HEIGHT-5, 10,                   3, editor::WIN_WIDTH-10);
-    editor::dialog  = newwin(8, 60,             editor::WIN_HEIGHT/3, editor::WIN_WIDTH/3); //good enough
+    editor::metawin = new WIN(3, editor::WIN_WIDTH, 0, 0);
+    editor::ptrnwin = new WIN(editor::WIN_HEIGHT-3, editor::WIN_WIDTH-11*2, 3, 0);
+    editor::instwin = new WIN(editor::WIN_HEIGHT, editor::WIN_WIDTH,      0, 0);
+    editor::wavewin = new WIN(editor::WIN_HEIGHT-5, 10,                   3, editor::WIN_WIDTH-20);
+    editor::pulsewin = new WIN(editor::WIN_HEIGHT-5, 10,                   3, editor::WIN_WIDTH-10);
+    editor::dialog  = new WIN(8, 60,             editor::WIN_HEIGHT/3, editor::WIN_WIDTH/3); //good enough
     editor::selinst = editor::song->getInstrument(0);
 
     editor::wingroup = editor::ptrnwin;
@@ -216,12 +217,6 @@ int main(int argc, char *argv[])
     patternedtr::selrowmeta = 0;
 
     keypad(stdscr, 1);
-    keypad(editor::metawin, 1);
-    keypad(editor::ptrnwin, 1);
-    keypad(editor::instwin, 1);
-    keypad(editor::wavewin, 1);
-    keypad(editor::pulsewin, 1);
-    keypad(editor::dialog, 1);
 
     //Show the tracker
     patternedtr::display();
@@ -232,6 +227,25 @@ int main(int argc, char *argv[])
     while(editor::running)
     {
         ch = getch();
+
+        //Update window geometry here
+        //If the user resizes the terminal, plebtrk shouldn't crash
+        //from invalid rendering operations
+        getmaxyx(stdscr, editor::WIN_HEIGHT, editor::WIN_WIDTH);
+
+        editor::metawin->width = editor::WIN_WIDTH;
+        editor::ptrnwin->height = editor::WIN_HEIGHT-3;
+        editor::ptrnwin->width = editor::WIN_WIDTH - TABLE_WIDTH*2;
+        editor::instwin->height = editor::WIN_HEIGHT;
+        editor::instwin->width = editor::WIN_WIDTH;
+        editor::wavewin->height = editor::WIN_HEIGHT-5;
+        editor::wavewin->x = editor::WIN_WIDTH-20;
+        editor::pulsewin->height = editor::WIN_HEIGHT-5;
+        editor::pulsewin->x = editor::WIN_WIDTH-10;
+
+
+        patternedtr::maxtracksviewport = (editor::WIN_WIDTH-TABLE_WIDTH*2 - 3) / TRACK_WIDTH;
+        patternedtr::maxrowsviewport = (editor::WIN_HEIGHT-3);
 
         //First thing's first, process input
         if(ch == '\t')
@@ -289,25 +303,19 @@ int main(int argc, char *argv[])
                         patternedtr::display();
 
                         break;
-                    case 'e':
-                    case 'd':
-                    case 'E':
-                    case 'D':
                         //Wave : Pattern View -- Wave : Instrument View
+                    case 'e':
+                    case 'E':
                         inputwin = wavewin;
-                        if(wingroup == ptrnwin)
-                        {
-                            patternedtr::display();
-                        }
-                        else if(wingroup == instwin)
-                        {
-                            instedtr::display();
-                        }
-                        else
-                        {
-                            wingroup = instwin;
-                            instedtr::display();
-                        }
+                        wingroup = ptrnwin;
+                        patternedtr::display();
+
+                        break;
+                    case 'D':
+                    case 'd':
+                        inputwin = wavewin;
+                        wingroup = instwin;
+                        instedtr::display();
 
                         break;
                     case 'r':
