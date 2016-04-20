@@ -9,10 +9,18 @@
 #include "instrument.h"
 
 #define TRACK_WIDTH 15
+#define TABLE_WIDTH 11
 #define HISTORY_SIZE 16
 #define CHARBUFFER_SIZE 128
 #define CMDBAR_SIZE 128
 #define LASTSONG_SIZE 128
+
+struct WIN
+{
+    public:
+    int width, height, x, y;
+    WIN(int H, int W, int Y, int X){width = W; height = H; x = X; y=Y;}
+};
 
 
 namespace editor
@@ -28,22 +36,22 @@ namespace editor
 
     extern int WIN_HEIGHT, WIN_WIDTH;
     //ncurses windows to render to and control input divergence
-    extern WINDOW *metawin;
-    extern WINDOW *ptrnwin;
-    extern WINDOW *instwin;
-    extern WINDOW *volwin;
-    extern WINDOW *wavewin;
-    extern WINDOW *pulsewin;
-    extern WINDOW *dialog;
+    extern WIN *metawin;
+    extern WIN *ptrnwin;
+    extern WIN *instwin;
+    extern WIN *volwin;
+    extern WIN *wavewin;
+    extern WIN *pulsewin;
+    extern WIN *dialog;
 
 
     //ptrnwin and instwin are windows that are the according
     //"group" windows. They are the primary focus of their
     //respective screens and so are used in code to more quickly
     //diverge input processing and display functions.
-    extern WINDOW *wingroup;
-    extern WINDOW *inputwin; //currently selected window, window that has focus
-    extern WINDOW *lastwin;  //last window to have focus
+    extern WIN *wingroup;
+    extern WIN *inputwin; //currently selected window, window that has focus
+    extern WIN *lastwin;  //last window to have focus
 
     //controls the active state of the program
     //if false, the program will end after the main loop
