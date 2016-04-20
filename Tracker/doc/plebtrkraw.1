@@ -20,7 +20,7 @@ plebtrkraw \- Ncurses interface for PLEBTracker
 If you do call this, pipe stderr somewhere otherwise it will go to the console and jumble the visual interface.
 .sp
 .SH "INTERFACE"
-There are 5 windows in the tracker. To focus one, press TAB and then another key to switch.
+There are 6 windows in the tracker. To focus one, press TAB and then another key to switch.
 Use arrow keys, HOME, END, PAGEUP, PAGEDN to maneuver.
 .sp
 Metadata Window (\fBTAB + q\fR)
@@ -107,11 +107,12 @@ New ( :\fBn\fR [inst|order|ptrn] )
 .sp
 \fBPATTERN EDITOR COMMANDS\fR
 .sp
-Delete ( :\fBd\fR [inst|order|ptrn|track [\fIWHICH\fR] ] | [row [\fILENGTH\fR [\fISTART_ROW\fR] ] ] )
+Delete ( :\fBd\fR [inst|order|ptrn|track [\fIWHICH\fR] ]
+        | [row [\fILENGTH\fR [\fISTART_ROW\fR] ] ]
+        | mark [\fITRACK_START\fR [\fITRACK_END\fR] ] )
     With no parameter, deletes the selected row in the selected track\&.
     The rest of the parameters remove the currently selected element\&,
     unless a parameter telling which to remove is provided\&.
-    :\fBd\fR track only clears the track\&.
 .sp
 Delete Track ( :\fBdd\fR )
     Clears all data in the selected track\&.
