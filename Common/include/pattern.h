@@ -120,6 +120,23 @@ Description:
         void deleteRow(const unsigned char &row, unsigned char len=1);
 
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void copyTrack(const unsigned char &srctrk, const unsigned char &desttrk)
+Description:
+    copy a track to another
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        void copyTrack(const unsigned char &srctrk, const unsigned char &desttrk);
+
+
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void removeTracks(const unsigned char &srctrk, const unsigned char &endtrk)
+Description:
+   Remove an interval of tracks
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        void removeTracks(const unsigned char &srctrk, const unsigned char &endtrk);
+
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: void chop(unsigned char start, unsigned char end)
 Description:
