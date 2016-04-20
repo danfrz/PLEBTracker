@@ -352,7 +352,7 @@ void patternedtr::populateNoteMap()
 
             notemap[whitekeys[7]] = addNotes(base, 0x20000000);
             notemap[whitekeys[8]] = addNotes(base, 0x24000000);
-            notemap[whitekeys[9]] = addNotes(base, 0x28000000);
+            notemap[whitekeys[9]] = addNotes(base, 0x26000000);
 
             notemap[whitekeys[10]] = addNotes(base, 0x20000000);
             notemap[whitekeys[11]] = addNotes(base, 0x24000000);
