@@ -1011,6 +1011,8 @@ void patternedtr::processPatternInput(int in)
                     patternedtr::selinstrument = inst;
                     editor::selinst   = editor::song->getInstrument(patternedtr::selinstrument);
                     instedtr::selwavrow = editor::selinst->getWaveIndex(); 
+                    if(editor::selinst->getPulseIndex() != 0xFFFF)
+                        instedtr::selpulrow = editor::selinst->getPulseIndex(); 
                 }
                 if((patternedtr::entryclipboard & R_PITCHSEG) != R_PITCHSEG)
                 {
