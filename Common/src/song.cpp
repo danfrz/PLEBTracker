@@ -631,7 +631,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
     if(difference == 0) return;
 
     //Fix instrument pulse index references
-    unsigned char instpls;
+    unsigned short instpls;
     if(difference > 0)
     {
         for(unsigned char i = 0; i < num_instruments; i++)
@@ -639,7 +639,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
             instpls = instruments[i]->getPulseIndex();
             // > 0 because the first instrument's wave pointer shouldn't
             // realistically change due to insertions at index 0
-            if(instpls > 0 && instpls >= index && instpls < 0xFFFF-difference)
+            if(instpls > 0 && instpls >= index && instpls < 0xFFFF-difference && instpls != 0xFFFF)
             {
                 instruments[i]->setPulseIndex(instpls+difference);
             }
@@ -650,7 +650,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
         for(unsigned char i = 0; i < num_instruments; i++)
         {
             instpls = instruments[i]->getPulseIndex();
-            if(instpls >= index)
+            if(instpls >= index && instpls != 0xFFFF)
             {
                 if(instpls >= -difference)
                     instruments[i]->setPulseIndex(instpls +difference);
