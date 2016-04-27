@@ -319,24 +319,19 @@ int main(int argc, char *argv[])
 
                         break;
                     case 'r':
-                    case 'f':
                     case 'R':
-                    case 'F':
-                        //Pulse : Pattern View -- Pulse : Instrument View
+                        //Pulse : Pattern View
                         inputwin = pulsewin;
-                        if(wingroup == ptrnwin)
-                        {
-                            patternedtr::display();
-                        }
-                        else if(wingroup == instwin)
-                        {
-                            instedtr::display();
-                        }
-                        else
-                        {
-                            wingroup = instwin;
-                            instedtr::display();
-                        }
+                        wingroup = ptrnwin;
+                        patternedtr::display();
+
+                        break;
+                    case 'f':
+                    case 'F':
+                        //Pulse : Instrument View
+                        inputwin = pulsewin;
+                        wingroup = instwin;
+                        instedtr::display();
 
                         break;
                     case 'a':
