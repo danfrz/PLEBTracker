@@ -2,6 +2,7 @@
 
 
 std::map<std::string, editor::cmd_handler> editor::cmdbar_cmdmap;
+std::map<std::string, unsigned int> editor::scalenamemap;
 
 void editor::populateCmdMap()
 {
@@ -24,8 +25,8 @@ void editor::populateCmdMap()
     cmdbar_cmdmap["ampmark"] =  handle_ampmark;
     cmdbar_cmdmap["amplin"] = handle_amplin;
 
-    cmdbar_cmdmap["scale"] =  handle_scale;
-    cmdbar_cmdmap["scalesong"] =  handle_scalesong;
+    cmdbar_cmdmap["resize"] =  handle_resize;
+    cmdbar_cmdmap["resizesong"] =  handle_resizesong;
     
     cmdbar_cmdmap["instset"] = handle_instset;
     cmdbar_cmdmap["instsetmark"] = handle_instsetmark;
@@ -44,6 +45,7 @@ void editor::populateCmdMap()
     cmdbar_cmdmap["transkey"] = handle_transkey;
     cmdbar_cmdmap["transkeysong"] = handle_transkeysong;
     cmdbar_cmdmap["key"] = handle_key;
+    cmdbar_cmdmap["scale"] = handle_scale;
 
     cmdbar_cmdmap["step"] = handle_step;
     cmdbar_cmdmap["oct"] = handle_oct;
@@ -98,31 +100,7 @@ int editor::parseKeySignature(char *key)
         return 10;
     else if(strcmp(key,"B") == 0)
         return 11;
-    else if(strcmp(key,"CM") == 0)
-        return 12;
-    else if(strcmp(key,"Cm") == 0)
-        return 13;
-    else if(strcmp(key,"DM") == 0)
-        return 14;
-    else if(strcmp(key,"Dm") == 0)
-        return 15;
-    else if(strcmp(key,"EM") == 0)
-        return 16;
-    else if(strcmp(key,"FM") == 0)
-        return 17;
-    else if(strcmp(key,"Fm") == 0)
-        return 18;
-    else if(strcmp(key,"GM") == 0)
-        return 19;
-    else if(strcmp(key,"Gm") == 0)
-        return 20;
-    else if(strcmp(key,"AM") == 0)
-        return 21;
-    else if(strcmp(key,"Am") == 0)
-        return 22;
-    else if(strcmp(key,"BM") == 0)
-        return 23;
-    return -1;
+    return 0;
 }
 
 
@@ -294,6 +272,112 @@ void editor::tokenize(std::vector<char*> &tokens, int i)
             }
         }
     }
+}
+
+void editor::initializeScaleMap()
+{
+    scalenamemap["CHROMATIC"] = SCALE_CHROMATIC;
+    scalenamemap["CHR"] = SCALE_CHROMATIC;
+    scalenamemap["ALL"] = SCALE_CHROMATIC;
+
+
+    scalenamemap["IONIAN"] = SCALE_MAJOR;
+    scalenamemap["MAJOR"] = SCALE_MAJOR;
+    scalenamemap["MJR"] = SCALE_MAJOR;
+    scalenamemap["MAJ"] = SCALE_MAJOR;
+    scalenamemap["MJ"] = SCALE_MAJOR;
+
+    scalenamemap["AEOLIAN"] = SCALE_AEOLIAN;
+    scalenamemap["MINOR"] = SCALE_AEOLIAN;
+    scalenamemap["MIN"] = SCALE_AEOLIAN;
+    scalenamemap["NMINOR"] = SCALE_AEOLIAN;
+    scalenamemap["NATMIN"] = SCALE_AEOLIAN;
+    scalenamemap["NATURAL_MINOR"] = SCALE_AEOLIAN;
+    scalenamemap["AEOLIAN_MINOR"] = SCALE_AEOLIAN;
+
+    scalenamemap["HARMONIC_MINOR"] = SCALE_HARMONIC;
+    scalenamemap["HRM_MINOR"] = SCALE_HARMONIC;
+    scalenamemap["HMIN"] = SCALE_HARMONIC;
+    scalenamemap["HAR"] = SCALE_HARMONIC;
+    scalenamemap["HMINOR"] = SCALE_HARMONIC;
+    scalenamemap["MINOR_HRMON"] = SCALE_HARMONIC;
+    scalenamemap["MINOR_HARMONIC"] = SCALE_HARMONIC;
+
+    scalenamemap["MELODIC_MINOR"] = SCALE_MELODIC;
+    scalenamemap["MEL_MINOR"] = SCALE_MELODIC;
+    scalenamemap["MMIN"] = SCALE_MELODIC;
+    scalenamemap["MEL"] = SCALE_MELODIC;
+    scalenamemap["MMINOR"] = SCALE_MELODIC;
+    scalenamemap["MINOR_MELOD"] = SCALE_MELODIC;
+    scalenamemap["MINOR_MELODIC"] = SCALE_MELODIC;
+
+    scalenamemap["DORIAN"] = SCALE_DORIAN;
+    scalenamemap["DOR"] = SCALE_DORIAN;
+
+    scalenamemap["PHYRGIAN"] = SCALE_PHYRGIAN;
+    scalenamemap["PHY"] = SCALE_PHYRGIAN;
+
+    scalenamemap["LYDIAN"] = SCALE_LYDIAN;
+    scalenamemap["LYD"] = SCALE_LYDIAN;
+
+    scalenamemap["MIXOLYDIAN"] = SCALE_MIXOLYDIAN;
+    scalenamemap["MIXO"] = SCALE_MIXOLYDIAN;
+    scalenamemap["MIX"] = SCALE_MIXOLYDIAN;
+
+    scalenamemap["LOCRIAN"] = SCALE_LOCRIAN;
+    scalenamemap["LOC"] = SCALE_LOCRIAN;
+    scalenamemap["LOCR"] = SCALE_LOCRIAN;
+}
+
+
+bool editor::parseScale(char *str, unsigned char &spinner, unsigned char *bfr)
+{
+    if(str[0] >= '1' && str[0] <= '9')
+    {
+        //parse as sequence
+        int acc, i;
+
+        for(acc = 0, i = 0; acc < 12 && i < 11 && str[i] != 0; i++)
+        {
+            bfr[i] = str[i]- '0';
+            acc += bfr[i];
+        }
+        if(acc > 12)
+            bfr[i-1] -= acc - 12;
+        else if(acc < 12)
+        {
+            bfr[i] = 12 - acc;
+            acc += bfr[i];
+            i++;
+        }
+        for(;i < 12; i++)
+            bfr[i] = 0;
+        patternedtr::inferScaleType(bfr);
+    }
+    else
+    {
+        //Parse by name
+        int len = strlen(str);
+        for(int i = 0; i < len; i++)
+        {
+            if(str[i]>='a' && str[i] <= 'z')
+                str[i]-=32;        
+        }
+       
+        try
+        {
+            int num = scalenamemap[std::string(str)];
+            spinner = num;
+            patternedtr::generateScaleFromType(bfr, spinner);
+        }
+        catch(const std::out_of_range &e)
+        {
+            return false;
+        }
+
+
+    }
+    return true;
 }
 
 unsigned int editor::parseUnsigned(char *str)
@@ -613,6 +697,10 @@ void editor::handle_d(std::vector<char*> &params)
             for(int i = 0; i < editor::song->numPatterns(); i++)
                 editor::song->getPattern(i)->removeTracks(track, track);
             editor::song->setTrackNum(editor::song->numTracks()-1);
+
+            //Changed on the road
+            if(patternedtr::seltrack >= editor::song->numTracks())
+                patternedtr::seltrack = editor::song->numTracks()-1;
         }
         else if(strcmp(p, "inst") == 0)
             if(params.size() > 1)
@@ -1035,18 +1123,18 @@ void editor::handle_amp(std::vector<char *> &params)
         inform("Amplify Track(amp) requires 1 to 3 params");
 }
 
-void editor::handle_scalesong(std::vector<char *> &params)
+void editor::handle_resizesong(std::vector<char *> &params)
 {
     Pattern *bup = patternedtr::selptrn;
     for(int i = 0; i < editor::song->numPatterns(); i++)
     {
         patternedtr::selptrn = editor::song->getPattern(i);
-        handle_scale(params);
+        handle_resize(params);
     }
     patternedtr::selptrn = bup;
 }
 
-void editor::handle_scale(std::vector<char *> &params)
+void editor::handle_resize(std::vector<char *> &params)
 {
     if(params.size() > 0)
     {
@@ -1098,7 +1186,7 @@ void editor::handle_scale(std::vector<char *> &params)
 
     }
     else
-        inform("Scale Pattern(scale) requires 1 param");
+        inform("Resize Pattern(scale) requires 1 param");
 }
 
 void editor::handle_ampmark(std::vector<char *> &params)
@@ -1387,7 +1475,7 @@ void editor::handle_transkeysong(std::vector<char*> &params)
     {
 
         unsigned char key = parseKeySignature(params.at(0));
-        if (key == 0xFF)//-1
+        if (key > 11)//-1
         {
             inform("Transpose To Key(transkey): key signature doesn't exist");
             return;
@@ -1435,13 +1523,18 @@ void editor::handle_transsong(std::vector<char*> &params)
 void editor::handle_transkey(std::vector<char*> &params)
 {
 
+
     //transpose x semitones
     //parameters :trans semitone trkstart trkend start end
     if(params.size() > 0)
     {
 
+        unsigned char scalebuffer[12]; //in case the user specifies a scale
+        unsigned char spinner = patternedtr::scalespinner;
+
+        unsigned char *scale = patternedtr::scaleconst;
         unsigned char key = parseKeySignature(params.at(0));
-        if (key == 0xFF)//-1
+        if (key > 11)
         {
             inform("Transpose To Key(transkey): key signature doesn't exist");
             return;
@@ -1451,26 +1544,37 @@ void editor::handle_transkey(std::vector<char*> &params)
         unsigned char semitones = 0;
         if(params.size() > 1)
         {
-            semitones = parseSigned(params.at(1));
+            bool scc = parseScale(params.at(1), spinner, scalebuffer);
+            scale = scalebuffer;
+            if(!scc)
+            {
+                inform("Transpose To Key(transkey): scale not recognized");
+                return;
+            }
+
             if(params.size() > 2)
             {
-                trkbegin = parseUnsigned(params.at(2));
-                trkend = trkbegin;
+                semitones = parseSigned(params.at(2));
                 if(params.size() > 3)
                 {
-                    trkend = parseUnsigned(params.at(3));
+                    trkbegin = parseUnsigned(params.at(3));
+                    trkend = trkbegin;
                     if(params.size() > 4)
                     {
-                        begin = parseUnsigned(params.at(4));
-
+                        trkend = parseUnsigned(params.at(4));
                         if(params.size() > 5)
                         {
-                            end = parseUnsigned(params.at(5));
+                            begin = parseUnsigned(params.at(5));
 
                             if(params.size() > 6)
                             {
-                                inform("Tanspose To Key(trans) requires 1 to 6 params");
-                                return;
+                                end = parseUnsigned(params.at(6));
+
+                                if(params.size() > 7)
+                                {
+                                    inform("Tanspose To Key(trans) requires 1 to 7 params");
+                                    return;
+                                }
                             }
                         }
                     }
@@ -1480,7 +1584,7 @@ void editor::handle_transkey(std::vector<char*> &params)
 
         if(trkbegin >= patternedtr::selptrn->numTracks())
         {
-            inform("Transpose To Key(transkey) param 3(trkstart) >= tracks");
+            inform("Transpose To Key(transkey) param 4(trkstart) >= tracks");
             return;
         }
 
@@ -1491,7 +1595,7 @@ void editor::handle_transkey(std::vector<char*> &params)
 
         if(begin >=  patternedtr::selptrn->numRows())
         {
-            inform("Transpose To Key(transkey) param 5(rowstart) >= rows");
+            inform("Transpose To Key(transkey) param 6(rowstart) >= rows");
             return;
         }
 
@@ -1524,7 +1628,7 @@ void editor::handle_transkey(std::vector<char*> &params)
                             note = patternedtr::subNotes(note, (-semitones)*0x02000000);
                     }
 
-                    note = patternedtr::toKey(note, key);
+                    note = patternedtr::toKey(note, scale, key);
 
                     entry &= ~R_PITCHSEG;
                     entry |= note;
@@ -1844,12 +1948,52 @@ void editor::handle_ddd(std::vector<char*> &params)
 
 void editor::handle_key(std::vector<char*> &params)
 {
+    using patternedtr::scalespinner;
+    using patternedtr::scaleconst;
     if(params.size() > 0)
     {
         patternedtr::key = parseKeySignature(params.at(0));
+        if(params.size() > 1)
+        {
+            unsigned char scalebfr[12];
+            bool scc = parseScale(params.at(1), scalespinner, scalebfr);
+            if(!scc)
+            {
+                inform("Key (key): param 2(scale) not recognized");
+                return;
+            }
+            for(int i = 0; i < 12; i++)
+                scaleconst[i] = scalebfr[i];
+            scalespinner = patternedtr::inferScaleType(scaleconst);
+        }
     }
     else
-        patternedtr::key = -1;
+        patternedtr::key = 0;
+    patternedtr::populateNoteMap();
+
+}
+
+
+void editor::handle_scale(std::vector<char*> &params)
+{
+    using patternedtr::scalespinner;
+    using patternedtr::scaleconst;
+    if(params.size() > 0)
+    {
+            unsigned char scalebfr[12];
+            bool scc = parseScale(params.at(0), scalespinner, scalebfr);
+            if(!scc)
+            {
+                inform("Set Scale (scale): param 1(scale) not recognized");
+                return;
+            }
+            for(int i = 0; i < 12; i++)
+                scaleconst[i] = scalebfr[i];
+            scalespinner = patternedtr::inferScaleType(scaleconst);
+    }
+    else
+        inform("Set Scale (scale): Requires a parameter");
+
     patternedtr::populateNoteMap();
 
 }
