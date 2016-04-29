@@ -33,6 +33,19 @@ namespace editor
 ///////////////////////////////////////////////////////////////
 
 
+    const unsigned char
+        SCALE_CHROMATIC = 0,
+        SCALE_MAJOR = 1,
+        SCALE_AEOLIAN = 2,
+        SCALE_HARMONIC = 3,
+        SCALE_MELODIC = 4,
+        SCALE_DORIAN = 5,
+        SCALE_PHYRGIAN = 6,
+        SCALE_LYDIAN = 7,
+        SCALE_MIXOLYDIAN = 8,
+        SCALE_LOCRIAN = 9;
+
+
 
     extern int WIN_HEIGHT, WIN_WIDTH;
     //ncurses windows to render to and control input divergence
@@ -263,10 +276,6 @@ namespace patternedtr
         COL_PTRN_MUTE_US  = 26,
         COL_PTRN_MUTE_UU  = 27;
 
-    const unsigned char
-        KEY_MAJOR = 0,
-        KEY_AEOLIAN = 1;
-
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void populateNoteMap()
@@ -299,6 +308,8 @@ Description:
     extern unsigned char row_underline;
     extern unsigned char octave;
     extern unsigned char key;
+    extern unsigned char scalespinner;
+    extern unsigned char scaleconst[12];//Scale construction pattern
 
 
     //PATTERN EDITOR CLIPBOARD
