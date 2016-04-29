@@ -22,9 +22,9 @@ namespace patternedtr
 ///////////////////////////////////////////////////////////////
 
     const unsigned int META_ROWS = 3,
-          META_ROW0_DEPTH = 10,
-          META_ROW1_DEPTH = 9,
-          META_ROW2_DEPTH = 13;
+          META_ROW0_DEPTH = 9,
+          META_ROW1_DEPTH = 7,
+          META_ROW2_DEPTH = 16;
 
 
 
@@ -35,7 +35,7 @@ Description:
    Returns the entry with its Note segment rounded to the nearest note available
    in the provided key signature
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    unsigned int toKey(const unsigned int &entry, const unsigned char &key);
+    unsigned int toKey(const unsigned int &entry, const unsigned char *scale, const unsigned char &key);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: int addNotes(const unsigned int &n1, const unsigned int &n2)
@@ -127,10 +127,46 @@ Description:
 Function: void getKeyChar(char *bfr, unsigned char note)
 Description:
    Get the key string for the selected key:
-   e.g. C_ C# CM Cm 
+   e.g. C_ C#
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void getKeyChar(char *bfr, unsigned char note);
 
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: void getScale_Sel(char *bfr, int *scale)
+Description:
+   Prepares output for the scale, writes the scale array to the buffer.
+   This is used when the scale UI element is selected or is being edited,
+   or when a default scale construction isn't being used.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void getScale_Sel(char *bfr, unsigned char *scale);
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: void getScale_Unsel(char *bfr, int scalespnr, int *scale)
+Description:
+   Perpares output for the scale, writes the scale name if appropriate,
+   otherwise calls getScale_Sel to just render the construction
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void getScale_Unsel(char *bfr, unsigned char scalespnr, unsigned char *scale);
+
+
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: int inferScaleType(unsigned char *scale)
+Description:
+   Decides which scale is within the scale array
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    unsigned char inferScaleType(unsigned char *scale);
+
+
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: char generateScaleFromType(unsigned char *scale, unsigned char scalespnr)
+Description:
+   Based on the scale type populated the scale with the appropriate
+   semitone offsets.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void generateScaleFromType(unsigned char *scale, unsigned char scalespnr);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void display()
