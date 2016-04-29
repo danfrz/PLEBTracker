@@ -58,42 +58,38 @@ void patternedtr::toggleMuteTracks(unsigned int *track, const unsigned int &trac
 
 
 const char *allkeys = "zsxdcvgbhnjm,l.;/q2w3er5t6y7ui9o0p[=]";
+const int all_octswitch = 17;
 const char *whitekeys = "zxcvbnm,./qwertyuiop[]\\";
+const int white_octswitch = 10;
 
 
 //Needs testing ---v
-unsigned int patternedtr::toKey(const unsigned int &entry, const unsigned char &key)
+unsigned int patternedtr::toKey(const unsigned int &entry, const unsigned char *scale, const unsigned char &key)
 {
-    unsigned int notes_in_key[7];
+    unsigned int notes_in_key[12];
     unsigned int note = entry & R_NOTE;
+    unsigned int last;
     unsigned int lower = 0;
     unsigned int higher = -1;
 
+    unsigned int base = key*0x02000000;
+    int acc, entries;
+    for(acc = 0, entries = 0; acc < 12 && entries < 11 && scale[entries] != 0; entries++)
+        acc += scale[entries];
+    if(entries > 11)
+        entries = 11;
+    entries-=1;
 
-    if(key < 12)
+    last = addNotes(base, 0x00000000) & R_NOTE;
+    notes_in_key[0]= last;
+
+    for(int j  = 0; j < entries; j++)
     {
-        unsigned int base = key*0x02000000;
-        notes_in_key[0]= addNotes(base, 0x00000000) & R_NOTE;
-        notes_in_key[1]= addNotes(base, 0x04000000) & R_NOTE;
-        notes_in_key[2]= addNotes(base, 0x08000000) & R_NOTE;
-        notes_in_key[3]= addNotes(base, 0x0A000000) & R_NOTE;
-        notes_in_key[4]= addNotes(base, 0x0E000000) & R_NOTE;
-        notes_in_key[5]= addNotes(base, 0x12000000) & R_NOTE;
-        notes_in_key[6]= addNotes(base, 0x16000000) & R_NOTE;
-    }
-    else if(key < 24)
-    {
-        unsigned int base = (key-12)*0x02000000;
-        notes_in_key[0]= addNotes(base, 0x00000000) & R_NOTE;
-        notes_in_key[1]= addNotes(base, 0x04000000) & R_NOTE;
-        notes_in_key[2]= addNotes(base, 0x06000000) & R_NOTE;
-        notes_in_key[3]= addNotes(base, 0x0A000000) & R_NOTE;
-        notes_in_key[4]= addNotes(base, 0x0E000000) & R_NOTE;
-        notes_in_key[5]= addNotes(base, 0x10000000) & R_NOTE;
-        notes_in_key[6]= addNotes(base, 0x14000000) & R_NOTE;
+        last = addNotes(last, scale[j]*0x02000000) & R_NOTE;
+        notes_in_key[j+1] = last;
     }
 
-    for(int i = 0; i < 7; i++)
+    for(int i = 0; i < entries; i++)
     {
         if(notes_in_key[i] == note)
             return entry;
@@ -191,217 +187,55 @@ unsigned int patternedtr::subNotes(const unsigned int &n1, const unsigned int &n
 
 void patternedtr::populateNoteMap()
 {
-    int numkeys = strlen(whitekeys);
+    //int numkeys = strlen(whitekeys);
+    int acc, i;
+    for(acc = 0, i = 0; acc < 12 && i < 11 && scaleconst[i] != 0; i++)
+        acc += scaleconst[i];
+
+    unsigned int base = 0x02000000*key,
+                 last = base;
+
+    //To control the modulus when
+    //the octave changes
+    unsigned int offset = 0;
+
     notemap.clear();
-    if(key == 0xFF)
+
+    //If there are more then 9 (10 or 11) notes in a scale,
+    //use all keys to represent them
+    //otherwise only use white keys
+    if(i > 9)
     {
-        //bottom row
-        notemap['z'] = 0x00000000;//C+0
-        notemap['s'] = 0x02000000;//C#0
-        notemap['x'] = 0x04000000;//D+0
-        notemap['d'] = 0x06000000;//D#+0
-        notemap['c'] = 0x08000000;//E+0
-        notemap['v'] = 0x0A000000;//F+0
-        notemap['g'] = 0x0C000000;//F#+0
-        notemap['b'] = 0x0E000000;//G+0
-        notemap['h'] = 0x10000000;//G#+0
-        notemap['n'] = 0x12000000;//A+0
-        notemap['j'] = 0x14000000;//A#+0
-        notemap['m'] = 0x16000000;//B+0
-
-        //bot extra
-        notemap[','] = 0x20000000;//C+1
-        notemap['l'] = 0x22000000;//C#1
-        notemap['.'] = 0x24000000;//D+1
-        notemap[';'] = 0x26000000;//D#1
-        notemap['/'] = 0x28000000;//E+1
-
-        //top row
-        notemap['q'] = 0x20000000;//C+1
-        notemap['2'] = 0x22000000;//C#1
-        notemap['w'] = 0x24000000;//D+1
-        notemap['3'] = 0x26000000;//D#1
-        notemap['e'] = 0x28000000;//E+1
-        notemap['r'] = 0x2A000000;//F+1
-        notemap['5'] = 0x2C000000;//F#+1
-        notemap['t'] = 0x2E000000;//G+1
-        notemap['6'] = 0x30000000;//G#+1
-        notemap['y'] = 0x32000000;//A+1
-        notemap['7'] = 0x34000000;//A#+1
-        notemap['u'] = 0x36000000;//B+1
-
-        //top extra
-        notemap['i'] = 0x40000000;//C+2
-        notemap['9'] = 0x42000000;//C#2
-        notemap['o'] = 0x44000000;//D+2
-        notemap['0'] = 0x46000000;//D#+2
-        notemap['p'] = 0x48000000;//E+2
-        notemap['['] = 0x4A000000;//F+2
-        notemap['='] = 0x4C000000;//F#+2
-        notemap[']'] = 0x4E000000;//G+2
-
-        //In case CAPS LOCK is on <_<
-        notemap['Z'] = 0x00000000;//C+0
-        notemap['S'] = 0x02000000;//C#0
-        notemap['X'] = 0x04000000;//D+0
-        notemap['D'] = 0x06000000;//D#+0
-        notemap['C'] = 0x08000000;//E+0
-        notemap['V'] = 0x0A000000;//F+0
-        notemap['G'] = 0x0C000000;//F#+0
-        notemap['B'] = 0x0E000000;//G+0
-        notemap['H'] = 0x10000000;//G#+0
-        notemap['N'] = 0x12000000;//A+0
-        notemap['J'] = 0x14000000;//A#+0
-        notemap['M'] = 0x16000000;//B+0
-
-        //top row
-        notemap['Q'] = 0x20000000;//C+1
-        notemap['@'] = 0x22000000;//C#1
-        notemap['W'] = 0x24000000;//D+1
-        notemap['#'] = 0x26000000;//D#1
-        notemap['E'] = 0x28000000;//E+1
-        notemap['R'] = 0x2A000000;//F+1
-        notemap['%'] = 0x2C000000;//F#+1
-        notemap['T'] = 0x2E000000;//G+1
-        notemap['^'] = 0x30000000;//G#+1
-        notemap['Y'] = 0x32000000;//A+1
-        notemap['&'] = 0x34000000;//A#+1
-        notemap['U'] = 0x36000000;//B+1
+        int numkeys = strlen(allkeys);
+        for(int j = 0; j < numkeys; j++)
+        {
+            if(j == all_octswitch)
+            {
+                //When the octave switches within a binding
+                //move up one octave and reset
+                last = addNotes(base, 0x20000000);
+                offset = j;
+            }
+            notemap[allkeys[j]] = last;
+            last = addNotes(last, scaleconst[(j- offset)%i]*0x02000000);
+        }
 
     }
     else
     {
-        //Programatically assign the notes of appropriate key to buttons
-        int note = 0;
-        unsigned int base;
-
-        
-        //Then add notes in the pattern {0 2 2 1 2 2 2} Major
-        //Then add notes in the pattern {0 2 1 2 2 2 1} Minor
-        if(key < 12) //MAJOR
+        int numkeys = strlen(whitekeys);
+        for(int j = 0; j < numkeys; j++)
         {
-            //set the base note
-            base = key*0x02000000;
-            notemap[whitekeys[0]] = addNotes(base, 0x00000000);
-            notemap[whitekeys[1]] = addNotes(base, 0x04000000);
-            notemap[whitekeys[2]] = addNotes(base, 0x08000000);
-            notemap[whitekeys[3]] = addNotes(base, 0x0A000000);
-            notemap[whitekeys[4]] = addNotes(base, 0x0E000000);
-            notemap[whitekeys[5]] = addNotes(base, 0x12000000);
-            notemap[whitekeys[6]] = addNotes(base, 0x16000000);
-
-            notemap[whitekeys[7]] = addNotes(base, 0x20000000);
-            notemap[whitekeys[8]] = addNotes(base, 0x24000000);
-            notemap[whitekeys[9]] = addNotes(base, 0x28000000);
-
-            notemap[whitekeys[10]] = addNotes(base, 0x20000000);
-            notemap[whitekeys[11]] = addNotes(base, 0x24000000);
-            notemap[whitekeys[12]] = addNotes(base, 0x28000000);
-            notemap[whitekeys[13]] = addNotes(base, 0x2A000000);
-
-            notemap[whitekeys[14]] = addNotes(base, 0x2E000000);
-            notemap[whitekeys[15]] = addNotes(base, 0x32000000);
-            notemap[whitekeys[16]] = addNotes(base, 0x36000000); //<-
-            notemap[whitekeys[17]] = addNotes(base, 0x40000000); //<-
-            notemap[whitekeys[18]] = addNotes(base, 0x44000000);
-            notemap[whitekeys[19]] = addNotes(base, 0x48000000);
-            notemap[whitekeys[20]] = addNotes(base, 0x4A000000);
-
-            notemap[whitekeys[21]] = addNotes(base, 0x4E000000);
-            notemap[whitekeys[22]] = addNotes(base, 0x52000000);
-            notemap[whitekeys[23]] = addNotes(base, 0x56000000);
-
-            //CAPS LOCK alternatives :v
-            notemap[whitekeys[0]+32] = addNotes(base, 0x00000000);
-            notemap[whitekeys[1]+32] = addNotes(base, 0x04000000);
-            notemap[whitekeys[2]+32] = addNotes(base, 0x08000000);
-            notemap[whitekeys[3]+32] = addNotes(base, 0x0A000000);
-            notemap[whitekeys[4]+32] = addNotes(base, 0x0E000000);
-            notemap[whitekeys[5]+32] = addNotes(base, 0x12000000);
-            notemap[whitekeys[6]+32] = addNotes(base, 0x16000000);
-
-            //notemap[whitekeys[7]+32] = addNotes(base, 0x20000000);
-            //notemap[whitekeys[8]+32] = addNotes(base, 0x24000000);
-            //notemap[whitekeys[9]+32] = addNotes(base, 0x28000000);
-
-            notemap[whitekeys[10]+32] = addNotes(base, 0x20000000);
-            notemap[whitekeys[11]+32] = addNotes(base, 0x24000000);
-            notemap[whitekeys[12]+32] = addNotes(base, 0x28000000);
-            notemap[whitekeys[13]+32] = addNotes(base, 0x2A000000);
-
-            notemap[whitekeys[14]+32] = addNotes(base, 0x2E000000);
-            notemap[whitekeys[15]+32] = addNotes(base, 0x32000000);
-            notemap[whitekeys[16]+32] = addNotes(base, 0x36000000);
-            notemap[whitekeys[17]+32] = addNotes(base, 0x40000000);
-            notemap[whitekeys[18]+32] = addNotes(base, 0x44000000);
-            notemap[whitekeys[19]+32] = addNotes(base, 0x48000000);
-            notemap[whitekeys[20]+32] = addNotes(base, 0x4A000000);
+            if(j == white_octswitch)
+            {
+                last = addNotes(base, 0x20000000);
+                offset = j;
+            }
+            notemap[whitekeys[j]] = last;
+            last = addNotes(last, scaleconst[(j- offset)%i]*0x02000000);
         }
-        else if (key < 24) // MINOR
-        {
-            
-            //set the base note
-            base = (key-12)*0x02000000;
-            notemap[whitekeys[0]] = addNotes(base, 0x00000000);
-            notemap[whitekeys[1]] = addNotes(base, 0x04000000);
-            notemap[whitekeys[2]] = addNotes(base, 0x06000000);
-            notemap[whitekeys[3]] = addNotes(base, 0x0A000000);
-            notemap[whitekeys[4]] = addNotes(base, 0x0E000000);
-            notemap[whitekeys[5]] = addNotes(base, 0x10000000);
-            notemap[whitekeys[6]] = addNotes(base, 0x14000000);
-
-            notemap[whitekeys[7]] = addNotes(base, 0x20000000);
-            notemap[whitekeys[8]] = addNotes(base, 0x24000000);
-            notemap[whitekeys[9]] = addNotes(base, 0x26000000);
-
-            notemap[whitekeys[10]] = addNotes(base, 0x20000000);
-            notemap[whitekeys[11]] = addNotes(base, 0x24000000);
-            notemap[whitekeys[12]] = addNotes(base, 0x26000000);
-            notemap[whitekeys[13]] = addNotes(base, 0x2A000000);
-
-            notemap[whitekeys[14]] = addNotes(base, 0x2E000000);
-            notemap[whitekeys[15]] = addNotes(base, 0x30000000);
-            notemap[whitekeys[16]] = addNotes(base, 0x34000000); //<-
-            notemap[whitekeys[17]] = addNotes(base, 0x40000000); //<-
-            notemap[whitekeys[18]] = addNotes(base, 0x44000000);
-            notemap[whitekeys[19]] = addNotes(base, 0x46000000);
-            notemap[whitekeys[20]] = addNotes(base, 0x4A000000);
-
-            notemap[whitekeys[21]] = addNotes(base, 0x4E000000);
-            notemap[whitekeys[22]] = addNotes(base, 0x50000000);
-            notemap[whitekeys[23]] = addNotes(base, 0x54000000);
-
-            //CAPS LOCK alternatives :v
-            notemap[whitekeys[0]+32] = addNotes(base, 0x00000000);
-            notemap[whitekeys[1]+32] = addNotes(base, 0x04000000);
-            notemap[whitekeys[2]+32] = addNotes(base, 0x06000000);
-            notemap[whitekeys[3]+32] = addNotes(base, 0x0A000000);
-            notemap[whitekeys[4]+32] = addNotes(base, 0x0E000000);
-            notemap[whitekeys[5]+32] = addNotes(base, 0x10000000);
-            notemap[whitekeys[6]+32] = addNotes(base, 0x14000000);
-
-            //notemap[whitekeys[7]+32] = addNotes(base, 0x20000000);
-            //notemap[whitekeys[8]+32] = addNotes(base, 0x24000000);
-            //notemap[whitekeys[9]+32] = addNotes(base, 0x28000000);
-
-            notemap[whitekeys[10]+32] = addNotes(base, 0x20000000);
-            notemap[whitekeys[11]+32] = addNotes(base, 0x24000000);
-            notemap[whitekeys[12]+32] = addNotes(base, 0x26000000);
-            notemap[whitekeys[13]+32] = addNotes(base, 0x2A000000);
-
-            notemap[whitekeys[14]+32] = addNotes(base, 0x2E000000);
-            notemap[whitekeys[15]+32] = addNotes(base, 0x30000000);
-            notemap[whitekeys[16]+32] = addNotes(base, 0x34000000);
-            notemap[whitekeys[17]+32] = addNotes(base, 0x40000000);
-            notemap[whitekeys[18]+32] = addNotes(base, 0x44000000);
-            notemap[whitekeys[19]+32] = addNotes(base, 0x46000000);
-            notemap[whitekeys[20]+32] = addNotes(base, 0x4A000000);
-        }
-            
-
-        //notemap[whitekeys[21]+32] = addNotes(base, 0x4E000000);
-        //notemap[whitekeys[22]+32] = addNotes(base, 0x52000000);
     }
+
 }
 
 void patternedtr::chgSelTrack(int i)
