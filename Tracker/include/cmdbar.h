@@ -17,7 +17,9 @@ namespace editor
 
     typedef void (*cmd_handler)(std::vector<char*>&);
     extern std::map<std::string, cmd_handler> cmdbar_cmdmap;
+    extern std::map<std::string, unsigned int> scalenamemap;
     void populateCmdMap();
+    void initializeScaleMap();
 
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
@@ -59,6 +61,17 @@ Description:
    Parses a key signature to numerical representation
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
 int parseKeySignature(char *key);
+
+
+
+
+/***\//////////////////////////////////////////////////////////////////////////
+Function: void parseScale(char *str)
+Description:
+    Tries to parse a string as either a scale number sequence
+    or by name
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+bool parseScale(char *str, unsigned char &spinner, unsigned char *bfr);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void tokenize(std::vector<char*> &tokens, int begin)
@@ -169,8 +182,8 @@ Description:
     void handle_amplin(std::vector<char*> &params);
 
 
-    void handle_scale(std::vector<char *> &params);
-    void handle_scalesong(std::vector<char *> &params);
+    void handle_resize(std::vector<char *> &params);
+    void handle_resizesong(std::vector<char *> &params);
 
     //Set instrument of all in interval
     void handle_instset(std::vector<char *> &params);
@@ -207,6 +220,8 @@ Description:
 
     //transpose whole song +/- semitones then round to nearest notes of key signature
     void handle_transkeysong(std::vector<char*> &params);
+
+    void handle_scale(std::vector<char*> &params);
     void handle_key(std::vector<char*> &params);
 
     
