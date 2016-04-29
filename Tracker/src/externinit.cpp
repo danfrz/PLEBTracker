@@ -36,6 +36,7 @@ namespace editor
     bool *muted_tracks;
     float playamp;
 
+
     Song *song;
     int daemonpid;
     Song *playback;
@@ -65,6 +66,8 @@ namespace patternedtr
     unsigned char row_underline;
     unsigned char octave;
     unsigned char key;
+    unsigned char scalespinner;
+    unsigned char scaleconst[12];//Scale construction pattern
     unsigned int entryclipboard;
 
 
