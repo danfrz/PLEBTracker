@@ -511,6 +511,10 @@ void patternedtr::setPatternAttribs(unsigned char track, unsigned char row, unsi
     attroff(-1);
     attron(A_BOLD);
 
+
+
+    
+
     if(editor::inputwin == editor::ptrnwin)
     {
         const unsigned temp = 0;
@@ -539,6 +543,12 @@ void patternedtr::setPatternAttribs(unsigned char track, unsigned char row, unsi
         }
         else
         {
+            if(row_underline > 0)
+            {
+                bool highlight_row = ((row+1) % row_underline) == 0;
+                if(highlight_row)
+                    attron(A_UNDERLINE);
+            }
             if(row == selrow)
             {
                 if(track == seltrack )
@@ -609,18 +619,17 @@ void patternedtr::setPatternAttribs(unsigned char track, unsigned char row, unsi
         }
         else
         {
+            if(row_underline > 0)
+            {
+                bool highlight_row = ((row+1) % row_underline) == 0;
+                if(highlight_row)
+                    attron(A_UNDERLINE);
+            }
             if(track == seltrack && row == selrow)
                 attron(COLOR_PAIR(COL_PTRN_US));
             else
                 attron(COLOR_PAIR(COL_PTRN_UU));
         }
-    }
-
-    if(row_underline > 0)
-    {
-        bool highlight_row = ((row+1) % row_underline) == 0;
-        if(highlight_row)
-            attron(A_UNDERLINE);
     }
 }
 
