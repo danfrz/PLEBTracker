@@ -1,7 +1,7 @@
 ////////////////////////////////MAIN WINDOW/////////////////////////////////////
-[NSO] Song Title___________________ TRACKS:___ ROWS:___ RES/DIV:____:__  [? X]
-INSTR Instrument Name________ [NCX] 01 STEP:_  OCT :_   KEY:__
-ORDER [04-02] [v^ NCX v^ NCQX] 
+[NSO] Song Title___________________ TRACKS:___ ROWS:___ RES/DIV:____:__    [? X]
+INSTR Instrument Name________ [NCX] 01 STEP:_  OCT :_   BEAT:_
+ORDER [04-02] [v^ NCX v^ NCQX]                          KEY :C  [^v] 11111111111
 01|TRACK_1___<)_||TRACK_2___<)_||TRACK_3___<X_||_..______||WAVE_TABLE|PULS_TABLE
 01|C-3 01 20 000||E-7 01 3F 000||E-7 01 3F 000|| ..      ||0000|01 00|0000|E1 00
 02|C#3 01 20 000||G-7 01 3F 000||---          || ..      ||0001|01 00|0001|00 10
