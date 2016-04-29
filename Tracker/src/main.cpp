@@ -174,8 +174,14 @@ int main(int argc, char *argv[])
     editor::playamp = 1;
 
     editor::populateCmdMap();
+    editor::initializeScaleMap();
 
-    patternedtr::key = 0xFF;
+    patternedtr::key = 0;
+    patternedtr::scalespinner = 0;
+    for(int i = 0; i < 11; i++)
+        patternedtr::scaleconst[i] = 1;
+    patternedtr::scaleconst[11] = 0;
+
     patternedtr::populateNoteMap();
     patternedtr::selptrn = editor::song->getPatternByOrder(0);
     patternedtr::viewporttrack = 0;
