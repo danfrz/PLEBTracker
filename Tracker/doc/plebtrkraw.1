@@ -151,8 +151,28 @@ Set Octave ( :\fBoct\fR \fIOCTAVE\fR )
 Set Instrument's Wave Index ( :\fBwave\fR \fIINDEX\fR )
     Sets the currently selected instrument's wave index\&.
 .sp
-Set Key Signature ( :\fBkey\fR [\fIKEY\fR] )
+Set Key Signature ( :\fBkey\fR \fIKEY\fR [\fISCALE\fR] )
     Sets the editor's key signature, enter no parameter to turn it off\&.
+    Keys are: \fBC C# D D# E F F# G G# A A# B\fR
+    See "Set Scale(:\fBscale\fR)" for how the scale should be formatted\&.
+.sp
+Set Scale ( :\fBscale\fR \fISCALE\fR )
+    Sets the scale for note mappings in the tracker\&.
+       Scales are:
+    chromatic | chr | all
+    ionian | major | maj | mjr | mj
+    natural_minor  | minor | min | nminor | natmin | aeolian_minor | aeolian
+    harmonic_minor | hrm_minor | hmin | har | hminor | minor_hrmon | minor_harmonic
+    melodic_minor  | mel_minor | mmin | mel | mminor | minor_melod | minor_melodic
+    dorian     | dor
+    phyrgian   | phy
+    lydian     | lyd
+    mixolydian | mix
+    locrian    | loc
+.sp
+Otherwise, you can specify a sequence of numbers that represent the semitone
+differences between the notes of the scale\&.
+e.g. Major is 2212221 "whole whole half whole whole whole half"
 .sp
 Select Instrument ( :\fBinst\fR \fIINSTRUMENT\fR )
     Selects the provided instrument\&.
@@ -214,20 +234,23 @@ Transpose Region ( :\fBtrans\fR [\fI±SEMITONES\fR] [\fITRACK_START\fR [\fITRACK
 Transpose Song ( :\fBtransall\fR [\fI±SEMITONES\fR] [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
     Tranpose a region in all patterns up or down some semitones\&.
 .sp
-Transpose to Key ( :\fBtranskey\fR \fIKEY\fR \fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
+Transpose to Key ( :\fBtranskey\fR \fIKEY\fR [\fISCALE\fR [\fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] ] ] )
     Transpose a region in the selected pattern up or down some semitones, then round to the nearest notes in the specified key signature\&.
-    Keys are Major: \fBC C# D D# E F F# G G# A A# B\fR, Minor: \fBCM Cm DM Dm EM FM Fm GM Gm AM Am BM\fR
+    Keys are \fBC C# D D# E F F# G G# A A# B\fR
+    See "Set Scale(:\fBscale\fR)" for how to format the scale\&.
 .sp
-Transpose Song to Key ( :\fBtranskeyall\fR \fIKEY\fR \fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] )
+Transpose Song to Key ( :\fBtranskeyall\fR \fIKEY\fR [\fISCALE\fR [\fI±SEMITONES\fR [\fITRACK_START\fR [\fITRACK_END\fR [\fIROW_START\fR [\fIROW_END\fR] ] ] ] ] ] )
     Transpose a region in all patterns up or down some semitones, then round to the nearest notes in the specified key signature\&.
-    Keys are Major: \fBC C# D D# E F F# G G# A A# B\fR, Minor: \fBCM Cm DM Dm EM FM Fm GM Gm AM Am BM\fR
+    Keys are: \fBC C# D D# E F F# G G# A A# B\fR
+    See "Set Scale(:\fBscale\fR)" for how the scale should be input. If no scale is input, the selected scale is used\&.
+
 .sp
-Scale pattern ( :\fBscale\fR \fIrate\fR )
+Resize pattern ( :\fBresize\fR \fIrate\fR )
     Scales a pattern to a new size.
 .sp
-Scale Song ( :\fBscalesong\fR \fIrate\fR )
+Resize Song ( :\fBresizesong\fR \fIrate\fR )
     Scales all patterns to a new size.
-.
+.sp
 
 \fBPLAYBACK COMMANDS\fR
 .sp
