@@ -8,29 +8,29 @@ void patternedtr::chgSelMetaObj(int i)
     switch(selrowmeta)
     {
         case 0://First row [N S O NAME TRACKS ROWS RES/DIV ? X]
-            if(selobjmeta >= META_ROW0_DEPTH)
+            if(selobjmeta > META_ROW0_DEPTH)
                 if(i>0)
-                    selobjmeta = META_ROW0_DEPTH-1;
+                    selobjmeta = META_ROW0_DEPTH;
                 else
                     selobjmeta=0;
             break;
-        case 1://Second row [INSTR N C X SEL STEP OCT KEY BEAT]
-            if(selobjmeta >= META_ROW1_DEPTH)
+        case 1://Second row [INSTR N C X SEL STEP OCT BEAT]
+            if(selobjmeta > META_ROW1_DEPTH)
                 if(i>0)
-                    selobjmeta = META_ROW1_DEPTH-1;
+                    selobjmeta = META_ROW1_DEPTH;
                 else
                     selobjmeta = 0;
             break;
-        case 2: //Third row [ORDER PATTERN v ^ N C X v ^ N C Q X] -- ...orders...
+        case 2: //Third row [ORDER PATTERN v ^ N C X v ^ N C Q X] ... KEY ^ v SCALE
             //if(selobjmeta > META_ROW2_DEPTH + editor::song->numOrders())
             //    if(i > 0)
             //        selobjmeta = META_ROW2_DEPTH + editor::song->numOrders()-1;
             //    else
             //        selobjmeta = 0;
             //Third row [ORDER PATTERN v ^ N C X v ^ N C Q X]        
-            if(selobjmeta >= META_ROW2_DEPTH)
+            if(selobjmeta > META_ROW2_DEPTH)
                 if(i > 0)
-                    selobjmeta = META_ROW2_DEPTH-1;
+                    selobjmeta = META_ROW2_DEPTH;
                 else
                     selobjmeta = 0;
             break;
@@ -117,64 +117,177 @@ void patternedtr::getKeyChar(char *bfr, unsigned char note)
         case 0xB:
             bfr[0] = 'B';
             break;
-            //MINOR
-        case 12:
-            bfr[0] = 'C';
-            bfr[1] = 'M';
-            break;
-        case 13:
-            bfr[0] = 'C';
-            bfr[1] = 'm';
-            break;
-
-        case 14:
-            bfr[0] = 'D';
-            bfr[1] = 'M';
-            break;
-        case 15:
-            bfr[0] = 'D';
-            bfr[1] = 'm';
-            break;
-
-        case 16:
-            bfr[0] = 'E';
-            bfr[1] = 'M';
-            break;
-
-        case 17:
-            bfr[0] = 'F';
-            bfr[1] = 'M';
-            break;
-        case 18:
-            bfr[0] = 'F';
-            bfr[1] = 'm';
-            break;
-
-        case 19:
-            bfr[0] = 'G';
-            bfr[1] = 'M';
-            break;
-        case 20:
-            bfr[0] = 'G';
-            bfr[1] = 'm';
-            break;
-
-        case 21:
-            bfr[0] = 'A';
-            bfr[1] = 'M';
-            break;
-        case 22:
-            bfr[0] = 'A';
-            bfr[1] = 'm';
-            break;
-
-        case 23:
-            bfr[0] = 'B';
-            bfr[1] = 'M';
-            break;
     }
 
 }
+
+
+void patternedtr::getScale_Sel(char *bfr, unsigned char *scale)
+{
+    int acc = 0;
+    int i;
+    
+
+    for(i = 0; i < 11 && acc < 12; i++)
+    {
+        acc += scale[i];
+        bfr[i] = ('0' + scale[i]);
+    }
+
+    scale[i] = 0;
+
+    for(i; i < 11; i++)
+        bfr[i] = ' ';
+    bfr[11] = 0;
+}
+
+void patternedtr::getScale_Unsel(char *bfr, unsigned char scalespnr, unsigned char *scale)
+{
+    int acc = 0;
+    for(int i = 0; i < 11; i++)
+        bfr[i] = ' ';
+    switch(scalespnr)
+    {
+        case 0: 
+            strcpy(bfr, "Chromatic");
+            bfr[9]=' ';
+            break;
+
+        case 1: 
+            strcpy(bfr, "Major");
+            bfr[5]=' '; //set the copied nullchar to space
+            break;
+        case 2: 
+            strcpy(bfr, "Minor");
+            bfr[5]=' ';
+            break;
+        case 3: 
+            strcpy(bfr, "Minor Hrmon");
+            break;
+        case 4: 
+            strcpy(bfr, "Minor Melod");
+            break;
+
+        case 5: 
+            strcpy(bfr, "Dorian");
+            bfr[6]=' ';
+            break;
+        case 6: 
+            strcpy(bfr, "Phyrgian");
+            bfr[8]=' ';
+            break;
+        case 7: 
+            strcpy(bfr, "Lydian");
+            bfr[6]=' ';
+            break;
+        case 8: 
+            strcpy(bfr, "Mixolydian");
+            bfr[10]=' ';
+            break;
+        case 9: 
+            strcpy(bfr, "Locrian");
+            bfr[7]=' ';
+            break;
+
+        default:
+            getScale_Sel(bfr, scale);
+    }
+    bfr[11] = 0;
+}
+
+
+
+unsigned char patternedtr::inferScaleType(unsigned char *scale)
+{
+    //Make an alias as signed for strcmp
+    char * scaleascii = (char *)scale;
+    unsigned char out = 0xFF;
+    //convert to ascii in order to use strcmp
+    for(int i = 0; i < 11; i++)
+    {
+        if(scale[i] != 0)
+            scale[i] += '0';
+    }
+
+    using namespace editor;
+    //It's just easier this way, unless I made a cmp function for scale
+    if(strcmp(scaleascii, "11111111111") == 0)
+        out = SCALE_CHROMATIC;
+    else if(strcmp(scaleascii, "2212221") == 0) //MAJOR
+        out = SCALE_MAJOR;
+    else if(strcmp(scaleascii, "2122122") == 0) //MINOR (AEOLIAN)
+        out = SCALE_AEOLIAN;
+    else if(strcmp(scaleascii, "2122131") == 0) //MINOR (HARMONIC)
+        out = SCALE_HARMONIC;
+    else if(strcmp(scaleascii, "2122221") == 0) //MINOR (MELODIC)
+        out = SCALE_MELODIC;
+    else if(strcmp(scaleascii, "2122212") == 0) //DORIAN
+        out = SCALE_DORIAN;
+    else if(strcmp(scaleascii, "1222122") == 0) //PHYRGIAN
+        out = SCALE_PHYRGIAN;
+    else if(strcmp(scaleascii, "2221221") == 0) //LYDIAN
+        out = SCALE_LYDIAN;
+    else if(strcmp(scaleascii, "2212212") == 0) //MIXOLYDIAN
+        out = SCALE_MIXOLYDIAN;
+    else if(strcmp(scaleascii, "1221222") == 0) //LOCRIAN
+        out = SCALE_LOCRIAN;
+
+    for(int i = 0; i < 11; i++)
+    {
+        if(scale[i] != 0)
+            scale[i] -= '0';
+    }
+
+    return out;
+}
+
+
+void patternedtr::generateScaleFromType(unsigned char *scale, unsigned char scalespnr)
+{
+
+    using namespace editor;
+    switch(scalespnr)
+    {
+        case SCALE_CHROMATIC:
+            for(int i = 0; i < 11; i++)
+                scale[i]='1';
+            break;
+        case SCALE_MAJOR:
+            strcpy((char*)scale, "2212221");
+            break;
+        case SCALE_AEOLIAN:
+            strcpy((char*)scale, "2122122");
+            break;
+        case SCALE_HARMONIC:
+            strcpy((char*)scale, "2122131");
+            break;
+        case SCALE_MELODIC:
+            strcpy((char*)scale, "2122221");
+            break;
+        case SCALE_DORIAN:
+            strcpy((char*)scale, "2122212");
+            break;
+        case SCALE_PHYRGIAN:
+            strcpy((char*)scale, "1222122");
+            break;
+        case SCALE_LYDIAN:
+            strcpy((char*)scale, "2221221");
+            break;
+        case SCALE_MIXOLYDIAN:
+            strcpy((char*)scale, "2212212");
+            break;
+        case SCALE_LOCRIAN:
+            strcpy((char*)scale, "1221222");
+            break;
+    }
+    int i;
+    for(i = 0; i < 11 && scale[i] != 0; i++)
+        scale[i] -= '0';
+    for(; i < 12; i++)
+        scale[i] = 0;
+
+}
+
 
 bool patternedtr::setMetaAttribs(unsigned char objmeta, unsigned char rowmeta)
 {
@@ -263,7 +376,7 @@ void patternedtr::displayMeta()
     mvprintw(0, 0, "[NSO] ", metawin);
     mvprintw(0, 35, " TRACKS:", metawin);
     mvprintw(0, 46, " ROWS:", metawin);
-    mvprintw(0, 55, " BPR/DIV:____/__", metawin);
+    mvprintw(0, 55, " BYT/SEG:____/__", metawin);
     mvprintw(0, 72, "   [? X]", metawin);
 
     //New
@@ -376,8 +489,7 @@ void patternedtr::displayMeta()
     //print order //two char hex
     mvprintw(1, 38," STEP:", metawin);
     mvprintw(1, 45, "  OCT :", metawin);
-    mvprintw(1, 53, "   KEY:__", metawin);
-    mvprintw(1, 62, "  BEAT:_", metawin);
+    mvprintw(1, 53, "  BEAT:_", metawin);
     //print octave //one char hex
 
     //Instrument name
@@ -422,36 +534,23 @@ void patternedtr::displayMeta()
         editor::byteString(charBuffer, patternedtr::octave);
     mvprintw(1, 52, charBuffer+1);
 
-    //Key
+
+    //Beat/Row lines
     isselected = setMetaAttribs(7, 1);
     if(isselected && metaobjedit)
     {
-        getKeyChar(charBuffer, numBuffer);
-        mvprintw(1, 60, charBuffer);
-    }
-    else
-        if(patternedtr::key != 0xFF || isselected)
-        {
-            getKeyChar(charBuffer, patternedtr::key);
-            mvprintw(1, 60, charBuffer);
-        }
-
-    //Beat/Row lines
-    isselected = setMetaAttribs(8, 1);
-    if(isselected && metaobjedit)
-    {
         byteString(charBuffer, numBuffer);
-        mvprintw(1, 69, charBuffer+1);
+        mvprintw(1, 60, charBuffer+1);
     }
     else
     {
         if(patternedtr::row_underline > 0)
         {
             editor::byteString(charBuffer, patternedtr::row_underline);
-            mvprintw(1, 69, charBuffer+1);
+            mvprintw(1, 60, charBuffer+1);
         }
         else if(isselected)
-            mvprintw(1, 69, "_");
+            mvprintw(1, 60, "_");
     }
 
     //////////////////////////////////////////////
@@ -461,7 +560,7 @@ void patternedtr::displayMeta()
     //////////////////////////////////////////////
 
     attroff(-1);
-    mvprintw(2, 0, "ORDER [  -  ] [v^ NCX v^ NCWX]    ", metawin);
+    mvprintw(2, 0, "ORDER [  -  ] [v^ NCX v^ NCWX]                         KEY :__ [v^]", metawin);
 
     //Order
     isselected = setMetaAttribs(0,2);
@@ -515,6 +614,47 @@ void patternedtr::displayMeta()
     //Remove Pattern
     setMetaAttribs(12,2);
     mvprintw(2,28,"X",metawin);
+
+    //Key
+    isselected = setMetaAttribs(13, 2);
+    if(isselected && metaobjedit)
+    {
+        getKeyChar(charBuffer, numBuffer);
+        mvprintw(2, 60, charBuffer);
+    }
+    else
+        if(patternedtr::key != 0xFF || isselected)
+        {
+            getKeyChar(charBuffer, patternedtr::key);
+            mvprintw(2, 60, charBuffer);
+        }
+    //Up Key
+    setMetaAttribs(14, 2);
+    mvprintw(2,64,"v",metawin);
+
+    //Down Key
+    setMetaAttribs(15, 2);
+    mvprintw(2,65,"^",metawin);
+
+    //Print Scale
+    isselected = setMetaAttribs(16, 2);
+    if(isselected && metaobjedit)
+    {
+        getScale_Sel(charBuffer, patternedtr::scaleconst);
+        mvprintw(2,68, charBuffer, metawin);
+
+        attron(COLOR_PAIR(COL_META_UU));
+        char sel[2];
+        sel[0] = charBuffer[textCursorPos];
+        sel[1] = 0;
+        mvprintw(2, 68 + textCursorPos, sel, metawin);
+    }
+    else
+    {
+        getScale_Unsel(charBuffer, patternedtr::scalespinner, patternedtr::scaleconst);
+        mvprintw(2,68, charBuffer, metawin);
+
+    }
 
 }
 void patternedtr::startMetaEditing()
@@ -652,6 +792,24 @@ void patternedtr::startMetaEditing()
                 //Remove Pattern ||Button [2,7]
                removePattern(editor::song->getPatternIndexByOrder(selorder)); 
                 return;
+            case 14:
+                //Cycle Scale Up
+                if(scalespinner < 9)
+                    scalespinner++;
+                else scalespinner = 0;
+
+                generateScaleFromType(scaleconst, scalespinner);
+                populateNoteMap();
+                return;
+            case 15:
+                //Cycle Scale Down
+                if(scalespinner > 0)
+                    scalespinner--;
+                else scalespinner = 9;
+
+                generateScaleFromType(scaleconst, scalespinner);
+                populateNoteMap();
+                return;
         }
     }
 
@@ -716,14 +874,9 @@ void patternedtr::startMetaEditing()
             editor::numBuffer = octave;
             metaobjedit = true;
         }
-        //Key custom spinner
-        else if(selobjmeta == 7)
-        {
-            editor::numBuffer = key;
-            metaobjedit = true;
-        }
+        
         //Rows per beat underline spinner
-        else if(selobjmeta == 8)
+        else if(selobjmeta == 7)
         {
             editor::numBuffer = row_underline;
             metaobjedit = true;
@@ -741,6 +894,17 @@ void patternedtr::startMetaEditing()
         else if(selobjmeta == 1)
         {
             editor::numBuffer = editor::song->getPatternIndexByOrder(selorder);
+            metaobjedit = true;
+        }
+        //Key custom spinner
+        else if(selobjmeta == 13)
+        {
+            editor::numBuffer = key;
+            metaobjedit = true;
+        }
+        else if(selobjmeta == 16)
+        {
+            editor::textCursorPos = 0;
             metaobjedit = true;
         }
     }
@@ -1036,107 +1200,8 @@ void patternedtr::metaEdit(int in)
                 else if(numBuffer < 0)
                     numBuffer = 0;
                 break;
-            case 7:
-                //Key ||Interactable?
-               
-                switch(in)
-                {
-                    case KEY_UP:
-                        numBuffer++;
-                        break;
-                    case KEY_DOWN:
-                        numBuffer--;
-                        break;
-                    case KEY_END:
-                        numBuffer = 0;
-                        break;
-                    case KEY_HOME:
-                        numBuffer = 11;
-                        break;
-                    case KEY_DC:
-                    case ' ':
-                        numBuffer = 0xFF;
-                        break;
-                    case 'q':
-                        numBuffer = 0;//C
-                        break;
-                    case '2':
-                        numBuffer = 1;//C#
-                        break;
-                    case 'w':
-                        numBuffer = 2;//D
-                        break;
-                    case '3':
-                        numBuffer = 3;//D#
-                        break;
-                    case 'e':
-                        numBuffer = 4;//E
-                        break;
-                    case 'r':
-                        numBuffer = 5;//F
-                        break;
-                    case '5':
-                        numBuffer = 6;//F#
-                        break;
-                    case 't':
-                        numBuffer = 7;//G
-                        break;
-                    case '6':
-                        numBuffer = 8;//G#
-                        break;
-                    case 'y':
-                        numBuffer = 9;//A
-                        break;
-                    case '7':
-                        numBuffer = 10;//A#
-                        break;
-                    case 'u':
-                        numBuffer = 11;//B
-                        break;
-                    case 'z':
-                        numBuffer = 12;//CM
-                        break;
-                    case 's':
-                        numBuffer = 13;//Cm
-                        break;
-                    case 'x':
-                        numBuffer = 14;//DM
-                        break;
-                    case 'd':
-                        numBuffer = 15;//Dm
-                        break;
-                    case 'c':
-                        numBuffer = 16;//EM
-                        break;
-                    case 'v':
-                        numBuffer = 17;//FM
-                        break;
-                    case 'g':
-                        numBuffer = 18;//Fm
-                        break;
-                    case 'b':
-                        numBuffer = 19;//GM
-                        break;
-                    case 'h':
-                        numBuffer = 20;//Gm
-                        break;
-                    case 'n':
-                        numBuffer = 21;//AM
-                        break;
-                    case 'j':
-                        numBuffer = 22;//Am
-                        break;
-                    case 'm':
-                        numBuffer = 23;//BM
-                        break;
-                }
-                if(numBuffer != 0xFF && numBuffer >= 23)
-                    numBuffer = 23;
-                else if(numBuffer < 0)
-                    numBuffer = 0;
-                break;
 
-            case 8:
+            case 7:
                 //Beat ||Spinner [1,8]
                 if(!spinnervalid) return;
                
@@ -1168,13 +1233,13 @@ void patternedtr::metaEdit(int in)
     }
     else if(selrowmeta == 2)
     {
-        if(!spinnervalid) return;
         switch(selobjmeta)
         {
             case 0:
             case 1:
                 //Order Selected ||Spinner [2,0]
                 //Pattern Selected ||Spinner [2,1]
+                if(!spinnervalid) return;
             switch(in)
                 {
                     case KEY_UP:
@@ -1221,7 +1286,122 @@ void patternedtr::metaEdit(int in)
             }
 
             break;
+            case 13:
+                //Key ||Interactable?
+               
+                switch(in)
+                {
+                    case KEY_UP:
+                        numBuffer++;
+                        break;
+                    case KEY_DOWN:
+                        numBuffer--;
+                        break;
+                    case KEY_END:
+                        numBuffer = 0;
+                        break;
+                    case KEY_HOME:
+                        numBuffer = 11;
+                        break;
+                    case KEY_DC:
+                    case ' ':
+                        for(int i = 0; i < 11; i++)
+                            scaleconst[i] = 1;
+                        scalespinner = inferScaleType(scaleconst);
+
+                    case 'q':
+                        numBuffer = 0;//C
+                        break;
+                    case '2':
+                        numBuffer = 1;//C#
+                        break;
+                    case 'w':
+                        numBuffer = 2;//D
+                        break;
+                    case '3':
+                        numBuffer = 3;//D#
+                        break;
+                    case 'e':
+                        numBuffer = 4;//E
+                        break;
+                    case 'r':
+                        numBuffer = 5;//F
+                        break;
+                    case '5':
+                        numBuffer = 6;//F#
+                        break;
+                    case 't':
+                        numBuffer = 7;//G
+                        break;
+                    case '6':
+                        numBuffer = 8;//G#
+                        break;
+                    case 'y':
+                        numBuffer = 9;//A
+                        break;
+                    case '7':
+                        numBuffer = 10;//A#
+                        break;
+                    case 'u':
+                        numBuffer = 11;//B
+                        break;
+                }
+                if(numBuffer >= 11)
+                    numBuffer = 11;
+                else if(numBuffer < 0)
+                    numBuffer = 0;
+                break;
+            case 16:
+                //Scale ||Interactable
+                switch(in)
+                {
+                    case KEY_LEFT:
+                        if(textCursorPos > 0)
+                            textCursorPos--;
+                        break;
+                    case KEY_RIGHT:
+                        textCursorPos++;
+                        break;
+                    case KEY_DC:
+                        for(int i = 0; i < 11; i++)
+                            scaleconst[i] = 1;
+                        key = 0;
+                        scalespinner = inferScaleType(scaleconst);
+                        break;
+
+                    default:
+                        if(in == KEY_DC)
+                        {
+                            hexnum = 1;
+                            ishex = true;
+                        }
+
+                        if(ishex && hexnum > 0 && hexnum < 0xA)
+                        {
+                            scaleconst[textCursorPos] = hexnum;
+                            textCursorPos++;
+                            int acc, i;
+                            for(acc = 0, i = 0; acc < 12 && i < 11 && scaleconst[i] != 0; i++)
+                                acc += scaleconst[i];
+                            if(acc > 12)
+                                scaleconst[i-1] -= acc - 12;
+                            if(acc < 12)
+                                for(; acc < 12; i++, acc++)
+                                    scaleconst[i]=1;
+                            for(;i < 12; i++)
+                                scaleconst[i] = 0;
+                        }
+                }
+                int acc, i;
+                for(acc = 0, i = 0; acc < 12 && i < 11; i++)
+                    acc += scaleconst[i];
+                if(textCursorPos >= i)
+                    textCursorPos = i-1;
+                scalespinner = inferScaleType(scaleconst);
+
+
         }
+
     }
 
 
@@ -1290,10 +1470,6 @@ void patternedtr::doneMetaEditing()
                 octave = numBuffer;
                 break;
             case 7:
-                key = numBuffer;
-                populateNoteMap();
-                break;
-            case 8:
                 row_underline = numBuffer;
                 break;
 
@@ -1310,6 +1486,13 @@ void patternedtr::doneMetaEditing()
             case 1:
                 song->setPatternIndexByOrder(selorder, numBuffer);
                 selptrn = song->getPattern(numBuffer);
+                break;
+            case 13:
+                key = numBuffer;
+                populateNoteMap();
+                break;
+            case 16:
+                populateNoteMap();
                 break;
         }
     }
