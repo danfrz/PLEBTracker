@@ -165,20 +165,34 @@ unsigned int patternedtr::subNotes(const unsigned int &n1, const unsigned int &n
 
     if(n2 > n1)
         return 0;
-    out = (n1 & R_OCTAVE) - (n2 & R_OCTAVE);
+    out = ((n1 & R_OCTAVE) - (n2 & R_OCTAVE)) & R_OCTAVE;
+    std::cerr << "note1 " << std::hex <<  n1 << " note2 " << n2 << '\n';
 
     unsigned int note1 = (n1 & R_NOTE);
     unsigned int note2 = (n2 & R_NOTE);
 
+    while(note2 > 0x16000000)
+    {
+        std::cerr << "subtracting: " << out << "--" << (out-0x20000000) << '\n';
+        out -= 0x20000000;
+        note2 =(note2 - 0x18000000);
+    }
+
+    std::cerr << "out=" << std::hex << out << " note1=" << note1 << " note2=" << note2 << '\n';
+
     if(note2 > note1) 
     {
         out -= 0x20000000;
+        std::cerr << "case1, " << out;
         out += (12*0x02000000 - note2) + note1;
+        std::cerr << ":" << out << '\n';
     }
     else
     {
         note1 -= note2;
+        std::cerr << "case2, " << note1;
         out |= note1;
+        std::cerr << ":" << out << '\n';
     }
 
     return out;
