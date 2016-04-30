@@ -1371,7 +1371,7 @@ void editor::handle_y(std::vector<char*> &params)
 
 
 }
-
+#include <iostream>
 
 //Transpose
 void editor::handle_trans(std::vector<char*> &params)
@@ -1431,7 +1431,7 @@ void editor::handle_trans(std::vector<char*> &params)
         }
 
 
-        unsigned char semitones = parseSigned(params.at(0));
+        char semitones = parseSigned(params.at(0));
         if(semitones == 0)
             return;
 
@@ -1449,6 +1449,7 @@ void editor::handle_trans(std::vector<char*> &params)
                 if((entry & R_FULLSEG) != R_FULLSEG)
                 {
                     note = (entry & R_PITCHSEG);
+                    std::cerr << "semitones " << (int)semitones << '\n';;
                     if(semitones > 0)
                         note = patternedtr::addNotes(note, semitones*0x02000000);
                     else 
