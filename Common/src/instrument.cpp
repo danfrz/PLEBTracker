@@ -1,6 +1,5 @@
 #include "instrument.h"
 
-
 Instrument::Instrument()
 {
     name[0] = 'i';
