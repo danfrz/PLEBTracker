@@ -553,7 +553,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 break;
             case 0x1: //frq slide up
                 {
-                    frq/=std::pow(NOTEMULT, (6.0*seltrk->fxparam)/song->getInterrowRes());
+                    frq/=std::pow(NOTEMULT, (1.0*seltrk->fxparam)/(song->getInterrowRes()*10.6));
                     if(frq < 1)
                         frq = 1;
                     seltrk->frq = frq;
@@ -561,7 +561,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 break;
             case 0x2: //frq slide dn
                 {
-                    frq*=std::pow(NOTEMULT,  (6.0*seltrk->fxparam)/song->getInterrowRes());
+                    frq*=std::pow(NOTEMULT,  (1.0*seltrk->fxparam)/(song->getInterrowRes()*10.6));
                     if(frq < 1)
                         frq = 1;
                     seltrk->frq = frq;
