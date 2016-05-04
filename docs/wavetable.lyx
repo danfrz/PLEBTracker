@@ -5941,7 +5941,7 @@ FA
 \begin_layout Plain Layout
 
 \size footnotesize
-_
+Repeat Counter
 \end_layout
 
 \end_inset
@@ -6031,7 +6031,7 @@ FE
 \begin_layout Plain Layout
 
 \size footnotesize
-LJump to Custom Jump
+Jump to Custom Jump
 \end_layout
 
 \end_inset
