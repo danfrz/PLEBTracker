@@ -877,7 +877,7 @@ void patternedtr::processPatternInput(int in)
                     if(patternedtr::octave > 7)
                         patternedtr::octave = 0;
                 }
-                if((patternedtr::entryclipboard & 0xF00) == 0x900)
+                if((patternedtr::entryclipboard & 0xF00) == 0x700)
                 {
                     if((patternedtr::entryclipboard & 0xFF) < editor::song->numWaveEntries())
                     {
@@ -885,7 +885,7 @@ void patternedtr::processPatternInput(int in)
                     }
 
                 }
-                else if((patternedtr::entryclipboard & 0xF00) == 0xC00)
+                else if((patternedtr::entryclipboard & 0xF00) == 0x900)
                 {
                     if((patternedtr::entryclipboard & 0xFF) < editor::song->numPulseEntries())
                     {
