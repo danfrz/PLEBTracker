@@ -476,22 +476,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 
             }
 
-
-            //Do pulseduracc handling
-            if((unsigned char)seltrk->ptbl[PARAM_LOOP4] < 2)
-            {
-                seltrk->pulsei++;
-                seltrk->pulseduracc = 1;
-            }
-            else
-            {
-                if(seltrk->pulseduracc == 0)
-                {
-                    seltrk->pulsei++;
-                    seltrk->pulseduracc = seltrk->ptbl[PARAM_LOOP4];
-                }
-            }
-            seltrk->pulseduracc--; 
+ 
         }
 
         if(_pulse < 0xE000) //0x0000 to 0xDFFF add pulse
@@ -553,7 +538,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 break;
             case 0x1: //frq slide up
                 {
-                    frq/=std::pow(NOTEMULT, (1.0*seltrk->fxparam)/(song->getInterrowRes()*10.6));
+                    frq/=std::pow(NOTEMULT, (1.0*seltrk->fxparam)/(song->getInterrowRes()*21.33333));
                     if(frq < 1)
                         frq = 1;
                     seltrk->frq = frq;
@@ -561,7 +546,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 break;
             case 0x2: //frq slide dn
                 {
-                    frq*=std::pow(NOTEMULT,  (1.0*seltrk->fxparam)/(song->getInterrowRes()*10.6));
+                    frq*=std::pow(NOTEMULT,  (1.0*seltrk->fxparam)/(song->getInterrowRes()*21.33333));
                     if(frq < 1)
                         frq = 1;
                     seltrk->frq = frq;
@@ -664,6 +649,25 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
         }
     }
 
+
+    if(seltrk->pulsei != 0xFFFF)
+    {
+        //Do pulseduracc handling
+        if((unsigned char)seltrk->ptbl[PARAM_LOOP4] < 2)
+        {
+            seltrk->pulsei++;
+            seltrk->pulseduracc = 1;
+        }
+        else
+        {
+            if(seltrk->pulseduracc == 0)
+            {
+                seltrk->pulsei++;
+                seltrk->pulseduracc = seltrk->ptbl[PARAM_LOOP4];
+            }
+        }
+        seltrk->pulseduracc--;
+    }
     if(frq < 1)
         frq = 1;
     if((unsigned char)seltrk->ptbl[PARAM_LOOP3] < 2)
