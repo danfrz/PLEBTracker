@@ -14,6 +14,7 @@
 #include "pattern.h"
 #include "generator.h"
 
+#define ARPEGGIO_SPEED 6
 
 namespace itrp
 {
@@ -36,6 +37,7 @@ namespace itrp
         unsigned short pulsei;
         unsigned char lastwave;
         unsigned char waveduracc;
+        unsigned char pulseduracc;
 
         //VOLUME
         unsigned char ptrnvol;
