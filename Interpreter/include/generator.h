@@ -13,6 +13,8 @@
 #define PARAM_PULSE2 5       //short
 #define PARAM_CUSTOM_JUMP2 6 //short
 #define PARAM_LOOP2 0xE      //byte
+#define PARAM_LOOP3 0xF      //byte
+#define PARAM_LOOP4 0x10      //byte
 
 //Form of a wave generator function 
 typedef void (*generator)(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
