@@ -69,6 +69,8 @@ void editor::populateCmdMap()
     cmdbar_cmdmap["playamp"] = handle_playamp;
     cmdbar_cmdmap["pid"] = handle_pid;
 
+    cmdbar_cmdmap["fxchange"] = handle_fxchange;
+
 }
 
 int editor::parseKeySignature(char *key)
@@ -1478,7 +1480,7 @@ void editor::handle_transkeysong(std::vector<char*> &params)
         unsigned char key = parseKeySignature(params.at(0));
         if (key > 11)//-1
         {
-            inform("Transpose To Key(transkey): key signature doesn't exist");
+            inform("Transpose To Key(transkeysong): key signature doesn't exist");
             return;
         }
 
@@ -2039,6 +2041,48 @@ void editor::handle_playamp(std::vector<char *> &params)
     }
 }
 
+void editor::handle_fxchange(std::vector<char *> &params)
+{
+    //Change one effect to another in whole song
 
+    if(params.size() > 1)
+    {
+
+        unsigned int effectsrc = 0;
+        unsigned int effectdest = 0;
+        
+        effectsrc = parseUnsigned(params.at(0))*0x100;
+        effectdest = parseUnsigned(params.at(1))*0x100;
+        
+
+        
+        unsigned int entry;
+        unsigned int effect;
+        Pattern *selection = patternedtr::selptrn;
+
+        unsigned char numpats = editor::song->numPatterns();
+        for(int i = 0; i < numpats; i++)
+        {
+            patternedtr::selptrn = editor::song->getPattern(i);
+            for(int trk = 0; trk < patternedtr::selptrn->numTracks(); trk++)
+                for(int row = 0; row < patternedtr::selptrn->numRows(); row++)
+                {
+                    entry = patternedtr::selptrn->at(trk, row);
+                    effect = entry & 0xF00;
+                    if(effect == effectsrc)
+                    {
+                        entry &= ~R_EFFECT;
+                        entry |= effectdest;
+                        patternedtr::selptrn->setAt(trk, row, entry);
+                    }
+                }
+        }
+        patternedtr::selptrn = selection;
+        
+    }
+    else
+        inform("Effect Change(fxchange): Requires 2 parameters");
+
+}
 
 

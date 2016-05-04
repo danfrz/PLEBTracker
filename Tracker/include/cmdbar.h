@@ -191,6 +191,7 @@ Description:
 
     //Set effect of all in interval
     void handle_fxset(std::vector<char *> &params);
+    void handle_fxchange(std::vector<char *> &params);
     void handle_fxsetmark(std::vector<char *> &params);
 
     //Insert empty rows [into track of pattern] calls entryins
