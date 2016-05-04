@@ -176,6 +176,18 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                     _wav = song->getWaveEntry(seltrk->wavei);
                 }
                 
+            } else if(cmd == 0xA) //Repeat Counter
+            {
+
+                if((_wav & 0xFF) == 0)
+                    seltrk->ptbl[PARAM_LOOP3] = 1;
+                else
+                    seltrk->ptbl[PARAM_LOOP3] = _wav & 0xFF;
+                seltrk->waveduracc = seltrk->ptbl[PARAM_LOOP3];
+
+                seltrk->wavei++;
+                _wav = song->getWaveEntry(seltrk->wavei);
+
             } else if(cmd == 0xB) //Set loop Counter
             {
                 seltrk->ptbl[PARAM_LOOP] = _wav & 0xFF;
@@ -305,7 +317,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
         seltrk->lastfrq = seltrk->frq;
     }
 
-    if(waveform == 0xF4)
+    if(waveform == 0xF4) //Does this mean to be F6?
         waveform = seltrk->lastwave;
 
     //////////////////////////////////////////
@@ -356,6 +368,17 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                         seltrk->pulsei = _pulse & 0x00FF;
                         _pulse = song->getPulseEntry(seltrk->pulsei);
                     }
+                } else if(cmd == 0xA) //Repeat Counter
+                {
+
+                    if((_pulse & 0xFF) == 0)
+                        seltrk->ptbl[PARAM_LOOP4] = 1;
+                    else
+                        seltrk->ptbl[PARAM_LOOP4] = _pulse & 0xFF;
+                    seltrk->pulseduracc = seltrk->ptbl[PARAM_LOOP4];
+
+                    seltrk->pulsei++;
+                    _pulse = song->getPulseEntry(seltrk->pulsei);
 
                 } else if(cmd == 0xB) //Set loop Counter
                 {
@@ -453,9 +476,22 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 
             }
 
-            
-            seltrk->pulsei++;
 
+            //Do pulseduracc handling
+            if((unsigned char)seltrk->ptbl[PARAM_LOOP4] < 2)
+            {
+                seltrk->pulsei++;
+                seltrk->pulseduracc = 1;
+            }
+            else
+            {
+                if(seltrk->pulseduracc == 0)
+                {
+                    seltrk->pulsei++;
+                    seltrk->pulseduracc = seltrk->ptbl[PARAM_LOOP4];
+                }
+            }
+            seltrk->pulseduracc--; 
         }
 
         if(_pulse < 0xE000) //0x0000 to 0xDFFF add pulse
@@ -503,12 +539,13 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
         {
             case 0x0: //arpeggio
                 {
-                    if(seltrk->segments == 1)
+                    int section;
+                    section = (ARPEGGIO_SPEED*seltrk->segments / song->getInterrowRes()) % 3;
+                    if(section == 1)
                         frq/=std::pow(NOTEMULT, (seltrk->fxparam & 0xF0) >> 4);
-                    else if(seltrk->segments == 2)
+                    else if(section == 2)
                     {
                         frq/=std::pow(NOTEMULT, (seltrk->fxparam & 0x0F));
-                        seltrk->segments = 0;
                     }
                     if(frq < 1)
                         frq = 1;
@@ -516,7 +553,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 break;
             case 0x1: //frq slide up
                 {
-                    frq/=std::pow(NOTEMULT,  (seltrk->fxparam)/512.f );
+                    frq/=std::pow(NOTEMULT, (6.0*seltrk->fxparam)/song->getInterrowRes());
                     if(frq < 1)
                         frq = 1;
                     seltrk->frq = frq;
@@ -524,7 +561,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 break;
             case 0x2: //frq slide dn
                 {
-                    frq*=std::pow(NOTEMULT, (seltrk->fxparam)/512.f );
+                    frq*=std::pow(NOTEMULT,  (6.0*seltrk->fxparam)/song->getInterrowRes());
                     if(frq < 1)
                         frq = 1;
                     seltrk->frq = frq;
@@ -540,7 +577,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                     //not sure if this is the correct way to implement this, but it does portamento so
                     float lastnote = logbase(NOTEMULT, seltrk->frq);
                     float nextnote = logbase(NOTEMULT, seltrk->nextfrq);
-                    float dif = (nextnote - lastnote)/((256-seltrk->fxparam)/12.0); //the higher the number on the right, faster portamento
+                    float dif = 12.0*(nextnote - lastnote)/(256-seltrk->fxparam); //the higher the number on the right, faster portamento
                     frq = std::pow(NOTEMULT, lastnote+dif);
                     
 
@@ -560,13 +597,16 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 {
                     unsigned char durparam = 0x10 - ((seltrk->fxparam & 0xF0) >> 4);
                     unsigned char duration = durparam*4;
-                    float depth = (std::pow(NOTEMULT,(((seltrk->fxparam & 0xF) + 1)/16.0)/duration));
-                    unsigned char part = (seltrk->segments % (duration)) / durparam;//why is it 12 and not 8?
+                    float depth = (std::pow(NOTEMULT,(((seltrk->fxparam & 0xF) +
+                                        1)/(durparam*16.0))));
+                    unsigned char part = (seltrk->segments % (duration)) / durparam;
                     switch(part)
                     {
                         case 0:
                         case 3:
-                            frq*=depth;
+                            frq*=depth; //floating point error galore but 
+                                        //it's okay                           
+                            
                             break;
                         case 1:
                         case 2:
@@ -626,7 +666,20 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 
     if(frq < 1)
         frq = 1;
-    seltrk->wavei++;
+    if((unsigned char)seltrk->ptbl[PARAM_LOOP3] < 2)
+    {
+        seltrk->wavei++;
+        seltrk->waveduracc = 1;
+    }
+    else
+    {
+        if(seltrk->waveduracc == 0)
+        {
+            seltrk->wavei++;
+            seltrk->waveduracc = seltrk->ptbl[PARAM_LOOP3];
+        }
+    }
+    seltrk->waveduracc--; 
 
     amp *= seltrk->ptrnvol / 63.0f;
     amp *= amplifyall;
@@ -785,16 +838,20 @@ void itrp::initializeRender()
         tracks[i].ptbl[2] = 0; //Custom jump (part 1)
         tracks[i].ptbl[3] = 0; //Custom jump (part 2)
 
-        tracks[i].ptbl[4] = 0; //loop counter
-        tracks[i].ptbl[5] = 127; //Wave misc param 1
-        tracks[i].ptbl[6] = 0x80; //Wave misc param 2
-        tracks[i].ptbl[7] = 127; //Chain
-        tracks[i].ptbl[8] = 127; //Track Interp
+        tracks[i].ptbl[PARAM_LOOP] = 0; //Wave Loop counter
+        tracks[i].ptbl[PARAM_WAVE1] = 127; //Wave misc param 1
+        tracks[i].ptbl[PARAM_WAVE2] = 0x80; //Wave misc param 2
+        tracks[i].ptbl[PARAM_CHAIN] = 127; //Chain
+        tracks[i].ptbl[PARAM_LAST] = 127; //Track Interp
+        tracks[i].ptbl[PARAM_LOOP2] = 0; //Pulse loop counter
+        tracks[i].ptbl[PARAM_LOOP3] = 1; //Wave repeat counter
+        tracks[i].ptbl[PARAM_LOOP4] = 1; //Pulse repeat counter
 
         tracks[i].ptrnvol = (firstrow & R_VOLUME) >> RI_VOLUME;
         tracks[i].ptrnlastvol = tracks[i].ptrnvol;
 
         tracks[i].waveduracc = 0;
+        tracks[i].pulseduracc = 0;
         tracks[i].volduracc = 0;
         tracks[i].lastvol = 0;
         tracks[i].voljump = 1;
@@ -866,6 +923,7 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                             seltrk->nextfrq = BASEFRQ/std::pow(NOTEMULT, 12*_oct+_note);
                     }
 
+                    //If instrument changes
                     if((row & R_INSTRUMENT) != R_INSTRUMENT)
                     {
                         //std::cerr << " inst";
@@ -880,6 +938,10 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                             //std::cerr << "INSTSET pulsei " << seltrk->pulsei << '\n';
                         }
                         seltrk->waveduracc = 0;
+                        seltrk->pulseduracc = 0;
+                        seltrk->ptbl[PARAM_LOOP3] = 1;//Reset the repeat
+                        seltrk->ptbl[PARAM_LOOP4] = 1;//params on inst change
+                        
                         seltrk->voli = 0;
                         seltrk->volduracc = 0;
                         seltrk->lastvol = (seltrk->inst->getVolEntry(0) & 0xFF00) >> 8;
@@ -937,11 +999,15 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                     _fxp1 = row & R_FXPARAM;
                    ((unsigned short*)seltrk->ptbl)[0] = (((unsigned short)_fxp1)<< 8); //oh dear.
                 }
-                else if(_fx == 9)
+                else if(_fx == 7)
                 { 
                     seltrk->wavei = row & R_FXPARAM;
                 }
-                else if(_fx == 0xC)
+                //else if(_fx == 0xA)
+                //{ 
+                //    seltrk->pulsei = row & R_FXPARAM;
+                //}
+                else if(_fx == 0x9)
                 { 
                     seltrk->pulsei = row & R_FXPARAM;
                 }
