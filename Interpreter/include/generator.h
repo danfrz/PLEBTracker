@@ -76,9 +76,6 @@ void genTri(unsigned char *bfr, unsigned char *ptbl, const float &period, const 
 
 void genTriPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
 
-void genTriPulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
-
-void genTriPulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
 
 //|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 //SINE WAVES|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
