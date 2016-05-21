@@ -89,8 +89,8 @@ Introduction
 \end_layout
 
 \begin_layout Paragraph*
-The pattern editor is the window in the center of the window when you start
- PLEBTracker.
+The pattern editor is the window in the center of the terminal when you
+ start PLEBTracker.
  This window displays one pattern of song data.
  You can see four vertical 'tracks' seperated by vertical bars 
 \begin_inset Quotes eld
@@ -109,19 +109,19 @@ Within a track there are 4 fields to edit.
 \end_layout
 
 \begin_layout Enumerate
-Note [C-4] A musical note, and its octave.
+Note [C-4], A musical note, and its octave.
 \end_layout
 
 \begin_layout Enumerate
-Instrument [00] Which instrument to play from the instrument list.
+Instrument [00], Which instrument to play from the instrument list.
 \end_layout
 
 \begin_layout Enumerate
-Volume [3F] How loud this instrument should be playing on this note.
+Volume [3F], How loud this instrument should be playing on this note.
 \end_layout
 
 \begin_layout Enumerate
-Effect [204] Does any number of things.
+Effect [204], Does any number of things.
 \end_layout
 
 \begin_layout Subsection*
@@ -160,9 +160,9 @@ The default key signature of the tracker is Chromatic C, which means when
 \begin_layout Paragraph*
 There are two options when choosing a scale, if you choose to use one (you
  can still just use the Chromatic C bindings and just choose the notes of
- that key yourself if you want.) The two options are to used one of the scales
- provided by pressing the up and down buttons by the scale display.
- There are many scales to choose from.
+ that key yourself if you want.) There are two options when changing scale.
+ One is to use one of the scales provided by pressing the up and down buttons
+ by the scale display.
  However if you want to create your own scale and populate the key bindings
  to keys of any arbitrary scale you can edit the 
 \emph on
@@ -257,7 +257,7 @@ On-row effects [R] perform an action once as soon as the tracker reaches
 
 \begin_layout Paragraph*
 Per-segment effects [S] continue to be applied throughout the row that it
- is applied.
+ is applied (and subsequent rows if the effect continues to be applied).
 \end_layout
 
 \begin_layout Paragraph*
@@ -591,11 +591,6 @@ Undefined
 \end_inset
 
 
-\end_layout
-
-\begin_layout Itemize
-Note to self: 9XX is now 7XX, CXX is now 9XX, delete this after porting
- songs
 \end_layout
 
 \begin_layout Subsection*
