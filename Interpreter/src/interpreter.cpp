@@ -745,8 +745,8 @@ void itrp::initializeWaveTable()
 
     //save room for more squares (how many could there be?)
 
-    generators[0x14] = genTriPulse2;
-    generators[0x15] = genTriPulseHybrid;
+    //generators[0x14] = genTriPulse2;
+    //generators[0x15] = genTriPulseHybrid;
 
     generators[0x16] = genSinePulse2;
     generators[0x17] = genSinePulseHybrid;
@@ -835,9 +835,11 @@ void itrp::initializeRender()
         tracks[i].lastwave = 0;
 
 
-        tracks[i].ptbl[0] = 0x00; //Pulse param (part 1)
-        tracks[i].ptbl[1] = 0x10; //Pulse param (part 2), a small value so you can hear it, but doesnt sound correct. better than nothing
+        tracks[i].ptbl[2*PARAM_PULSE  ] = 0x00; //Pulse param (part 1)
+        tracks[i].ptbl[2*PARAM_PULSE+1] = 0x10; //Pulse param (part 2), a small value so you can hear it, but doesnt sound correct. better than nothing
 
+        tracks[i].ptbl[2*PARAM_PULSE2  ] = 0x00; //Pulse param (part 1)
+        tracks[i].ptbl[2*PARAM_PULSE2+1] = 0x10; //Pulse param (part 1)
 
         tracks[i].ptbl[2] = 0; //Custom jump (part 1)
         tracks[i].ptbl[3] = 0; //Custom jump (part 2)
