@@ -29,13 +29,23 @@ void genSawPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, 
     if(period == 0 || amplitude == 0)
         return;
 
+    long prd = period;
     float halfamp = amplitude/2.0;
-    float ratio = 32 - 31*(float)(((unsigned short*)ptbl)[PARAM_PULSE]) / 0xFFFF;
+    //ratio*(amp / period)
+    //(1 - p)*(amp / period)
+    //(period - 0) = period
+    //(period - 1*(period-1)) = 1
+    //
+    //(period - ratio*(period-1))*(amp / period)
+    //Sounds good. But doesn't "iterate" fast enough
+    //Need to find a transform that takes PULSE/0xFFFF to give more weight on
+    //higher values. Bell curve?
+    float prdmod = period/1;
+    float ratio = prdmod - ((float)(((unsigned short*)ptbl)[PARAM_PULSE]) / 0xFFFF)*(prdmod-1);
     float acc = ratio*(amplitude / period);
     //unsigned long lowlen = len - (len % long(period));
     unsigned long increments = std::ceil(period);
 
-    long prd = period;
     unsigned long shift = phase*period;
     unsigned long ovr;
     unsigned long i;
@@ -43,13 +53,14 @@ void genSawPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, 
     {
         ovr = ((i+shift)%prd)*acc;
 
-        if(ovr <= halfamp)
+        if(ovr <= amplitude)
             bfr[i] += ovr - halfamp;
 
         //if(ovr > halfamp)
         //    ovr = halfamp;
         //bfr[i] += ovr-halfamp;
     }
+    
 
     phase = ((i + shift) % prd) / period;
 }
@@ -74,7 +85,7 @@ void genSqr(unsigned char *bfr, unsigned char *ptbl,  const float &period, const
 
 
 //Creates a Square wave where the center median shifts
-void genSqrPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+void genSqrPulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
 {
     if(period == 0 || amplitude == 0)
         return;
@@ -94,7 +105,7 @@ void genSqrPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, 
 }
 
 //Creates a Square wave where the whole wave is scaled and silence is left for the rest of the period
-void genSqrPulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+void genSqrPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
 {
     if(period == 0 || amplitude == 0)
         return;
@@ -104,14 +115,16 @@ void genSqrPulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period,
     unsigned long lowlen = len;
     const long prd = period;
     float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000;
+    
 
     int roll;
     unsigned long i;
     for(i = 0; i < lowlen; i++)
     {
-        roll = static_cast<unsigned long>(i/ratio+offset) % prd;
+        roll = static_cast<unsigned long>((i+offset)) % prd;
+
         if(roll < ratio*period)
-            bfr[i] += ((roll < (period/2)) - 0.5f)*amplitude;
+            bfr[i] += ((roll < ((period*ratio)/2)) - 0.5f)*amplitude;
     }
 
     phase = ((i+offset)%prd) / period;
@@ -128,17 +141,20 @@ void genSqrPulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &pe
     unsigned long offset = phase*period;
     unsigned long lowlen = len;
     const long prd = period;
-    //float ratio = (float)(((unsigned short*)ptbl)[PARAM_PULSE]) / 0xFFFF;
-    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000;
+    float ratio2 = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000;
+    float ratio = (float)(((unsigned short*)ptbl)[PARAM_PULSE2]) / 0xFFFF;
+    
 
     int roll;
     unsigned long i;
     for(i = 0; i < lowlen; i++)
     {
-        roll = static_cast<unsigned long>(i/ratio+offset) % prd;
-        if(roll < ratio*period)
-            bfr[i] += ((roll < (period*ratio)) - 0.5f)*amplitude;
+        roll = static_cast<unsigned long>((i+offset)) % prd;
+
+        if(roll < ratio2*period)
+            bfr[i] += ((roll < ((period*ratio2*ratio))) - 0.5f)*amplitude;
     }
+
     phase = ((i+offset)%prd) / period;
 }
 
@@ -303,89 +319,16 @@ void genTriPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, 
         }
         else
         {
-            //Tri pulse was doing this annoying clicking
-            //If you want the clicking delete these 2 ifs and leave the else
-
             if(std::abs(char(ptbl[PARAM_LAST]) - halfamp) > 3)
             {
                 int interp = (3*int((char)ptbl[PARAM_LAST]) - halfamp) / 4;
                 ptbl[PARAM_LAST] = interp;
 
             }
-/*
-            if(char(ptbl[PARAM_LAST]) < -amplitude/2.0)
-                ptbl[PARAM_LAST] += (i%6) == 0;
-            else if(char(ptbl[PARAM_LAST]) > -amplitude/2.0)
-                ptbl[PARAM_LAST] -= (i%6) == 0;
-            else
-                ptbl[PARAM_LAST] = -halfamp;*/
         }
         bfr[i] += ptbl[PARAM_LAST];
     }
-    //Confirm this part is correct:
-    phase = ((i+shift)%prd) / period;
-}
 
-//TODO::
-void genTriPulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
-{
-    if(period == 0 || amplitude == 0)
-        return;
-    float halfamp = amplitude/2.0;
-
-    unsigned long shift = phase*period;
-
-    unsigned short param = ((unsigned short*)ptbl)[PARAM_PULSE];
-    float ratio = 16 - 15.0*(static_cast<float>(param) / 0xFFFF);
-
-    unsigned long prd = period;
-    float halfprd = prd/2;
-    unsigned long fourthprd = prd/4;
-
-    unsigned long ovr;
-    unsigned long i;
-    for(i = 0; i < len; i++)
-    {
-        ovr = (i+shift)%prd;
-        if(ovr < period/ratio)
-        {
-            ptbl[PARAM_LAST] = amplitude*ratio*(fourthprd/ratio - std::abs(halfprd/ratio-ovr))/halfprd;
-            bfr[i] += ptbl[PARAM_LAST];
-        }
-        else bfr[i] += -halfamp;
-    }
-
-    //Confirm this part is correct:
-    phase = ((i+shift)%prd) / period;
-}
-
-//TODO::
-void genTriPulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
-{
-    if(period == 0 || amplitude == 0)
-        return;
-    float halfamp = amplitude/2.0;
-
-    unsigned long shift = phase*period;
-
-    unsigned short param = ((unsigned short*)ptbl)[PARAM_PULSE];
-    float ratio = 16 - 15.0*(static_cast<float>(param) / 0xFFFF);
-
-    unsigned long prd = period;
-    float halfprd = prd/2;
-    unsigned long fourthprd = prd/4;
-
-    unsigned long ovr;
-    unsigned long i;
-    for(i = 0; i < len; i++)
-    {
-        ovr = (i+shift)%prd;
-        if(ovr < period/ratio)
-            bfr[i] += amplitude*ratio*(fourthprd/ratio - std::abs(halfprd/ratio-ovr))/halfprd;
-        else bfr[i] += -halfamp;
-    }
-
-    //Confirm this part is correct:
     phase = ((i+shift)%prd) / period;
 }
 
@@ -425,36 +368,28 @@ void genSinePulse(unsigned char *bfr, unsigned char *ptbl,  const float &period,
     phase = phase + (tau*i)/period;
 }
 
-//Deprecated
-void genSineOldPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
-{
-    if(period == 0 || amplitude == 0)
-        return;
-    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000 ;
 
-    const float tau = (2*M_PI);
 
-    float temp;
-    float halfamp = amplitude/2.0;
-    unsigned long i;
-    for(i = 0; i < len; i++)
-    {
-        //remainer acts wierd, check C++ std
-        temp = remainder(phase + (tau*i)/period, tau);
-        if(temp < tau*ratio)
-            bfr[i] += halfamp*std::sin(temp/ratio);
-    }
-
-    temp = remainder(phase + (tau*i)/period, tau);
-    phase = phase + (tau*i)/period;
-}
-
-//TODO::
 void genSinePulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
 {
     if(period == 0 || amplitude == 0)
         return;
-    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000 ;
+    float trueratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1.0) / 0x10000;
+
+
+    float ratio; //ratio that modifies the upper sine
+    float invratio; //ratio that modifies the lower sine
+
+    if(trueratio <= 0.5)
+    {
+        ratio = trueratio*2;                //0 to 1
+        invratio = 1.0 + (1.0 - ratio); //2 to 1
+    }
+    else
+    {
+        ratio = 1.0 + (trueratio - 0.5)*2; //1 to 2
+        invratio = 1.0 - (trueratio-0.5)*2;//1 to 0
+    }
 
     const float tau = (2*M_PI);
 
@@ -464,20 +399,76 @@ void genSinePulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period
     for(i = 0; i < len; i++)
     {
         temp = fmod(phase + (tau*i)/period, tau);
-        if(temp < tau*ratio)
-            bfr[i] += halfamp*std::sin(temp/ratio);
+        if(temp < tau*ratio/2)
+            bfr[i] += halfamp*std::sin(temp/(ratio));
+        else
+            bfr[i] += halfamp*std::sin((temp-M_PI*ratio + M_PI*invratio)/(invratio));
+
     }
 
     temp = fmod(phase + (tau*i)/period, tau);
     phase = phase + (tau*i)/period;
 }
 
-//TODO::
-void genSinePulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+//First step on the way to making genSinePulse2, these steps are going to stay
+//here because some of them sounded kind of cool in their own right.
+//I'll decide which ones stay later, if any.
+void genSinePulse2_A(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
 {
     if(period == 0 || amplitude == 0)
         return;
-    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000 ;
+    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1.0) / 0x10000 ;
+
+    const float tau = (2*M_PI);
+
+    float temp;
+    float halfamp = amplitude/2.0;
+    unsigned long i;
+    for(i = 0; i < len; i++)
+    {
+        temp = fmod(phase + (tau*i)/period, tau);
+        if(temp < tau*ratio/2.0)
+            bfr[i] += halfamp*std::sin(temp/ratio);
+        else
+            bfr[i] += halfamp*std::sin((temp)/((1-ratio)*2.0));
+    }
+
+    temp = fmod(phase + (tau*i)/period, tau);
+    phase = phase + (tau*i)/period;
+}
+
+//Second step on the way to making genSinePulse2
+void genSinePulse2_B(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+{
+    if(period == 0 || amplitude == 0)
+        return;
+    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1.0) / 0x10000 ;
+
+    const float tau = (2*M_PI);
+
+    float temp;
+    float halfamp = amplitude/2.0;
+    unsigned long i;
+    for(i = 0; i < len; i++)
+    {
+        temp = fmod(phase + (tau*i)/period, tau);
+        if(temp < tau*ratio/2.0)
+            bfr[i] += halfamp*std::sin(temp/ratio);
+        else
+            bfr[i] += halfamp*std::sin((temp-M_PI*ratio + M_PI*(1-ratio)*2)/((1-ratio)*2.0));
+    }
+
+    temp = fmod(phase + (tau*i)/period, tau);
+    phase = phase + (tau*i)/period;
+}
+
+//Third step on the way to making genSinePulse2
+void genSinePulse2_C(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+{
+    if(period == 0 || amplitude == 0)
+        return;
+    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1.0) / 0x10000 ;
+    float invratio = 1.0 - ratio;
 
     const float tau = (2*M_PI);
 
@@ -489,10 +480,86 @@ void genSinePulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &p
         temp = fmod(phase + (tau*i)/period, tau);
         if(temp < tau*ratio)
             bfr[i] += halfamp*std::sin(temp/ratio);
+        else
+            bfr[i] += halfamp*std::sin((temp-M_PI*ratio + M_PI*invratio*2)/(invratio*2.0));
     }
 
     temp = fmod(phase + (tau*i)/period, tau);
     phase = phase + (tau*i)/period;
+}
+
+//Fourth step on the way to making genSinePulse2
+void genSinePulse2_D(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+{
+    if(period == 0 || amplitude == 0)
+        return;
+    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1.0) / 0x10000 ;
+    float invratio = 0.5 + (1.0 - ratio)*0.5;
+
+    const float tau = (2*M_PI);
+
+    float temp;
+    float halfamp = amplitude/2.0;
+    unsigned long i;
+    for(i = 0; i < len; i++)
+    {
+        temp = fmod(phase + (tau*i)/period, tau);
+        if(temp < tau*ratio/2)
+            bfr[i] += halfamp*std::sin(temp/ratio);
+        else
+            bfr[i] += halfamp*std::sin((temp-M_PI*ratio + M_PI*invratio*2)/(invratio*2.0));
+    }
+
+    temp = fmod(phase + (tau*i)/period, tau);
+    phase = phase + (tau*i)/period;
+}
+
+void genSinePulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+{
+
+    if(period == 0 || amplitude == 0)
+        return;
+    //Pulse2 ratio
+    float trueratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE2])+1.0) / 0x10000;
+    //Pulse1 ratio
+    float p1ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1.0) / 0x10000;
+
+
+    float ratio; //ratio that modifies the upper sine
+    float invratio; //ratio that modifies the lower sine
+
+    if(trueratio <= 0.5)
+    {
+        ratio = trueratio*2;                //0 to 1
+        invratio = 1.0 + (1.0 - ratio); //2 to 1
+    }
+    else
+    {
+        ratio = 1.0 + (trueratio - 0.5)*2; //1 to 2
+        invratio = 1.0 - (trueratio-0.5)*2;//1 to 0
+    }
+
+    const float tau = (2*M_PI);
+
+    float temp;
+    float halfamp = amplitude/2.0;
+    unsigned long i;
+    for(i = 0; i < len; i++)
+    {
+        temp = fmod(phase + (tau*i)/period, tau);
+        if(temp < tau*p1ratio)
+        {
+            if(temp < (tau*ratio*p1ratio)/2)
+                bfr[i] += halfamp*std::sin(temp/(p1ratio*ratio));
+            else
+                bfr[i] += halfamp*std::sin((temp-M_PI*p1ratio*ratio + M_PI*p1ratio*invratio)/(p1ratio*invratio));
+        }
+
+    }
+
+    temp = fmod(phase + (tau*i)/period, tau);
+    phase = phase + (tau*i)/period;
+
 }
 
 
@@ -501,12 +568,21 @@ void genNSine(unsigned char *bfr, unsigned char *ptbl,  const float &period, con
     if(period == 0 || amplitude == 0)
         return;
 
+
     float n = ptbl[PARAM_WAVE1]; //Wave Param
+
     const float tau = (2*M_PI);
+
+    float temp;
     float halfamp = amplitude/2.0;
     unsigned long i;
     for(i = 0; i < len; i++)
-        bfr[i] += halfamp*std::sin(phase + (tau*i*n)/period);
+    {
+        temp = fmod(phase + (tau*i)/period, tau);
+        bfr[i] += halfamp*std::sin(temp*n);
+    }
+
+    temp = fmod(phase + (tau*i)/period, tau);
     phase = phase + (tau*i)/period;
 }
 
@@ -538,7 +614,24 @@ void genNSinePulse2(unsigned char *bfr, unsigned char *ptbl,  const float &perio
 {
     if(period == 0 || amplitude == 0)
         return;
-    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000 ;
+
+    float trueratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1.0) / 0x10000;
+
+
+    float ratio; //ratio that modifies the upper sine
+    float invratio; //ratio that modifies the lower sine
+
+    if(trueratio <= 0.5)
+    {
+        ratio = trueratio*2;                //0 to 1
+        invratio = 1.0 + (1.0 - ratio); //2 to 1
+    }
+    else
+    {
+        ratio = 1.0 + (trueratio - 0.5)*2; //1 to 2
+        invratio = 1.0 - (trueratio-0.5)*2;//1 to 0
+    }
+
     float n = ptbl[PARAM_WAVE1]; //Wave Param
 
     const float tau = (2*M_PI);
@@ -549,20 +642,42 @@ void genNSinePulse2(unsigned char *bfr, unsigned char *ptbl,  const float &perio
     for(i = 0; i < len; i++)
     {
         temp = fmod(phase + (tau*i)/period, tau);
-        if(temp < tau*ratio)
-            bfr[i] += halfamp*std::sin(temp/ratio*n);
+        //bfr[i] += halfamp*std::sin(temp/ratio*n);
+
+        if(temp < tau*ratio/2)
+            bfr[i] += halfamp*std::sin(temp/(ratio)*n);
+        else
+            bfr[i] += halfamp*std::sin((temp-M_PI*ratio + M_PI*invratio)/(invratio)*n);
     }
 
     temp = fmod(phase + (tau*i)/period, tau);
     phase = phase + (tau*i)/period;
 }
 
-//TODO::
 void genNSinePulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
 {
+
     if(period == 0 || amplitude == 0)
         return;
-    float ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000 ;
+
+    float trueratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE2])+1.0) / 0x10000;
+    float p1ratio = ((float)(((unsigned short*)ptbl)[PARAM_PULSE])+1) / 0x10000 ;
+
+
+    float ratio; //ratio that modifies the upper sine
+    float invratio; //ratio that modifies the lower sine
+
+    if(trueratio <= 0.5)
+    {
+        ratio = trueratio*2;                //0 to 1
+        invratio = 1.0 + (1.0 - ratio); //2 to 1
+    }
+    else
+    {
+        ratio = 1.0 + (trueratio - 0.5)*2; //1 to 2
+        invratio = 1.0 - (trueratio-0.5)*2;//1 to 0
+    }
+
     float n = ptbl[PARAM_WAVE1]; //Wave Param
 
     const float tau = (2*M_PI);
@@ -573,12 +688,18 @@ void genNSinePulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &
     for(i = 0; i < len; i++)
     {
         temp = fmod(phase + (tau*i)/period, tau);
+        //bfr[i] += halfamp*std::sin(temp/ratio*n);
         if(temp < tau*ratio)
-            bfr[i] += halfamp*std::sin(temp/ratio*n);
+            if(temp < (tau*ratio*p1ratio)/2)
+                bfr[i] += halfamp*std::sin(temp/(p1ratio*ratio)*n);
+            else
+                bfr[i] += halfamp*std::sin((temp-M_PI*p1ratio*ratio + M_PI*p1ratio*invratio)/(p1ratio*invratio)*n);
     }
 
     temp = fmod(phase + (tau*i)/period, tau);
     phase = phase + (tau*i)/period;
+
+
 }
 
 void genHalfSine(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
@@ -587,9 +708,16 @@ void genHalfSine(unsigned char *bfr, unsigned char *ptbl,  const float &period, 
         return;
 
     const float tau = (2*M_PI);
+    float temp;
     unsigned long i;
+
     for(i = 0; i < len; i++)
-        bfr[i] += amplitude*(std::abs(std::sin(phase + (tau*i/2.0)/period)) - 0.5);
+    {
+        temp = fmod(phase + (tau*i)/period, tau);
+        bfr[i] += amplitude*(std::abs(std::sin(temp/2.0)) - 0.5);
+    }
+
+
     phase = phase + (tau*i)/period;
 }
 
@@ -619,10 +747,14 @@ void genNHalfSine(unsigned char *bfr, unsigned char *ptbl,  const float &period,
         return;
 
     float n = ptbl[PARAM_WAVE1] / 2.0; //Wave Param
+    float temp;
     const float tau = (2*M_PI);
     unsigned long i;
     for(i = 0; i < len; i++)
-        bfr[i] += amplitude*(std::abs(std::sin(phase + (tau*i*n)/period)) - 0.5);
+    {
+        temp = fmod(phase + (tau*i)/period, tau);
+        bfr[i] += amplitude*(std::abs(std::sin(temp*n)) - 0.5);
+    }
     phase = phase + (tau*i)/period;
 }
 
