@@ -22,6 +22,7 @@ void editor::populateCmdMap()
 
     cmdbar_cmdmap["amp"] =  handle_amp;
     cmdbar_cmdmap["ampinst"] =  handle_ampinst;
+    cmdbar_cmdmap["ampinstall"] =  handle_ampinstall;
     cmdbar_cmdmap["ampmark"] =  handle_ampmark;
     cmdbar_cmdmap["amplin"] = handle_amplin;
 
@@ -798,7 +799,6 @@ void editor::handle_d(std::vector<char*> &params)
         patternedtr::selptrn->deleteRow(patternedtr::seltrack, patternedtr::selrow, 1);
 }
 
-
 void editor::handle_ampinst(std::vector<char *> &params)
 {
     if(params.size() > 0)
@@ -838,24 +838,58 @@ void editor::handle_ampinst(std::vector<char *> &params)
         }
         else
         {
-            for(int i = 0; i < editor::song->numInstruments(); i++)
+            unsigned char inst = patternedtr::selinstrument;
+            vtbl = editor::song->getInstrument(inst)->getVolTable();
+            entries = editor::song->getInstrument(inst)->numVolEntries();
+
+            for(int j = 0; j < entries; j++)
             {
-                vtbl = editor::song->getInstrument(i)->getVolTable();
-                entries = editor::song->getInstrument(i)->numVolEntries();
-
-                for(int j = 0; j < entries; j++)
+                out = (vtbl[j] & 0xFF00) >> 8;
+                if(out < 0xFA)
                 {
-                    out = (vtbl[j] & 0xFF00) >> 8;
-                    if(out < 0xFA)
-                    {
-                        out*=amp;
-                        outchar = out;
-                        vtbl[j] &= 0x00FF;
-                        vtbl[j] |= (outchar << 8);
-                    }
+                    out*=amp;
+                    outchar = out;
+                    vtbl[j] &= 0x00FF;
+                    vtbl[j] |= (outchar << 8);
                 }
-
             }
+
+        }
+    }
+}
+
+
+
+void editor::handle_ampinstall(std::vector<char *> &params)
+{
+    if(params.size() > 0)
+    {
+        float amp, out;
+        unsigned short *vtbl;
+        unsigned char entries;
+        unsigned short outchar;
+
+        amp = parseFloat(params.at(0));
+
+        if(amp == 1)
+            return;
+        for(int i = 0; i < editor::song->numInstruments(); i++)
+        {
+            vtbl = editor::song->getInstrument(i)->getVolTable();
+            entries = editor::song->getInstrument(i)->numVolEntries();
+
+            for(int j = 0; j < entries; j++)
+            {
+                out = (vtbl[j] & 0xFF00) >> 8;
+                if(out < 0xFA)
+                {
+                    out*=amp;
+                    outchar = out;
+                    vtbl[j] &= 0x00FF;
+                    vtbl[j] |= (outchar << 8);
+                }
+            }
+
         }
     }
 }

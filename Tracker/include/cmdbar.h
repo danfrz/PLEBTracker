@@ -176,6 +176,7 @@ Description:
     void handle_amp(std::vector<char*> &params);
     //Amplify Instrument['s VolTable entries]
     void handle_ampinst(std::vector<char *> &params);
+    void handle_ampinstall(std::vector<char *> &params);
     //Amplify region between editor::playback_mark and patternedtr::selrow
     void handle_ampmark(std::vector<char *> &params);
 
