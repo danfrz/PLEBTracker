@@ -526,9 +526,6 @@ void patternedtr::setPatternAttribs(unsigned char track, unsigned char row, unsi
     attron(A_BOLD);
 
 
-
-    
-
     if(editor::inputwin == editor::ptrnwin)
     {
         const unsigned temp = 0;
@@ -548,6 +545,7 @@ void patternedtr::setPatternAttribs(unsigned char track, unsigned char row, unsi
                 else
                 {
                     attron(COLOR_PAIR(COL_PTRN_MUTE_SU));
+                    
                 }
             }
             else
@@ -690,10 +688,11 @@ void patternedtr::displayPattern()
     {
         unsigned char xoff = 2+TRACK_WIDTH*i;
         attroff(-1);
+        attron(A_UNDERLINE);
         if(muted_tracks[viewporttrack + i])
-            mvprintw(3,xoff, "|TRACK_  __<x_|",ptrnwin);
+            mvprintw(3,xoff, "|TRACK     <X |",ptrnwin);
         else
-            mvprintw(3,xoff, "|TRACK_  __<)_|",ptrnwin);
+            mvprintw(3,xoff, "|TRACK     <) |",ptrnwin);
         name[2] = 0;
         byteString(name, viewporttrack+i);
         mvprintw(3, xoff + 7, name, ptrnwin);

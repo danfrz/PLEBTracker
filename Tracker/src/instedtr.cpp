@@ -198,7 +198,8 @@ void instedtr::displayWav()
         height = editor::WIN_HEIGHT - 3-1;
     }
 
-    mvprintw(y++, x, "|WAVE_TABLE",editor::wavewin);
+    attron(A_UNDERLINE);
+    mvprintw(y++, x, "|WAVE TABLE",editor::wavewin);
     unsigned short * wavTable = editor::song->getWaveTable();
     //Print the wave table entries
     bool emptyvisible = true;
@@ -307,8 +308,9 @@ void instedtr::displayPulse()
         x = editor::WIN_WIDTH-11;
         height = editor::WIN_HEIGHT - 3-1;
     }
+    attron(A_UNDERLINE);
 
-    mvprintw(y++, x, "|PULS_TABLE",editor::pulsewin);
+    mvprintw(y++, x, "|PULS TABLE",editor::pulsewin);
     unsigned short * pulseTable = editor::song->getPulseTable();
     //Print the wave table entries
     bool emptyvisible = true;
@@ -579,8 +581,10 @@ void instedtr::displayEnvelope()
         for(int j = y+1; j < bot; j++)
             mvprintw(j,x+11*i, "           ", editor::instwin);//11 spaces
 
+    attron(A_UNDERLINE);
     for(int i = 0; i < width; i++)
-        mvprintw(y, x+i,"-",editor::instwin);
+        mvprintw(y, x+i," ",editor::instwin);
+    attroff(A_UNDERLINE);
     y++;
     attron(A_BOLD);
     attron(COLOR_PAIR(patternedtr::COL_META_UU));
@@ -653,7 +657,8 @@ void instedtr::displayVol()
     x = 2;
     height = editor::WIN_HEIGHT - 4-1; //-1 for the header
 
-    mvprintw(y++, x, "VOL_TBLE|",editor::wavewin);
+    attron(A_UNDERLINE);
+    mvprintw(y++, x, "VOL TBLE|",editor::wavewin);
     unsigned short * volTable = editor::selinst->getVolTable();
     //Print the wave table entries
     bool emptyvisible = true;
