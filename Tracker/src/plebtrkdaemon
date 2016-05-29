@@ -2,13 +2,11 @@
 
 function stop_playback
 {
-    aplaypid=`ps | grep aplay`
-    aplaypid=${aplaypid%%p*aplay}
+    aplaypid=`ps -C aplay -o pid=`
     while [ $aplaypid ]
     do
         kill $aplaypid
-        aplaypid=`ps | grep aplay`
-        aplaypid=${aplaypid%%p*aplay}
+        aplaypid=`ps -C aplay -o pid=`
     done
 }
 
