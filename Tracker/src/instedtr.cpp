@@ -955,7 +955,7 @@ void instedtr::processInputWav(int in)
                 if(entries == 0xFFFF)
                     return;
 
-                if(isJumpFunc(song->getWaveEntry(selwavrow)))
+                if(isJumpFunc_Volatile(song->getWaveEntry(selwavrow)))
                     song->insertWaveEntry(selwavrow, 0);
                 else
                     song->insertWaveEntry(selwavrow, song->getWaveEntry(selwavrow));
@@ -1058,7 +1058,7 @@ void instedtr::processInputPulse(int in)
                 if(entries == 0xFFFF)
                     return;
 
-                if(isJumpFunc(song->getPulseEntry(selpulrow)))
+                if(isJumpFunc_Volatile(song->getPulseEntry(selpulrow)))
                     song->insertPulseEntry(selpulrow, 0);
                 else
                     song->insertPulseEntry(selpulrow, song->getPulseEntry(selpulrow));
@@ -1136,7 +1136,18 @@ void instedtr::processInputPulse(int in)
 
 }
 
-
+bool isJumpFunc(const unsigned short &wave)
+{
+    unsigned short func = (wave & 0xFF00);
+    switch(func)
+    {
+        case 0xFF00:
+        case 0xFC00:
+        case 0xFE00:
+            return true;
+    }
+    return false;
+}
 
 bool instedtr::setInstAttribs(unsigned char instrow, unsigned char instobj)
 {
@@ -1167,81 +1178,136 @@ bool instedtr::setInstAttribs(unsigned char instrow, unsigned char instobj)
 void instedtr::setVolAttribs(unsigned char volrow, unsigned char volseg)
 {
     attroff(-1);
+    unsigned short entry;
+    bool isJump;
+    if(volrow < editor::selinst->numVolEntries())
+    {
+        entry = editor::selinst->getVolEntry(volrow);
+        isJump = isJumpFunc(entry);
+    }
+    else
+        isJump = false;
+
     if(editor::inputwin == editor::volwin)
     {
         if(volrow == selvolrow)
         {
             attron(A_BOLD);
             if(volseg == selvolseg)
-                attron(COLOR_PAIR(patternedtr::COL_META_SSS));
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_SSS));
             else
-                attron(COLOR_PAIR(patternedtr::COL_META_SSU));
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_SSU));
         }
         else
+        {
             if(volrow > editor::selinst->numVolEntries())
-                attron(COLOR_PAIR(patternedtr::COL_META_UU));
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
             else
-                attron(COLOR_PAIR(patternedtr::COL_META_SU));
+                if(isJump)
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                else
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU));
+        }
     }
     else
+    {
         if(volrow == selvolrow)
-            attron(COLOR_PAIR(patternedtr::COL_META_US));
+            attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
         else
-            attron(COLOR_PAIR(patternedtr::COL_META_UU));
+        {
+            if(isJump)
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
+            else
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
+        }
+    }
 }
 
 
 void instedtr::setWaveAttribs(unsigned short waverow, unsigned char waveseg)
 {
     attroff(-1);
+    unsigned short entry;
+    bool isJump;
+    if(waverow < editor::song->numWaveEntries())
+    {
+        entry = editor::song->getWaveEntry(waverow);
+        isJump = isJumpFunc(entry);
+    }
+    else
+        isJump = false;
+
     if(editor::inputwin == editor::wavewin)
     {
         if(waverow == selwavrow)
         {
             attron(A_BOLD);
             if(waveseg == selwavseg)
-                attron(COLOR_PAIR(patternedtr::COL_META_SSS));
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_SSS));
             else
-                attron(COLOR_PAIR(patternedtr::COL_META_SSU));
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_SSU));
         }
         else
             if(waverow > editor::song->numWaveEntries())
-                attron(COLOR_PAIR(patternedtr::COL_META_US));
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
             else
-                attron(COLOR_PAIR(patternedtr::COL_META_SU));
+                if(isJump)
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                else
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU));
     }
     else
         if(waverow == selwavrow)
-            attron(COLOR_PAIR(patternedtr::COL_META_US));
+            attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
         else
-            attron(COLOR_PAIR(patternedtr::COL_META_UU));
+             if(isJump)
+            attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
+             else
+            attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
 }
 
 
 void instedtr::setPulseAttribs(unsigned short pulserow, unsigned char pulseseg)
 {
     attroff(-1);
+
+    unsigned short entry;
+    bool isJump;
+    if(pulserow < editor::song->numPulseEntries())
+    {
+        entry = editor::song->getPulseEntry(pulserow);
+        isJump = isJumpFunc(entry);
+    }
+    else
+        isJump = false;
+
     if(editor::inputwin == editor::pulsewin)
     {
         if(pulserow == selpulrow)
         {
             attron(A_BOLD);
             if(pulseseg == selpulseg)
-                attron(COLOR_PAIR(patternedtr::COL_META_SSS));
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_SSS));
             else
-                attron(COLOR_PAIR(patternedtr::COL_META_SSU));
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_SSU));
         }
         else
             if(pulserow > editor::song->numPulseEntries())
-                attron(COLOR_PAIR(patternedtr::COL_META_US));
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
             else
-                attron(COLOR_PAIR(patternedtr::COL_META_SU));
+                if(isJump)
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                else
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU));
     }
     else
         if(pulserow == selpulrow)
-            attron(COLOR_PAIR(patternedtr::COL_META_US));
+            attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
         else
-            attron(COLOR_PAIR(patternedtr::COL_META_UU));
+            if(isJump)
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
+            else
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
 }
 
 
