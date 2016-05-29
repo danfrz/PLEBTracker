@@ -399,7 +399,7 @@ void genSinePulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period
     for(i = 0; i < len; i++)
     {
         temp = fmod(phase + (tau*i)/period, tau);
-        if(temp < tau*ratio/2)
+        if(temp < M_PI*ratio)
             bfr[i] += halfamp*std::sin(temp/(ratio));
         else
             bfr[i] += halfamp*std::sin((temp-M_PI*ratio + M_PI*invratio)/(invratio));
@@ -549,7 +549,7 @@ void genSinePulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &p
         temp = fmod(phase + (tau*i)/period, tau);
         if(temp < tau*p1ratio)
         {
-            if(temp < (tau*ratio*p1ratio)/2)
+            if(temp < (M_PI*ratio*p1ratio))
                 bfr[i] += halfamp*std::sin(temp/(p1ratio*ratio));
             else
                 bfr[i] += halfamp*std::sin((temp-M_PI*p1ratio*ratio + M_PI*p1ratio*invratio)/(p1ratio*invratio));
