@@ -422,8 +422,6 @@ Square NES Pulse W
 
 \begin_layout Plain Layout
 
-\size footnotesize
-Square VTX
 \end_layout
 
 \end_inset
@@ -444,8 +442,6 @@ Square VTX
 
 \begin_layout Plain Layout
 
-\size footnotesize
-Square VTX Pulse
 \end_layout
 
 \end_inset
@@ -594,8 +590,6 @@ Square PulseH
 
 \begin_layout Plain Layout
 
-\size footnotesize
-Triangle Pulse2
 \end_layout
 
 \end_inset
@@ -616,8 +610,6 @@ Triangle Pulse2
 
 \begin_layout Plain Layout
 
-\size footnotesize
-Triangle PulseH
 \end_layout
 
 \end_inset
@@ -2390,7 +2382,7 @@ Noise0
 \begin_inset Text
 
 \begin_layout Plain Layout
-Noise1
+Noise1 
 \end_layout
 
 \end_inset
@@ -2410,7 +2402,7 @@ Noise1
 \begin_inset Text
 
 \begin_layout Plain Layout
-Noise2
+Noise2 [P1]
 \end_layout
 
 \end_inset
@@ -2430,7 +2422,7 @@ Noise2
 \begin_inset Text
 
 \begin_layout Plain Layout
-Noise3
+Noise3 [P1W]
 \end_layout
 
 \end_inset
@@ -6080,8 +6072,6 @@ The Pulse Table
 Pulse1 waveforms modulate by contracting their frequencies toward the beginning
  of pulses, leaving the rest of what the pulse would be (had it not been
  modulated), as silence.
- Imagine the example pictures are of actual sine waves.
- 
 \end_layout
 
 \begin_layout Subsubsection*
@@ -6109,12 +6099,10 @@ down-valley
 
  (or trough, whatever you want to call it) of the sound to be longer or
  shorter.
- This pulse effect pulls off a similar sound to Pulse1, but I speculate
- has additional lower frequencies.
 \end_layout
 
 \begin_layout Subsubsection*
-Sine Pulse 2 [80..C0..F0]
+Sine Pulse 2 [80..40..10]
 \end_layout
 
 \begin_layout Standard
@@ -6139,7 +6127,7 @@ PulseH, Pulse Hybrid, Combines these effects.
 \end_layout
 
 \begin_layout Subsubsection*
-Sine Pulse Hybrid 2[20..20..20] 1[FF..80..10]
+Sine Pulse Hybrid {2[20..20..20] 1[FF..80..10]}
 \end_layout
 
 \begin_layout Standard
@@ -6501,358 +6489,64 @@ name "sec:The-Wave-Parameter"
 The Wave Parameter
 \end_layout
 
+\begin_layout Paragraph*
+[Index] [Wave Name] [Description]
+\end_layout
+
 \begin_layout Paragraph
 Some waveforms utilize the wave parameter, but the effect that the wave
  parameter has on a waveform is dependant on that waveform.
  
 \end_layout
 
-\begin_layout Standard
-\begin_inset Tabular
-<lyxtabular version="3" rows="10" columns="3">
-<features rotate="0" tabularvalignment="middle">
-<column alignment="center" valignment="top">
-<column alignment="left" valignment="top">
-<column alignment="left" valignment="top">
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Index
+\begin_layout Subsection*
+[0A-0B] Square NES W:
 \end_layout
 
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Wave name
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Description
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-0A-0B
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-Square NES W
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
+\begin_layout Paragraph*
 Changes how strong the effect of making the square wave similar to a gameboy/NES
 's square.
 \end_layout
 
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-0C-0D
+\begin_layout Subsection*
+[1A-1D] N Sine W:
 \end_layout
 
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-Square VTX W
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Innefectually changes how strong the effect of making the square wave similar
- to a YM2149 square.
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-1A-1D
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-N Sine W
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
+\begin_layout Paragraph*
 N Sine duplicates a number of sine waves and shrinks them into the space
  of 1 normal sine's pulse.
  Therefore, say wave parameter was set to 2 for a normal N Sine (not pulse.)
  That sine would be effectively scaled up one octave.
 \end_layout
 
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-1E-1F
+\begin_layout Subsection*
+[1E-1F] N Half-Sine W:
 \end_layout
 
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-N Half-Sine W
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
+\begin_layout Paragraph*
 Does the same as N Sine W, but with only the top half of a sine wave in
  a sort of repeating bell shape.
 \end_layout
 
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-20-22
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
+\begin_layout Subsection*
+[20-22] Multiplexed Waves
 \size footnotesize
-Multiplexed Waves
+:
 \end_layout
 
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
+\begin_layout Paragraph*
 The wave parameter defines a ratio of phase between the two waves.
  This function also uses Wave 2 to control the ratio amplitude between the
  waves.
 \end_layout
 
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-00
+\begin_layout Subsection*
+[63] Noise 3:
 \end_layout
 
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-_
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-00
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-_
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-00
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-_
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-00
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-_
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
+\begin_layout Paragraph*
+For Noise 1 to 3, Pulse defines the seed that produces the timbre.
+ Noise 3 averages the timbre of a number of different seeds together.
 \end_layout
 
 \end_body
