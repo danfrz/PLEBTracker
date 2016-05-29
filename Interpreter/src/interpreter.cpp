@@ -973,7 +973,6 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
             seltrk->ptrnlastvol = seltrk->ptrnvol;
 
             //Handle instant effects that happen once immediately per row
-            //TODO: handle more effects
             if(row & R_EFFECTSEG) // Handle effects seperately
             {
                 //std::cerr << "Effect " << std::hex << (row & 0xFFF) << '\n';
@@ -993,12 +992,12 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                 if(_fx == 5)
                 { 
                     _fxp1 = row & R_FXPARAM;
-                    seltrk->ptbl[5] = _fxp1; //oh dear.
+                    seltrk->ptbl[5] = _fxp1;
                 }
                 else if(_fx == 6)
                 { 
                     _fxp1 = row & R_FXPARAM;
-                    seltrk->ptbl[6] = _fxp1; //oh dear.
+                    seltrk->ptbl[6] = _fxp1; 
                 }
                 else if(_fx == 8)
                 { 
@@ -1009,10 +1008,6 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                 { 
                     seltrk->wavei = row & R_FXPARAM;
                 }
-                //else if(_fx == 0xA)
-                //{ 
-                //    seltrk->pulsei = row & R_FXPARAM;
-                //}
                 else if(_fx == 0x9)
                 { 
                     seltrk->pulsei = row & R_FXPARAM;
