@@ -6,7 +6,7 @@
 #include <istream>
 #include <ostream>
 
-bool isJumpFunc(const unsigned short &wave);
+bool isJumpFunc_Volatile(const unsigned short &wave);
 const unsigned int SONGNAME_LENGTH = 29;
 
 class Song{

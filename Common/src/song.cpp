@@ -432,7 +432,9 @@ bool Song::insertWaveEntry(unsigned short index, unsigned short entry)
     return true;
 }
 
-bool isJumpFunc(const unsigned short &wave)
+//The entry is a jump function whose value might be changed
+//by the insertion or deletion of other entries.
+bool isJumpFunc_Volatile(const unsigned short &wave)
 {
     unsigned char func = (wave & 0xFF00) >> 8;
     switch(func)
@@ -485,7 +487,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
     {
         for(unsigned short i = 0; i < waveEntries; i++)
         {
-            if( isJumpFunc(waveTable[i]))//is jump, correct it
+            if( isJumpFunc_Volatile(waveTable[i]))//is jump, correct it
             {
                 jumptype = waveTable[i] & 0xFF00;
                 if( (i < waveEntries-1) && ((waveTable[i+1]&0xFF00) == jumptype))//Long jump
@@ -527,7 +529,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
     {
         for(unsigned short i = 0; i < waveEntries; i++)
         {
-            if( isJumpFunc(waveTable[i]))//is jump, correct it
+            if( isJumpFunc_Volatile(waveTable[i]))//is jump, correct it
             {
                 jumptype = waveTable[i] & 0xFF00;
             
@@ -667,7 +669,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
     {
         for(unsigned short i = 0; i < pulseEntries; i++)
         {
-            if( isJumpFunc(pulseTable[i]))//is jump, correct it
+            if( isJumpFunc_Volatile(pulseTable[i]))//is jump, correct it
             {
                 jumptype = pulseTable[i] & 0xFF00;
                 if( (i < pulseEntries-1) && ((pulseTable[i+1]&0xFF00) == jumptype))//Long jump
@@ -709,7 +711,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
     {
         for(unsigned short i = 0; i < pulseEntries; i++)
         {
-            if( isJumpFunc(pulseTable[i]))//is jump, correct it
+            if( isJumpFunc_Volatile(pulseTable[i]))//is jump, correct it
             {
                 jumptype = pulseTable[i] & 0xFF00;
             
