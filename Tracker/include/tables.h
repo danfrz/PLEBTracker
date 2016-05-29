@@ -246,13 +246,22 @@ namespace patternedtr
     //   Window Selected, Object Selected, But not the row segment
     const unsigned char
         COL_META_SSS = 1,
+        COL_META_SSS_ERR  = 21,
         COL_META_SSSE = 6,
         COL_META_SSU = 2,
         COL_META_SU  = 3,
         COL_META_US  = 4,
         COL_META_UU  = 5,
         COL_META_ERR  = 7,
-        COL_META_SSS_ERR  = 21,
+
+        COL_TABLE_SSS = 1,
+        COL_TABLE_SSU = 2,
+        COL_TABLE_SU  = 3,
+        COL_TABLE_SU_JUMP  = 29,
+        COL_TABLE_US  = 4,
+        COL_TABLE_UU  = 5,
+        COL_TABLE_UU_JUMP  = 30,
+
         COL_CMDBAR_S  = 28;
 
     const unsigned char
