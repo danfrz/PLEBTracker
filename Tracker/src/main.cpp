@@ -99,7 +99,6 @@ int main(int argc, char *argv[])
         init_pair(COL_META_US , COLOR_WHITE  , COLOR_BLUE);
         init_pair(COL_META_UU , COLOR_CYAN  , COLOR_BLACK);
 
-
         init_pair(COL_META_ERR, COLOR_MAGENTA, COLOR_BLUE);
         init_pair(COL_META_SSS_ERR, COLOR_MAGENTA, COLOR_CYAN);
 
@@ -130,6 +129,10 @@ int main(int argc, char *argv[])
         init_pair(COL_PTRN_MUTE_UU  , COLOR_BLUE, COLOR_BLACK);
 
         init_pair(COL_CMDBAR_S       , COLOR_BLACK, COLOR_WHITE);
+
+        init_pair(COL_TABLE_SU_JUMP , COLOR_GREEN  , COLOR_BLACK);
+        init_pair(COL_TABLE_UU_JUMP , COLOR_GREEN  , COLOR_BLACK);
+
 
 
     }
