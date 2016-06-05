@@ -965,7 +965,7 @@ void instedtr::processInputWav(int in)
                 else
                     song->insertWaveEntry(selwavrow, song->getWaveEntry(selwavrow));
                 return;
-            case KEY_DC: //"Delete Character"? (rolls eyes) come on guys.
+            case KEY_DC: 
                 if(selwavrow >= entries)
                     return;
                 if(entries != 0)
