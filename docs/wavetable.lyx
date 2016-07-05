@@ -1,7 +1,9 @@
-#LyX 2.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 474
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass report
 \use_default_options true
 \begin_modules
@@ -14,16 +16,16 @@ figs-within-sections
 \language_package default
 \inputencoding auto
 \fontencoding global
-\font_roman default
-\font_sans default
-\font_typewriter default
-\font_math auto
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 1
@@ -97,7 +99,7 @@ plebitp
  wavetable.
  Wave names that end in W utilize the wave parameter to change how that
  wave sounds.
- Wave names that contain Pulse[TYPE] utilize the pulse parameter to produce
+ Wave names that contain Pulse[1 or 2] utilize the pulse parameters to produce
  a pulse effect of that type.
  At the end of the Wave Index Table is some information on the pulse and
  wave parameters and how they affect the waveforms.
@@ -116,7 +118,7 @@ Wave Index Table
 \begin_layout Subsubsection*
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Basic-Waves-(00-1F)"
+name "subsec:Basic-Waves-(00-1F)"
 
 \end_inset
 
@@ -126,7 +128,7 @@ Basic Waves (00-1F)
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="8">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="left" valignment="top">
 <column alignment="left" valignment="top" width="0pt">
 <column alignment="left" valignment="top">
@@ -849,7 +851,7 @@ N Half-Sine W
 \begin_layout Subsubsection*
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Multiplexed-Waves-(20-3F)"
+name "subsec:Multiplexed-Waves-(20-3F)"
 
 \end_inset
 
@@ -859,7 +861,7 @@ Multiplexed Waves (20-3F)
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="8">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="left" valignment="top" width="0pt">
 <column alignment="center" valignment="top">
@@ -1232,7 +1234,7 @@ _
 \begin_layout Plain Layout
 
 \size footnotesize
-Last Wave
+Last Wave (not impl)
 \end_layout
 
 \end_inset
@@ -1588,7 +1590,7 @@ Untitled Section
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="8">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -2327,7 +2329,7 @@ _
 \begin_layout Subsubsection*
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Percussion-and-Noise-(60-7F)"
+name "subsec:Percussion-and-Noise-(60-7F)"
 
 \end_inset
 
@@ -2337,7 +2339,7 @@ Percussion and Noise (60-7F)
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="8">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="left" valignment="top">
 <column alignment="center" valignment="top">
@@ -3070,7 +3072,7 @@ Untitled Section
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="8">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -3813,7 +3815,7 @@ Untitled Section
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="8">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -4556,7 +4558,7 @@ Untitled Section
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="8">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="left" valignment="top">
 <column alignment="center" valignment="top">
@@ -5299,7 +5301,7 @@ Untitled Section
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="8">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="left" valignment="top">
 <column alignment="center" valignment="top">
@@ -5682,7 +5684,7 @@ Wave Functions
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="8">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -6163,7 +6165,7 @@ Entries that begin with F are functions.
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="4">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -6490,17 +6492,17 @@ The Wave Parameter
 \end_layout
 
 \begin_layout Paragraph*
-[Index] [Wave Name] [Description]
+[Index] [Wave Name] [Description] (Uses Wave parameters 1 or 2):
 \end_layout
 
 \begin_layout Paragraph
-Some waveforms utilize the wave parameter, but the effect that the wave
+Some waveforms utilize the wave parameters, but the effect that the wave
  parameter has on a waveform is dependant on that waveform.
  
 \end_layout
 
 \begin_layout Subsection*
-[0A-0B] Square NES W:
+[0A-0B] Square NES W (W1):
 \end_layout
 
 \begin_layout Paragraph*
@@ -6509,7 +6511,7 @@ Changes how strong the effect of making the square wave similar to a gameboy/NES
 \end_layout
 
 \begin_layout Subsection*
-[1A-1D] N Sine W:
+[1A-1D] N Sine W (W1):
 \end_layout
 
 \begin_layout Paragraph*
@@ -6520,18 +6522,18 @@ N Sine duplicates a number of sine waves and shrinks them into the space
 \end_layout
 
 \begin_layout Subsection*
-[1E-1F] N Half-Sine W:
+[1E-1F] N Half-Sine W (W1):
 \end_layout
 
 \begin_layout Paragraph*
-Does the same as N Sine W, but with only the top half of a sine wave in
+Does the same as N Sine W, but with only the top half of a sine wave, in
  a sort of repeating bell shape.
 \end_layout
 
 \begin_layout Subsection*
-[20-22] Multiplexed Waves
+[20-22] Multiplexed Waves (W1, W2):
 \size footnotesize
-:
+ (Wave
 \end_layout
 
 \begin_layout Paragraph*
@@ -6541,12 +6543,13 @@ The wave parameter defines a ratio of phase between the two waves.
 \end_layout
 
 \begin_layout Subsection*
-[63] Noise 3:
+[63] Noise 3 (W1):
 \end_layout
 
 \begin_layout Paragraph*
 For Noise 1 to 3, Pulse defines the seed that produces the timbre.
- Noise 3 averages the timbre of a number of different seeds together.
+ Noise 3 averages the timbre of a number of different seeds together, which
+ functions as a configurable rudimentary lo-pass filter.
 \end_layout
 
 \end_body

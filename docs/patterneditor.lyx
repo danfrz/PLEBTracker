@@ -1,7 +1,9 @@
-#LyX 2.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 474
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass report
 \use_default_options true
 \begin_modules
@@ -14,16 +16,16 @@ figs-within-sections
 \language_package default
 \inputencoding auto
 \fontencoding global
-\font_roman default
-\font_sans default
-\font_typewriter default
-\font_math auto
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -198,8 +200,47 @@ The instrument can not be set to an instrument that does not yet exist,
 \begin_layout Paragraph*
 When the instrument for an entry within a track is set, the instrument is
  played.
- This means that the volume envelope begins again and the wave and pulse
- indicies are (re)set according to this instrument's fields.
+ This means that the volume envelope begins again at the first index, and
+ the wave and pulse indicies are (re)set according to this instrument's
+ fields.
+\end_layout
+
+\begin_layout Paragraph*
+If the pulse index for an instrument is set to [____], (by pressing Space
+ or Del when editing an instrument's pulse index) then the iteration of
+ the pulse table will continue uninterrupted when this instrument played.
+ Therefore if you have an instrument that starts a loop in the pulse table,
+ then you want to use this instrument, the previous instrument's pulse iteration
+ will continue unaffected, which may have desired or undesired effects.
+ It's good practice to have:
+\end_layout
+
+\begin_layout Paragraph*
+\begin_inset Formula $\begin{array}{cc}
+00| & 0000\\
+01| & FF00
+\end{array}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph*
+at the top of the pulse table for instruments that don't want to change
+ the pulse parameter.
+\end_layout
+
+\begin_layout Paragraph*
+If the FA function for the wave table is used for an instrument, and then
+ another instrument is played, the Wave Repeat parameter is unset before
+ processing the next instrument's parameters.
+ This is to avoid having to annoyingly unset the repeat parameter every
+ time you have an instrument that doesn't need it.
+ The FA function in the pulse table does the same thing, but it 
+\shape italic
+doesn't
+\shape default
+ reset if the new instrument's pulse parameter is set to [____].
 \end_layout
 
 \begin_layout Subsection*
@@ -221,9 +262,9 @@ The range of volume that is possible to be enterred within the pattern editor
  3F is full volume and 00 is silent.
  If a sound must be louder, consider increasing the volume of the instrument
  (in the instrument's Volume Table, TAB + a) and lowering the volume of
- uses of that instrument elsewhere in the song.
- Or create a copy of that instrument at a higher volume and use that instrument
- when you need a louder version of the original.
+ that instrument within the song's patterns where appropriate.
+ Another solution is to create a copy of that instrument at a higher volume
+ and use that instrument when you need a louder version of the original.
 \end_layout
 
 \begin_layout Section*
@@ -263,7 +304,7 @@ Per-segment effects [S] continue to be applied throughout the row that it
 \begin_layout Paragraph*
 \begin_inset Tabular
 <lyxtabular version="3" rows="16" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="right" valignment="top">
 <column alignment="left" valignment="top">
 <row>
