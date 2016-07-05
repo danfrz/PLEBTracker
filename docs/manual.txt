@@ -109,6 +109,7 @@ structures:
   forever, producing a Tremor effect
 
   FA to FF are reserved for functions,
+  |FA XX| is Set Repeat, following volume entries will be repeated XX times before iterating
   |FB XX| is Set loop counter
   |FC XX| is Decrement loop counter, then jump if loop counter isn't 0
   |FF XX| is Jump
@@ -130,7 +131,7 @@ structures:
 
   --Waveforms
   00 - Silence
-  01 - Square (1/2 duty)
+  01 - Square (normal square)
   02 - Triangle
   03 - Saw
   04 - Sine
@@ -138,20 +139,20 @@ structures:
 
   06 - Square (with duty)
 
-    These are the basic waveforms, as of now there are over 32 waveforms
-    all of which are detailed in the wavetable.svg vector graphic.
-
+    These are the basic waveforms, as of now there are around 32 waveforms
+    all of which are detailed in the wavetable.pdf document.
 The wave table also has functions:
-  FF - Jump
+  |FF XX| - Jump
 
-  FB - Set loop counter
-  FC - Decrease loop counter, jump to location if loop counter != 0
+  |FA XX| - Set Repeat, following wave entries will be repeated XX times before iterating
+  |FB XX| - Set loop counter
+  |FC XX| - Decrease loop counter, jump to location if loop counter != 0
 
-  FD - Set custom jump location
-  FE - Jump to custom jump location
+  |FD XX| - Set custom jump location
+  |FE XX| - Jump to custom jump location
 
-  F0 - Set pulse/duty cycle
-  F1 - Add to pulse/duty cycle
+  |F0 XX| - Set pulse/duty cycle
+  |F1 XX| - Add to pulse/duty cycle
 
   Note, that the wave table has 0x10000 indicies and the jump command
   only goes from 00 to FF. To work around that, two adjacent FF or FD commands
@@ -188,8 +189,10 @@ The wave table also has functions:
   infinite loop that will freeze or crash the interpreter.
   As long as a waveform is played, the wavetable won't get stuck.
 
-  This is no longer entirely true. Now instead of an infinite loop, if the interpreter goes through
-  upwards of some amount of jumps (30?) it will give up and choose waveform 0, silence.
+  !] This is no longer entirely true. Now instead of an infinite loop, if the interpreter goes through
+  upwards of some amount of jumps (64 wave function calls) it will give up and choose waveform 0, silence.
+
+the [>] in these examples shows where the instrument enters the wave table
 
  >|0003|01 03| //Is safe
   |0004|FF 03|
@@ -201,7 +204,7 @@ The wave table also has functions:
 
   |0001|01 00| //Is safe, but weird.
   |0002|FE 00|
- >|0003|FD 00|
+ >|0003|FD 01|
   |0004|FF 01|
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -209,7 +212,7 @@ The wave table also has functions:
   The pulse table modifies how waves that use the pulse parameter sound.
 
   The pulse table works a little bit differently than the wave table.
-  Entries that begni with...
+  Entries that begin with...
    [0 to 6] ADD to the pulse parameter.
    [7 to D] SUBTRACT fom the pulse parameter.
    [E]      Set the pulse parameter.
@@ -218,21 +221,29 @@ The wave table also has functions:
         vv vv  
   |0000|XX XX|
 
-Each track has a pulse parameter and it is the size of a 16 bit integer [0000 to FFFF]
+Each track has two pulse parameters and they are the size of 16 bit integers [0000 to FFFF]
 so for instance if you were to do
 
-  |0000|E0 01| //Pulse param= 0010
+  |0000|E0 01| //then Pulse param 1 = 0010
   |0001|FB 0F| //Set loop counter to F 
   |0002|10 00| //Add 1000
   |0003|FC 02| //Jump to 2, adding 1000 until loop counter is 0
-               //Pulse param= F010
+               //Pulse param 1 = F010
 
-  Really, the best way to do subtraction is to write in what number you want to be negative
+  Really, the best way to do pulse subtraction is to write in what number you want to be negative
   then press N. The number will be negated for you.
-  BUT if you like making things harder for yourself know that DFFF = -1 and D000 = -1000
+  BUT if you like making things harder for yourself, know that DFFF = -1 and D000 = -1000
 
+The pulse table has the same jump functions as the wave table.
 
-
+  |F0 XX| - Set Pulse Parameter 2 
+  |F1 XX| - Add/Subtract Pulse Parameter 2 [00-7F/80-FF]
+  |FA XX| - Set Pulse Repeat
+  |FB XX| - Set Pulse loop Counter
+  |FC XX| - Decrement Pulse loop counter, Jump to destination if it's > 0
+  |FD XX| - Set custom jump location
+  |FE XX| - Jump to custom jump location (offset by XX)
+  |FF XX| - Jump to XX
 
 
 
