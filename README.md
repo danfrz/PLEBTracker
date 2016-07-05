@@ -8,11 +8,11 @@ and wanted to implement what I've been learning by using other trackers and stud
 With this program, like other trackers, you can compose music (.plb modules) and listen to them.
 All of the sounds produced in this tracker are synthesized, meaning there are no samples.
 
-##Requirements
-   ncurses     (ncurses)         --Interface                                                     
-   aplay       (alsa-utils)      --Playback                                                      
-   inotifywait (inotify-tools)   --Detecting changes to playback file for playback within tracker
-   sudo        (sudo)            --Used in installation script                                   
+##Requirements program (package)
+   ncurses     (ncurses)                                                             
+   aplay       (alsa-utils)                                                        
+   inotifywait (inotify-tools)   
+   sudo        (sudo)                                           
 
 ##Installation
 Clone this project from git
