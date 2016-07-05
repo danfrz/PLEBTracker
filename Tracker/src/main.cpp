@@ -84,7 +84,10 @@ int main(int argc, char *argv[])
     noecho();
 
     clear();
-    printw("Welcome to PLEBTracker!  [Press any key to continue]  20160114-20160414");
+    printw("Welcome to PLEBTracker!  [Press any key to continue]  20160114-20160705\n\n");
+    printw("To view logs produced by plebtrk see\n");
+    printw("    /var/tmp/plebtrk/trklog.log and\n");
+    printw("    /var/tmp/plebtrk/itplog.log");
     curs_set(0);
     getch();
     clear();
