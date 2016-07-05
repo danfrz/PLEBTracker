@@ -9,11 +9,11 @@ With this program, like other trackers, you can compose music (.plb modules) and
 All of the sounds produced in this tracker are synthesized, meaning there are no samples.
 
 ##Requirements
-   program...  (package...)
-   ncurses     (ncurses)                                                             
-   aplay       (alsa-utils)                                                        
-   inotifywait (inotify-tools)   
-   sudo        (sudo)                                           
+   program...  (package...)   
+   ncurses     (ncurses)      
+   aplay       (alsa-utils)   
+   inotifywait (inotify-tools)
+   sudo        (sudo)         
 
 ##Installation
 Clone this project from git
