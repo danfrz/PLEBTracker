@@ -1001,3 +1001,27 @@ void genMuxSwap2(unsigned char *bfr, unsigned char *ptbl, const float &period, c
     GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
 
 }
+
+void genBMrecurse(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len, int depth)
+{
+    if(period == 0 || amplitude == 0)
+        return;
+    float start_phase = phase/pow(2,depth);
+    genTri(bfr, ptbl, period, amplitude, phase, len);
+    float end_phase = phase;
+    
+    if(depth < ptbl[PARAM_WAVE1])
+        genBMrecurse(bfr, ptbl, period/2.0, amplitude/2.0, start_phase, len, depth+1);
+
+    if(depth == 0)
+        phase = end_phase;
+}
+
+void genBlacmange(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+{
+    if(period == 0 || amplitude == 0)
+        return;
+    
+    genBMrecurse(bfr,ptbl,period,amplitude,phase,len, 0);
+}
+

@@ -126,5 +126,6 @@ void genMuxShared(unsigned char *bfr, unsigned char *ptbl, const float &period, 
 void genMuxSwap(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 void genMuxSwap2(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 
+void genBlacmange(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 
 #endif
