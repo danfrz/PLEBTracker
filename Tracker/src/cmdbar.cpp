@@ -1482,7 +1482,7 @@ void editor::handle_trans(std::vector<char*> &params)
             for(int i = 0; i < len; i++)
             {
                 entry = patternedtr::selptrn->at(trkbegin+j, begin+i);
-                if((entry & R_FULLSEG) != R_FULLSEG)
+                if((entry & R_PITCHSEG) != R_PITCHSEG)
                 {
                     note = (entry & R_PITCHSEG);
                     std::cerr << "semitones " << (int)semitones << '\n';;
@@ -1654,7 +1654,7 @@ void editor::handle_transkey(std::vector<char*> &params)
             for(int i = 0; i < len; i++)
             {
                 entry = patternedtr::selptrn->at(trkbegin+j, begin+i);
-                if((entry & R_FULLSEG) != R_FULLSEG)
+                if((entry & R_PITCHSEG) != R_PITCHSEG)
                 {
                     note = (entry & R_PITCHSEG);
                     if(semitones != 0)
