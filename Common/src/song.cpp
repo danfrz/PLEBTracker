@@ -120,7 +120,6 @@ std::istream &Song::input(std::istream &in)
     in.read((char*)waveTable, waveEntries*sizeof(short));
     for(int i = waveEntries; i < 256; i++)
         waveTable[i] = 0;
-
     
     in.read((char*)&pulseEntries, sizeof(short));
     in.read((char*)pulseTable, pulseEntries*sizeof(short));
@@ -149,11 +148,13 @@ void Song::copyCommutable(Song *other)
 {
     unsigned short *otrwavebl = other->getWaveTable();
     for(int i = 0; i < waveEntries; i++)
-        other->insertWaveEntry(i,waveTable[i]);
+        other->setWaveEntry(i,waveTable[i]);
+    other->waveEntries = waveEntries;
 
     unsigned short *otrpulsebl = other->getPulseTable();
     for(int i = 0; i < pulseEntries; i++)
-        other->insertPulseEntry(i,pulseTable[i]);
+        other->setPulseEntry(i,pulseTable[i]);
+    other->pulseEntries = pulseEntries;
 
     other->setInterRowResolution(interrow_resolution);
     other->setBytesPerRow(bytes_per_row);
@@ -570,7 +571,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
             for(int row = 0; row < p->numRows(); row++)
             {
                 unsigned int entry = p->at(trk,row);
-                if((entry & 0xF00) == 0x900)
+                if((entry & 0xF00) == 0x700)
                 {
                     unsigned char wavejump = entry & 0xFF;
 
@@ -752,7 +753,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
             for(int row = 0; row < p->numRows(); row++)
             {
                 unsigned int entry = p->at(trk,row);
-                if((entry & 0xF00) == 0xC00)
+                if((entry & 0xF00) == 0x900)
                 {
                     unsigned char plsjump = entry & 0xFF;
 
