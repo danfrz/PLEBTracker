@@ -795,6 +795,13 @@ void itrp::initializeWaveTable()
     generators[0x20] = genMuxShared;
     generators[0x21] = genMuxSwap;
     generators[0x22] = genMuxSwap2;
+    generators[0x23] = genMuxPCTRL;
+    generators[0x24] = genMuxP2CTRL;
+    generators[0x25] = genMuxHPCTRL;
+
+
+    generators[0x31] = genWavePiecewise;
+    generators[0x32] = genWavePiecewisePCTRL;
 
 
     //PERCUSSION
@@ -1043,6 +1050,13 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                 else if(_fx == 0x9)
                 { 
                     seltrk->pulsei = row & R_FXPARAM;
+                }
+                else if(_fx == 0xC)
+                {
+                    seltrk->voli = row & R_FXPARAM;
+                    if(seltrk->voli >= seltrk->inst->numVolEntries())
+                        seltrk->voli = seltrk->inst->numVolEntries()-1;
+                    seltrk->volduracc = 0;
                 }
 
             }
