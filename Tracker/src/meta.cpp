@@ -489,7 +489,7 @@ void patternedtr::displayMeta()
     //print order //two char hex
     mvprintw(1, 38," STEP:", metawin);
     mvprintw(1, 45, "  OCT :", metawin);
-    mvprintw(1, 53, "  BEAT:_", metawin);
+    mvprintw(1, 53, "   BEAT:_", metawin);
     //print octave //one char hex
 
     //Instrument name
@@ -540,17 +540,17 @@ void patternedtr::displayMeta()
     if(isselected && metaobjedit)
     {
         byteString(charBuffer, numBuffer);
-        mvprintw(1, 60, charBuffer+1);
+        mvprintw(1, 61, charBuffer+1);
     }
     else
     {
         if(patternedtr::row_underline > 0)
         {
             editor::byteString(charBuffer, patternedtr::row_underline);
-            mvprintw(1, 60, charBuffer+1);
+            mvprintw(1, 61, charBuffer+1);
         }
         else if(isselected)
-            mvprintw(1, 60, "_");
+            mvprintw(1, 61, "_");
     }
 
     //////////////////////////////////////////////
@@ -560,7 +560,7 @@ void patternedtr::displayMeta()
     //////////////////////////////////////////////
 
     attroff(-1);
-    mvprintw(2, 0, "ORDER [  -  ] [v^ NCX v^ NCWX]                         KEY :__ [v^]", metawin);
+    mvprintw(2, 0, "ORDER [  -  ] [v^ NCX v^ NCWX]                 KEY :__  [v^]", metawin);
 
     //Order
     isselected = setMetaAttribs(0,2);
@@ -620,39 +620,39 @@ void patternedtr::displayMeta()
     if(isselected && metaobjedit)
     {
         getKeyChar(charBuffer, numBuffer);
-        mvprintw(2, 60, charBuffer);
+        mvprintw(2, 60-8, charBuffer);
     }
     else
         if(patternedtr::key != 0xFF || isselected)
         {
             getKeyChar(charBuffer, patternedtr::key);
-            mvprintw(2, 60, charBuffer);
+            mvprintw(2, 60-8, charBuffer);
         }
     //Up Key
     setMetaAttribs(14, 2);
-    mvprintw(2,64,"v",metawin);
+    mvprintw(2,64-7,"v",metawin);
 
     //Down Key
     setMetaAttribs(15, 2);
-    mvprintw(2,65,"^",metawin);
+    mvprintw(2,65-7,"^",metawin);
 
     //Print Scale
     isselected = setMetaAttribs(16, 2);
     if(isselected && metaobjedit)
     {
         getScale_Sel(charBuffer, patternedtr::scaleconst);
-        mvprintw(2,68, charBuffer, metawin);
+        mvprintw(2,68-7, charBuffer, metawin);
 
         attron(COLOR_PAIR(COL_META_UU));
         char sel[2];
         sel[0] = charBuffer[textCursorPos];
         sel[1] = 0;
-        mvprintw(2, 68 + textCursorPos, sel, metawin);
+        mvprintw(2, 68 -7+ textCursorPos, sel, metawin);
     }
     else
     {
         getScale_Unsel(charBuffer, patternedtr::scalespinner, patternedtr::scaleconst);
-        mvprintw(2,68, charBuffer, metawin);
+        mvprintw(2,68-7, charBuffer, metawin);
 
     }
 
@@ -1742,8 +1742,6 @@ void patternedtr::chgSelOrder(int i)
         else
             selorder = 0;
     }
-    if(i!= 0)
-        editor::playback_mark = 0xFF;
     selptrn = editor::song->getPattern(editor::song->getPatternIndexByOrder(selorder));
 }
 
