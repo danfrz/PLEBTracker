@@ -125,7 +125,12 @@ void genBongo(unsigned char *bfr, unsigned char *ptbl, const float &period, cons
 void genMuxShared(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 void genMuxSwap(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 void genMuxSwap2(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genMuxPCTRL(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genMuxP2CTRL(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genMuxHPCTRL(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 
+void genWavePiecewise(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genWavePiecewisePCTRL(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
 void genBlacmange(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
 
 #endif
