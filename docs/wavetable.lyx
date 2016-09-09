@@ -851,11 +851,11 @@ N Half-Sine W
 \begin_layout Subsubsection*
 \begin_inset CommandInset label
 LatexCommand label
-name "subsec:Multiplexed-Waves-(20-3F)"
+name "subsec:Specialized-Waves-(20-3F)"
 
 \end_inset
 
-Multiplexed Waves (20-3F)
+Specialized Waves (20-3F)
 \end_layout
 
 \begin_layout Standard
@@ -953,6 +953,8 @@ Mux Wave (Swap2)
 
 \begin_layout Plain Layout
 
+\size footnotesize
+Mux Wave Pulse Control
 \end_layout
 
 \end_inset
@@ -975,6 +977,8 @@ Mux Wave (Swap2)
 
 \begin_layout Plain Layout
 
+\size footnotesize
+Mux Wave Pulse2 Control
 \end_layout
 
 \end_inset
@@ -995,6 +999,8 @@ Mux Wave (Swap2)
 
 \begin_layout Plain Layout
 
+\size footnotesize
+Mux Wave HPulse Control
 \end_layout
 
 \end_inset
@@ -1015,6 +1021,8 @@ Mux Wave (Swap2)
 
 \begin_layout Plain Layout
 
+\size footnotesize
+_
 \end_layout
 
 \end_inset
@@ -1035,6 +1043,8 @@ Mux Wave (Swap2)
 
 \begin_layout Plain Layout
 
+\size footnotesize
+_
 \end_layout
 
 \end_inset
@@ -1057,6 +1067,8 @@ Mux Wave (Swap2)
 
 \begin_layout Plain Layout
 
+\size footnotesize
+_
 \end_layout
 
 \end_inset
@@ -1077,6 +1089,8 @@ Mux Wave (Swap2)
 
 \begin_layout Plain Layout
 
+\size footnotesize
+_
 \end_layout
 
 \end_inset
@@ -1254,9 +1268,7 @@ Last Wave (not impl)
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\size footnotesize
-_
+Wave Piecewise
 \end_layout
 
 \end_inset
@@ -1276,9 +1288,7 @@ _
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\size footnotesize
-_
+Wave Piecewise PCTRL
 \end_layout
 
 \end_inset
@@ -6531,15 +6541,43 @@ Does the same as N Sine W, but with only the top half of a sine wave, in
 \end_layout
 
 \begin_layout Subsection*
-[20-22] Multiplexed Waves (W1, W2):
+[20-25] Multiplexed Waves (W1, W2):
 \size footnotesize
  (Wave
 \end_layout
 
 \begin_layout Paragraph*
-The wave parameter defines a ratio of phase between the two waves.
- This function also uses Wave 2 to control the ratio amplitude between the
- waves.
+Multiplexed waves have to parameters: the ratio of phase between the multiplexed
+ waves, and the ratio of amplitude between them.
+\end_layout
+
+\begin_layout Paragraph*
+20's, 21's, and 22's multiplex effect parameters are bound to the wave parameter
+s.
+ For these, Wave 1 defines the ratio of phase between the two waves.
+ Wave 2 controls the ratio of amplitude between the waves.
+\end_layout
+
+\begin_layout Paragraph*
+23, 24, and 25 all have different ways of interacting with the multiplex
+ effect parameters.
+\end_layout
+
+\begin_layout Paragraph*
+23 uses Pulse1 as the ratio of phase between the waves.
+ Wave 1 controls ratio of amplitude.
+\end_layout
+
+\begin_layout Paragraph*
+24 uses Pulse2 as the ratio of phase between waves, this one is the most
+ useful because you can still use Pulse1 without changing the multiplexer
+ effects.
+ Wave 1 controls ratio of amplitude.
+\end_layout
+
+\begin_layout Paragraph*
+25 uses Pulse1 as the ratio of phase between waves and Pulse2 as the ratio
+ of amplitude.
 \end_layout
 
 \begin_layout Subsection*
