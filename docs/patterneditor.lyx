@@ -110,6 +110,18 @@ The pattern editor is the window in the center of the terminal when you
 Within a track there are 4 fields to edit.
 \end_layout
 
+\begin_layout Paragraph*
+An entry in a track may look like this: ||C-4 00 
+\color green
+3F
+\color inherit
+ 
+\color orange
+204
+\color inherit
+||
+\end_layout
+
 \begin_layout Enumerate
 Note [C-4], A musical note, and its octave.
 \end_layout
@@ -119,11 +131,20 @@ Instrument [00], Which instrument to play from the instrument list.
 \end_layout
 
 \begin_layout Enumerate
-Volume [3F], How loud this instrument should be playing on this note.
+Volume [
+\color green
+3F
+\color inherit
+], How loud this instrument should be playing on this note.
 \end_layout
 
 \begin_layout Enumerate
-Effect [204], Does any number of things.
+Effect [
+\color orange
+204
+\color inherit
+], Does any number of things.
+ See the section titled Effects.
 \end_layout
 
 \begin_layout Subsection*
@@ -132,11 +153,11 @@ Notes
 
 \begin_layout Paragraph*
 The first field in a track is the note and octave.
- || [[
+ || 
 \bar under
 C-2
 \bar default
-]] 00 3F 444 ||
+ 00 3F 444 ||
 \end_layout
 
 \begin_layout Paragraph*
@@ -184,11 +205,11 @@ Instrument
 
 \begin_layout Paragraph*
 The second field in a track is the Instrument.
- ||C-2 [[
+ ||C-2 
 \bar under
 00
 \bar default
-]] 3F 444||
+ 3F 444||
 \end_layout
 
 \begin_layout Paragraph*
@@ -231,7 +252,7 @@ at the top of the pulse table for instruments that don't want to change
 \end_layout
 
 \begin_layout Paragraph*
-If the FA function for the wave table is used for an instrument, and then
+If the FA function in the wave table is used for an instrument, and then
  another instrument is played, the Wave Repeat parameter is unset before
  processing the next instrument's parameters.
  This is to avoid having to annoyingly unset the repeat parameter every
@@ -249,11 +270,11 @@ Volume
 
 \begin_layout Paragraph*
 The third field in a track is the Volume.
- ||C-2 00 [[
+ ||C-2 00 
 \bar under
 3F
 \bar default
-]] 444||
+ 444||
 \end_layout
 
 \begin_layout Paragraph*
@@ -279,11 +300,11 @@ Effects
 
 \begin_layout Paragraph*
 The fourth field in a track is the Effect.
- ||C-2 00 3F [[
+ ||C-2 00 3F 
 \bar under
 444
 \bar default
-]] ||
+ ||
 \end_layout
 
 \begin_layout Paragraph*
@@ -552,7 +573,7 @@ Volume slide down by rate (XX+FF)/FF
 \begin_inset Text
 
 \begin_layout Plain Layout
-C__ [_]
+CXX [R]
 \end_layout
 
 \end_inset
@@ -561,7 +582,7 @@ C__ [_]
 \begin_inset Text
 
 \begin_layout Plain Layout
-Undefined
+Set volume index of track to XX
 \end_layout
 
 \end_inset
@@ -771,7 +792,7 @@ Sets the operating position in the wave table to XX.
  with this effect.
  If this actually becomes a problem, you could insert some jumps within
  the wavetable and point to those jumps.
- Not ideal, but this is more or less a convenience function.
+ Not ideal, but 7xx is more or less a convenience function.
 \end_layout
 
 \begin_layout Subsection*
@@ -843,7 +864,15 @@ The volume is decreased by a rate of
 \end_layout
 
 \begin_layout Subsection*
-C__ Undefined
+Cxx Set Volume Index
+\end_layout
+
+\begin_layout Paragraph*
+Sets the current volume index of the track to xx.
+ The Volume index is the index that points to an entry in the volume table
+ of the selected instrument.
+ If the index provided exceeds the length of the volume table of this instrument
+, the index is set to the last index of the table.
 \end_layout
 
 \begin_layout Subsection*
