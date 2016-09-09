@@ -779,6 +779,50 @@ void genNHalfSinePulse(unsigned char *bfr, unsigned char *ptbl,  const float &pe
 }
 
 
+void genWavePiecewise(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+{
+    //Wave1 controls amplitude of %3==1
+    //Wave2 controls amplitude of %3==2
+    char * tempbfr = new char[len];
+    for(int i = 0; i < len; i++)
+        tempbfr[i] = 0;
+
+    GEN_MUX1((unsigned char*)tempbfr, ptbl, period, amplitude, phase, len);
+
+    for(int i = 0; i < len; i++)
+    {
+        if((i%3)==1)
+            tempbfr[i] *= ptbl[PARAM_WAVE1] / 255.0;
+        else if((i%3)==2)
+            tempbfr[i] *= ptbl[PARAM_WAVE2] / 255.0;
+        bfr[i] += tempbfr[i];
+    }
+
+    delete [] tempbfr;
+}
+
+void genWavePiecewisePCTRL(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len)
+{
+    //Wave1 controls amplitude of %3==1
+    //Wave2 controls amplitude of %3==2
+    char * tempbfr = new char[len];
+    for(int i = 0; i < len; i++)
+        tempbfr[i] = 0;
+
+    GEN_MUX1((unsigned char*)tempbfr, ptbl, period, amplitude, phase, len);
+
+    for(int i = 0; i < len; i++)
+    {
+        if((i%6)==0)
+            tempbfr[i] *= (((unsigned short*)ptbl)[PARAM_PULSE]) / (float)0xFFFF;
+        else if((i%6)==3)
+            tempbfr[i] *= (((unsigned short*)ptbl)[PARAM_PULSE2]) / (float)0xFFFF;
+        bfr[i] += tempbfr[i];
+    }
+
+    delete [] tempbfr;
+}
+
 void genSilence(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &height, float &phase, const unsigned long &len)
 {
     return;
@@ -976,6 +1020,7 @@ void genMuxShared(unsigned char *bfr, unsigned char *ptbl, const float &period, 
     float phase2 = phase + diff;
     GEN_MUX1(bfr, ptbl, period, height*ampratio, phase, len);
     GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
+    //phase = phase2-diff;
 
 }
 
@@ -988,8 +1033,8 @@ void genMuxSwap(unsigned char *bfr, unsigned char *ptbl, const float &period, co
     swapPulseParams(ptbl);
     GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
     swapPulseParams(ptbl);
-
 }
+
 void genMuxSwap2(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len)
 {
     float diff = (ptbl[PARAM_WAVE1]/255.0) * period;
@@ -1001,6 +1046,32 @@ void genMuxSwap2(unsigned char *bfr, unsigned char *ptbl, const float &period, c
     GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
 
 }
+
+void genMuxPCTRL(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len)
+{
+    float diff = ((((unsigned short*)ptbl)[PARAM_PULSE])/(float)0xFFFF) * period;
+    float ampratio = (ptbl[PARAM_WAVE1]/255.0);
+    float phase2 = phase + diff;
+    GEN_MUX1(bfr, ptbl, period, height*ampratio, phase, len);
+    GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
+}
+void genMuxP2CTRL(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len)
+{
+    float diff = ((((unsigned short*)ptbl)[PARAM_PULSE2])/(float)0xFFFF) * period;
+    float ampratio = (ptbl[PARAM_WAVE1]/255.0);
+    float phase2 = phase + diff;
+    GEN_MUX1(bfr, ptbl, period, height*ampratio, phase, len);
+    GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
+}
+void genMuxHPCTRL(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len)
+{
+    float diff = ((((unsigned short*)ptbl)[PARAM_PULSE])/(float)0xFFFF) * period;
+    float ampratio = ((((unsigned short*)ptbl)[PARAM_PULSE2])/(float)0xFFFF);
+    float phase2 = phase + diff;
+    GEN_MUX1(bfr, ptbl, period, height*ampratio, phase, len);
+    GEN_MUX2(bfr, ptbl, period, height*(1.0-ampratio), phase2, len);
+}
+
 
 void genBMrecurse(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len, int depth)
 {
