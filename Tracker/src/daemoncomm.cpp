@@ -147,14 +147,27 @@ void editor::renderSong()
 //Refreshes the muted tracks with the plebtrkdaemon
 void editor::refreshMutedTracks()
 {
+    bool anymuted = false;
+    for(int i = 0; !anymuted && i < editor::song->numTracks(); i++)
+        anymuted = editor::muted_tracks[i];
+
+    
+
     std::ofstream signal(signalpath, std::ofstream::out | std::ofstream::app);
     if(signal.is_open())
     {
-        signal << "mute " << " ";
-        for(int i = 0; i < editor::song->numTracks(); i++)
+        if(!anymuted)
         {
-            if(editor::muted_tracks[i])
-                signal << i << ',';
+            signal << "unmute ";
+        }
+        else
+        {
+            signal << "mute ";
+            for(int i = 0; i < editor::song->numTracks(); i++)
+            {
+                if(editor::muted_tracks[i])
+                    signal << i << ',';
+            }
         }
 
         signal << "\n";
