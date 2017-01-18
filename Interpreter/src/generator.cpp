@@ -317,15 +317,6 @@ void genTriPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, 
         {
             ptbl[PARAM_LAST] = amplitude*ratio*(fourthprd/ratio - std::abs(halfprd/ratio-ovr))/halfprd;
         }
-        else
-        {
-            if(std::abs(char(ptbl[PARAM_LAST]) - halfamp) > 3)
-            {
-                int interp = (3*int((char)ptbl[PARAM_LAST]) - halfamp) / 4;
-                ptbl[PARAM_LAST] = interp;
-
-            }
-        }
         bfr[i] += ptbl[PARAM_LAST];
     }
 
