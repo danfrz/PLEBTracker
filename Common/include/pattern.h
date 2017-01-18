@@ -6,6 +6,7 @@
 
 //twelvth root of 2
 #define NOTEMULT 1.05946309435929526456f
+#define CHROMATIC_NOTES 12
 //more or less arbitrary
 //44100 (hz) / 10
 #define BASEFRQ 4410.0f
