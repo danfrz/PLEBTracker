@@ -27,7 +27,6 @@ void patternedtr::chgSelMetaObj(int i)
             //        selobjmeta = META_ROW2_DEPTH + editor::song->numOrders()-1;
             //    else
             //        selobjmeta = 0;
-            //Third row [ORDER PATTERN v ^ N C X v ^ N C Q X]        
             if(selobjmeta > META_ROW2_DEPTH)
                 if(i > 0)
                     selobjmeta = META_ROW2_DEPTH;
@@ -128,7 +127,7 @@ void patternedtr::getScale_Sel(char *bfr, unsigned char *scale)
     int i;
     
 
-    for(i = 0; i < 11 && acc < 12; i++)
+    for(i = 0; i < CHROMATIC_NOTES-1 && acc < CHROMATIC_NOTES; i++)
     {
         acc += scale[i];
         bfr[i] = ('0' + scale[i]);
@@ -136,15 +135,15 @@ void patternedtr::getScale_Sel(char *bfr, unsigned char *scale)
 
     scale[i] = 0;
 
-    for(i; i < 11; i++)
+    for(i; i < CHROMATIC_NOTES-1; i++)
         bfr[i] = ' ';
-    bfr[11] = 0;
+    bfr[CHROMATIC_NOTES-1] = 0;
 }
 
 void patternedtr::getScale_Unsel(char *bfr, unsigned char scalespnr, unsigned char *scale)
 {
     int acc = 0;
-    for(int i = 0; i < 11; i++)
+    for(int i = 0; i < CHROMATIC_NOTES-1; i++)
         bfr[i] = ' ';
     switch(scalespnr)
     {
@@ -192,7 +191,7 @@ void patternedtr::getScale_Unsel(char *bfr, unsigned char scalespnr, unsigned ch
         default:
             getScale_Sel(bfr, scale);
     }
-    bfr[11] = 0;
+    bfr[CHROMATIC_NOTES-1] = 0;
 }
 
 
@@ -203,7 +202,7 @@ unsigned char patternedtr::inferScaleType(unsigned char *scale)
     char * scaleascii = (char *)scale;
     unsigned char out = 0xFF;
     //convert to ascii in order to use strcmp
-    for(int i = 0; i < 11; i++)
+    for(int i = 0; i < CHROMATIC_NOTES-1; i++)
     {
         if(scale[i] != 0)
             scale[i] += '0';
@@ -232,7 +231,7 @@ unsigned char patternedtr::inferScaleType(unsigned char *scale)
     else if(strcmp(scaleascii, "1221222") == 0) //LOCRIAN
         out = SCALE_LOCRIAN;
 
-    for(int i = 0; i < 11; i++)
+    for(int i = 0; i < CHROMATIC_NOTES-1; i++)
     {
         if(scale[i] != 0)
             scale[i] -= '0';
@@ -249,7 +248,7 @@ void patternedtr::generateScaleFromType(unsigned char *scale, unsigned char scal
     switch(scalespnr)
     {
         case SCALE_CHROMATIC:
-            for(int i = 0; i < 11; i++)
+            for(int i = 0; i < CHROMATIC_NOTES-1; i++)
                 scale[i]='1';
             break;
         case SCALE_MAJOR:
@@ -281,9 +280,9 @@ void patternedtr::generateScaleFromType(unsigned char *scale, unsigned char scal
             break;
     }
     int i;
-    for(i = 0; i < 11 && scale[i] != 0; i++)
+    for(i = 0; i < CHROMATIC_NOTES && scale[i] != 0; i++)
         scale[i] -= '0';
-    for(; i < 12; i++)
+    for(; i < CHROMATIC_NOTES; i++)
         scale[i] = 0;
 
 }
@@ -344,12 +343,14 @@ void patternedtr::displayMeta()
         lastwin = metawin;
         //using a buffer will be far more efficient than setting each individual cell
         //and for some reason im adversed to using dynamic memory here so yeah
+        
+
+        /////////////////////////////////////////////////////////////////
+        //CLEAR THE META WINDOW/////to clean up potential artifacts/////
+        //clear the majority of the meta region
         int div = editor::WIN_WIDTH / 12;
         int rem = editor::WIN_WIDTH % 12;
         char bfr[12];
-
-        //CLEAR THE META WINDOW to clean up potential artifacts/////
-        //clear the majority of the meta region
         int i;
         for(i = 0; i < div; i++)
             for(int j = 0; j < 3; j++)
@@ -405,7 +406,7 @@ void patternedtr::displayMeta()
     }
     else
     {
-        charBuffer[SONGNAME_LENGTH]=0;
+        charBuffer[SONGNAME_LENGTH+1]=0;
         copy(editor::song->getName(), charBuffer, SONGNAME_LENGTH);
         makeUnderlines(charBuffer, SONGNAME_LENGTH);
         mvprintw(0, 6, charBuffer, metawin);
@@ -494,9 +495,9 @@ void patternedtr::displayMeta()
 
     //Instrument name
     isselected = setMetaAttribs(0, 1);
-    copy(editor::selinst->getName(), charBuffer, 23);
-    charBuffer[22] = 0;
-    mvprintw(1, 6, makeUnderlines(charBuffer,22), metawin); 
+    copy(editor::selinst->getName(), charBuffer, INST_NAME_SIZE);
+    charBuffer[INST_NAME_SIZE-1] = 0;
+    mvprintw(1, 6, makeUnderlines(charBuffer,INST_NAME_SIZE-1), metawin); 
 
     charBuffer[2] = 0;
     isselected = setMetaAttribs(4, 1);
@@ -934,7 +935,7 @@ void patternedtr::metaEdit(int in)
                     }
                     else if(in == KEY_RIGHT)
                     {
-                        if(textCursorPos < strlen(charInputBuffer))
+                        if(textCursorPos < SONGNAME_LENGTH-1)
                             textCursorPos++;
                     }
                 }
@@ -960,13 +961,13 @@ void patternedtr::metaEdit(int in)
                 else if(in == KEY_HOME)
                     textCursorPos = 0;
                 else if(in == KEY_END)
-                    textCursorPos = strlen(charInputBuffer);
+                    textCursorPos = SONGNAME_LENGTH-1;
                 else
                 {
                     if(in <= 'z' && in >= ' ')
                     {
                         charInputBuffer[textCursorPos] = in;
-                        if(textCursorPos < strlen(charInputBuffer))
+                        if(textCursorPos < SONGNAME_LENGTH-1)
                             textCursorPos++;
                     }
                 }
@@ -1020,29 +1021,30 @@ void patternedtr::metaEdit(int in)
                 switch(in)
                 {
                     case KEY_UP:
-                        numBuffer += 0x10*editor::song->getInterRowResolution();
+                        numBuffer += editor::song->getInterRowResolution();
                         numBuffer = (numBuffer/editor::song->getInterRowResolution())* editor::song->getInterRowResolution();
                         break;
                     case KEY_LEFT:
-                        numBuffer -= 0x100*editor::song->getInterRowResolution();
-                        numBuffer = (numBuffer/editor::song->getInterRowResolution())* editor::song->getInterRowResolution();
-                        break;
-                    case KEY_DOWN:
                         numBuffer -= 0x10*editor::song->getInterRowResolution();
                         numBuffer = (numBuffer/editor::song->getInterRowResolution())* editor::song->getInterRowResolution();
                         break;
+                    case KEY_DOWN:
+                        numBuffer -= editor::song->getInterRowResolution();
+                        numBuffer = (numBuffer/editor::song->getInterRowResolution())* editor::song->getInterRowResolution();
+                        break;
                     case KEY_RIGHT:
-                        numBuffer += editor::song->getInterRowResolution()*0x100;
+                        numBuffer += 0x10*editor::song->getInterRowResolution();
                         numBuffer = (numBuffer/editor::song->getInterRowResolution())* editor::song->getInterRowResolution();
                         break;
                     case KEY_END:
-                        numBuffer = song->getInterRowResolution()*0x10;
+                        numBuffer = 0x100*editor::song->getInterRowResolution();
                         break;
                     case KEY_HOME:
                         numBuffer = 0xFFFFF;
+                        numBuffer = (numBuffer/editor::song->getInterRowResolution())* editor::song->getInterRowResolution();
                         break;
                     case KEY_DC:
-                        numBuffer = 0;
+                        numBuffer = editor::song->getInterRowResolution();
                         break;
                     default:
                         if(ishex)
@@ -1053,8 +1055,8 @@ void patternedtr::metaEdit(int in)
                 }
                 if(numBuffer > 0xFFFF)
                     numBuffer &= 0xFFFF;
-                else if(numBuffer < 0)
-                    numBuffer = 0;
+                else if(numBuffer < editor::song->getInterRowResolution())
+                    numBuffer = editor::song->getInterRowResolution();
                 break;
             case 7:
                 //DIV  ||Spinner [0,7]
@@ -1065,19 +1067,19 @@ void patternedtr::metaEdit(int in)
                         numBuffer++;
                         break;
                     case KEY_LEFT:
-                        numBuffer -= 0x10;
+                        numBuffer -= 0x8;
                         break;
                     case KEY_DOWN:
                         numBuffer--;
                         break;
                     case KEY_RIGHT:
-                        numBuffer += 0x10;
+                        numBuffer += 0x8;
                         break;
                     case KEY_END:
                         numBuffer = 1;
                         break;
                     case KEY_HOME:
-                        numBuffer = 255;
+                        numBuffer = 128;
                         break;
                     case KEY_DC:
                         numBuffer /= 0x10;
@@ -1301,11 +1303,11 @@ void patternedtr::metaEdit(int in)
                         numBuffer = 0;
                         break;
                     case KEY_HOME:
-                        numBuffer = 11;
+                        numBuffer = CHROMATIC_NOTES-1;
                         break;
                     case KEY_DC:
                     case ' ':
-                        for(int i = 0; i < 11; i++)
+                        for(int i = 0; i < CHROMATIC_NOTES-1; i++)
                             scaleconst[i] = 1;
                         scalespinner = inferScaleType(scaleconst);
 
@@ -1346,8 +1348,8 @@ void patternedtr::metaEdit(int in)
                         numBuffer = 11;//B
                         break;
                 }
-                if(numBuffer >= 11)
-                    numBuffer = 11;
+                if(numBuffer >= CHROMATIC_NOTES-1)
+                    numBuffer = CHROMATIC_NOTES-1;
                 else if(numBuffer < 0)
                     numBuffer = 0;
                 break;
@@ -1363,7 +1365,7 @@ void patternedtr::metaEdit(int in)
                         textCursorPos++;
                         break;
                     case KEY_DC:
-                        for(int i = 0; i < 11; i++)
+                        for(int i = 0; i < CHROMATIC_NOTES-1; i++)
                             scaleconst[i] = 1;
                         key = 0;
                         scalespinner = inferScaleType(scaleconst);
@@ -1381,19 +1383,19 @@ void patternedtr::metaEdit(int in)
                             scaleconst[textCursorPos] = hexnum;
                             textCursorPos++;
                             int acc, i;
-                            for(acc = 0, i = 0; acc < 12 && i < 11 && scaleconst[i] != 0; i++)
+                            for(acc = 0, i = 0; acc < CHROMATIC_NOTES && i < CHROMATIC_NOTES-1 && scaleconst[i] != 0; i++)
                                 acc += scaleconst[i];
-                            if(acc > 12)
-                                scaleconst[i-1] -= acc - 12;
-                            if(acc < 12)
-                                for(; acc < 12; i++, acc++)
+                            if(acc > CHROMATIC_NOTES)
+                                scaleconst[i-1] -= acc - CHROMATIC_NOTES;
+                            if(acc < CHROMATIC_NOTES)
+                                for(; acc < CHROMATIC_NOTES; i++, acc++)
                                     scaleconst[i]=1;
-                            for(;i < 12; i++)
+                            for(;i < CHROMATIC_NOTES; i++)
                                 scaleconst[i] = 0;
                         }
                 }
                 int acc, i;
-                for(acc = 0, i = 0; acc < 12 && i < 11; i++)
+                for(acc = 0, i = 0; acc < CHROMATIC_NOTES && i < CHROMATIC_NOTES-1; i++)
                     acc += scaleconst[i];
                 if(textCursorPos >= i)
                     textCursorPos = i-1;
@@ -1642,17 +1644,6 @@ bool patternedtr::saveSong(const char *file)
     fileout.close();
     return true;
 }
-
-/*
-const char *patternedtr::browse()
-{
-    if(strcmp(editor::lastSongPath, "song.plb") == 0)
-    {
-
-    }
-
-    return editor::lastSongPath;
-}*/
 
 bool patternedtr::openSong(const char *file)
 {
