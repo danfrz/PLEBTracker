@@ -6,13 +6,18 @@ Song::Song()
     bytes_per_row = 0x1CB0;
     interrow_resolution = 0x18;
 
-    for(int i = 4; i < 29; i++)
+    for(int i = 9; i < SONGNAME_LENGTH+1; i++)
         songname[i] = 0;
 
-    songname[0]='N';
-    songname[1]='a';
-    songname[2]='m';
-    songname[3]='e';
+    songname[0]='s';
+    songname[1]='o';
+    songname[2]='n';
+    songname[3]='g';
+    songname[4]=' ';
+    songname[5]='n';
+    songname[6]='a';
+    songname[7]='m';
+    songname[8]='e';
 
     num_instruments = 1;
     instruments = new Instrument*[256];
@@ -76,12 +81,12 @@ Song::~Song()
 std::ostream &Song::output(std::ostream &out) const
 {
 
-    out.write(songname, 29);
+    out.write(songname, SONGNAME_LENGTH);
     out.write((char*)&bytes_per_row, sizeof(short));
-    out.write((char*)&interrow_resolution, 1);
-    out.write((char*)&tracks, 1);
+    out.write((char*)&interrow_resolution, sizeof(char));
+    out.write((char*)&tracks, sizeof(char));
 
-    out.write((char*)&num_orders, 1);
+    out.write((char*)&num_orders, sizeof(char));
     out.write((char*)orders, num_orders);
 
     out.write((char*)&waveEntries, sizeof(short));
@@ -90,12 +95,12 @@ std::ostream &Song::output(std::ostream &out) const
     out.write((char*)&pulseEntries, sizeof(short));
     out.write((char*)pulseTable, pulseEntries*sizeof(short));
 
-    out.write((char*)&num_instruments, 1);
+    out.write((char*)&num_instruments, sizeof(char));
     for(int i = 0; i < num_instruments; i++)
         (instruments[i])->output(out);
     
 
-    out.write((char*)&num_patterns, 1);
+    out.write((char*)&num_patterns, sizeof(char));
     for(int i = 0; i < num_patterns; i++)
         (patterns[i])->output(out);
     return out;
@@ -103,16 +108,19 @@ std::ostream &Song::output(std::ostream &out) const
 
 std::istream &Song::input(std::istream &in)
 {
-    delete [] instruments;
-    delete [] patterns;
+    if(instruments)
+        delete [] instruments;
+
+    if(patterns)
+        delete [] patterns;
 
 
-    in.read(songname, 29);
+    in.read(songname, SONGNAME_LENGTH+1);
     in.read((char*)&bytes_per_row, sizeof(short));
-    in.read((char*)&interrow_resolution, 1);
-    in.read((char*)&tracks, 1);
+    in.read((char*)&interrow_resolution, sizeof(char));
+    in.read((char*)&tracks, sizeof(char));
 
-    in.read((char*)&num_orders, 1);
+    in.read((char*)&num_orders, sizeof(char));
     in.read((char*)orders, num_orders);
 
 
@@ -128,14 +136,14 @@ std::istream &Song::input(std::istream &in)
         
 
     instruments = new Instrument*[256];
-    in.read((char*)&num_instruments, 1);
+    in.read((char*)&num_instruments, sizeof(char));
     for(int i = 0; i < num_instruments; i++)
         instruments[i] = new Instrument(in);	
     for(int i = num_instruments; i < 256; i++)
         instruments[i] = NULL;
 
     patterns = new Pattern*[256];
-    in.read((char*)&num_patterns, 1);
+    in.read((char*)&num_patterns, sizeof(char));
     for(int i = 0; i < num_patterns; i++)
         patterns[i] = new Pattern(in);
     for(int i = num_patterns; i < 256; i++)
@@ -146,20 +154,27 @@ std::istream &Song::input(std::istream &in)
 
 void Song::copyCommutable(Song *other)
 {
+    //Copy things that are necessary for any of the objects of the song to operate
+    //Instruments, Wavetable, Pulsetable, metadata
+    
+    //Copy the wave table from this song into the other song
     unsigned short *otrwavebl = other->getWaveTable();
     for(int i = 0; i < waveEntries; i++)
         other->setWaveEntry(i,waveTable[i]);
     other->waveEntries = waveEntries;
 
+    //Copy the pulse table from this song into the other song
     unsigned short *otrpulsebl = other->getPulseTable();
     for(int i = 0; i < pulseEntries; i++)
         other->setPulseEntry(i,pulseTable[i]);
     other->pulseEntries = pulseEntries;
 
+    //Copy important song data to the other song
     other->setInterRowResolution(interrow_resolution);
     other->setBytesPerRow(bytes_per_row);
     other->setTrackNum(tracks);
     
+    //Copy instruments
     for(int i = 0; i < num_instruments; i++)
         other->addInstrument(new Instrument(*instruments[i]));
 
@@ -172,44 +187,51 @@ Song *Song::makeExcerpt(unsigned char orderstart, unsigned char orderend, unsign
         len += getPatternByOrder(orderi)->numRows();
     len -= rowstart;
     len -= getPatternByOrder(orderend)->numRows() - orderend+1;
-    //std::cerr << "Excerpt5\n";
+
+    
     Song *out = new Song();
     copyCommutable(out);
+
+
+    //Remove the default instrument installed by the default constructor
     out->removeInstrument(0);
-    //std::cerr << "Excerpt6\n";
 
     Pattern *first, *last;
 
-    if(orderstart == orderend)
+    if(orderstart == orderend) //play only one order
     {
-        //std::cerr << "Excerpt7\n";
         first = new Pattern(*getPatternByOrder(orderstart)); 
         first->chop(rowstart, rowend);
         out->addPattern(first);
         out->insertOrder(0,1);
         //Clear the default order and patterns
         out->removeOrder(1);
-        //out->removePattern(0);
+        out->removePattern(0);
 
-
-        //std::cerr << "Excerpt8: " << int(out->numOrders()) << " " << int(out->numPatterns()) << " \n";
     }
-    else
+    else //play multiple orders
     {
-        //std::cerr << "ExcerptA\n";
+        //Copy over the first and last patterns
         first = new Pattern(*getPatternByOrder(orderstart));
         last = new Pattern(*getPatternByOrder(orderend));
 
+        //Chop them to specification
         first->chop(rowstart, first->numRows()-1);
         last->chop(0,rowend);
 
-        //std::cerr << "ExcerptB\n";
+        //Add the first pattern
         out->addPattern(first);
+        out->insertOrder(0,1);
+
+        //Remove the default pattern and order
         out->removePattern(0);
-        out->insertOrder(0,0);
         out->removeOrder(1);//default order
+
+        //Add the final pattern at the end
         out->addPattern(last);
         out->insertOrder(1,1);
+        
+        //The last order will continue to be pushed back by the insertion of other orders on it's location
         for(int orderi = orderstart+1, i = 1; orderi < orderend; orderi++, i++)
         {
             //Have to create new patterns because Song will
@@ -218,11 +240,7 @@ Song *Song::makeExcerpt(unsigned char orderstart, unsigned char orderend, unsign
             out->insertOrder(i,i+1);
         }
 
-
-        //std::cerr << "ExcerptC\n";
-
     }
-    //std::cerr << "Excerpt Done\n";
 
     
     return out;
@@ -233,37 +251,37 @@ Song *Song::makeExcerpt(unsigned char orderstart, unsigned char orderend, unsign
 Song *Song::makeExcerpt(unsigned int length, unsigned char orderstart, unsigned char rowstart)
 {
 
+    //Acc is used to accumulate how many rows have been added already until length has been reached
     unsigned char rowend, orderend;
     unsigned int acc = getPatternByOrder(orderstart)->numRows() - rowstart;
     unsigned char orderi = orderstart;
 
-    //std::cerr << "Excerpt1\n";
+    //Loop through following orders until acc >= length
     while (acc < length && ++orderi < num_orders)
     {
         acc += getPatternByOrder(orderi)->numRows();
-        
     }
-    //std::cerr << "Excerpt2\n";
 
+    //Make the ending order the last order that filled acc to length
     if(orderi >= num_orders)
         orderend = num_orders-1;
     else
         orderend = orderi;
-    //std::cerr << "Excerpt3\n";
 
-    if(orderstart == orderend)
+    
+    if(orderstart == orderend) //If there is only one order in this excerpt
     {
+        //cut off rowend at wherever makes the length
         rowend = rowstart + length;
         if(rowend >= getPatternByOrder(orderstart)->numRows())
             rowend = getPatternByOrder(orderstart)->numRows()-1;
     }
     else
     {
+        //cut off rowend at the max row of the last order's pattern plus (length - acc)
         rowend = length - (acc - getPatternByOrder(orderend)->numRows());
     }
     
-    //std::cerr << "Excerpt4\n";
-    //std::cerr << "The excerpt: " << int(orderstart) << " "<< int(orderend) << " "<< int(rowstart) << " " << int(rowend) << "\n";
     return makeExcerpt(orderstart, orderend, rowstart, rowend);
 }
 
@@ -272,8 +290,8 @@ Song *Song::makeExcerpt(unsigned int length, unsigned char orderstart, unsigned 
 
 void Song::setName(const char *name, int length)
 {
-    if(length > 28)
-        length = 28;
+    if(length > SONGNAME_LENGTH)
+        length = SONGNAME_LENGTH;
     for(int i = 0; i < length; i++)
         songname[i] = name[i];
 }
