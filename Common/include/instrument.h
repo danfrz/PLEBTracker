@@ -4,10 +4,14 @@
 #include<istream>
 #include<ostream>
 
+#define INST_NAME_SIZE 23
+#define INST_VOL_SIZE 256
+#define INST_VOL_LOOP_MAX_JUMPS 64
+
 class Instrument
 {
     private:
-        char name[23]{0};
+        char name[INST_NAME_SIZE]{0};
         unsigned short waveIndex;
         unsigned short pulseIndex;
 
@@ -23,7 +27,7 @@ class Instrument
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: Instrument(std::istream &in)
 Description:
-    Creates a new instrument from an input stream
+    Read a new instrument from an input stream
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         Instrument(std::istream &in);
 
@@ -49,10 +53,31 @@ Description:
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         std::istream &input(std::istream &in);
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void setWaveIndex(short i){waveIndex = i;
+
+Description:
+   Set the wave index for this instrument
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline void setWaveIndex(short i){waveIndex = i;}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void setPulseIndex(short i){pulseIndex = i;
+
+Description:
+   Set the pulse index for this instrument
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline void setPulseIndex(short i){pulseIndex = i;}
         
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void setVolEntry(unsigned char index, unsigned short entry){volTable[index] = entry;
+
+Description:
+   Set the volume at the specified index of this instrument's volume table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline void setVolEntry(unsigned char index, unsigned short entry){volTable[index] = entry;}
 
 /***\//////////////////////////////////////////////////////////////////////////        
@@ -61,12 +86,54 @@ Description:
    Copies over another volume table to this instrument's
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         void setVolTable(unsigned short *table);
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: getName(){return name;
+
+Description:
+   Get the pointer to this instrument's name.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline char *getName(){return name;}
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: short getWaveIndex() const{return waveIndex;
+
+Description:
+   Get the wave index for this instrument.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned short getWaveIndex() const{return waveIndex;}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: short getPulseIndex() const{return pulseIndex;
+
+Description:
+   Get the pulse index for this instrument.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned short getPulseIndex() const{return pulseIndex;}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: short getVolEntry(unsigned char index) const {return volTable[index];
+
+Description:
+   Get the volume a the specified index of this instrument's volume table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned short getVolEntry(unsigned char index) const {return volTable[index];}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: char numVolEntries() const {return volEntries;
+
+Description:
+   Get the logical size of the volume table.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned char numVolEntries() const {return volEntries;}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: getVolTable() const {return volTable;
+
+Description:
+   Get a pointer to this instrument's volume table.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned short *getVolTable() const {return volTable;}
 
 
@@ -74,6 +141,9 @@ Description:
 Function: bool insertVolEntry(unsigned char index, unsigned short entry)
 Description:
     Inserts a new entry to the volume table at an index, then fixes jumps
+    
+    Returns false if another entry can not be added to this instrument's
+    volume table
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         bool insertVolEntry(unsigned char index, unsigned short entry);
 
@@ -81,6 +151,8 @@ Description:
 Function: bool removeVolEntry(unsigned char index)
 Description:
    Removes the specified entry in the vol table, then fixes jumps
+
+   Returns false if there is already only one entry in the volume table
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         bool removeVolEntry(unsigned char index);
 
@@ -94,13 +166,13 @@ Description:
 
 
 /***\//////////////////////////////////////////////////////////////////////////        
-Function: char getVolume(unsigned char &cur, unsigned char &seg, unsigned char &last)
+Function: char getVolume(unsigned char &index, unsigned char &seg, unsigned char &last)
 Description
    Interpolates what volume this instrument should be at for the specified index.
    seg should be an accumulation of the number of row segments that have passed
    since the last time the inst changed current vol table index (cur)
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-        unsigned char getVolume(unsigned char &cur, unsigned char &seg, unsigned char &jump, unsigned char &last);
+        unsigned char getVolume(unsigned char &index, unsigned char &seg, unsigned char &jump_param, unsigned char &last);
 
 };
 
