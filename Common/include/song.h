@@ -6,12 +6,22 @@
 #include <istream>
 #include <ostream>
 
+
+#define SONGNAME_LENGTH 28
+
+/***\//////////////////////////////////////////////////////////////////////////
+Function: bool isJumpFunc_Volatile(const unsigned short &wave)
+
+Description:
+   To check whether this wave function is a jump function,
+   But only one whose right parameter can be invalidated by the insertion or removal
+   from the wave table.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
 bool isJumpFunc_Volatile(const unsigned short &wave);
-const unsigned int SONGNAME_LENGTH = 29;
 
 class Song{
     private:
-        char songname[SONGNAME_LENGTH];
+        char songname[SONGNAME_LENGTH+1];
         unsigned char tracks;
         unsigned short  bytes_per_row;
         unsigned char interrow_resolution;
@@ -145,10 +155,39 @@ Description:
         inline unsigned short numWaveEntries() const {return waveEntries;}
         inline unsigned short numPulseEntries() const {return pulseEntries;}
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void setPatternIndexByOrder(unsigned const char &order, const unsigned char &pattern){orders[order] = pattern;
+
+Description:
+   Sets the pattern index at the `order` index in the order list for this song
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline void setPatternIndexByOrder(unsigned const char &order, const unsigned char &pattern){orders[order] = pattern;}
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: getPattern(unsigned const char &ptrn) const {return patterns[ptrn];
+
+Description:
+   Get a pointer to the pattern within the `ptrn` index of the pattern list
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline Pattern *getPattern(unsigned const char &ptrn) const {return patterns[ptrn];}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: getPatternByOrder(unsigned const char &order) const {return patterns[orders[order]];
+
+Description:
+   Get a pointer to the pattern within this song found at the `order` order
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline Pattern *getPatternByOrder(unsigned const char &order) const {return patterns[orders[order]];}
+
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: getInstrument(unsigned const char &inst) const {if(inst >= num_instruments) return NULL; else return instruments[inst];
+
+Description:
+   Get a pointer to the instrument found at the `inst` index of this song's instrument list
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline Instrument *getInstrument(unsigned const char &inst) const {if(inst >= num_instruments) return NULL; else return instruments[inst];}
         inline unsigned char getPatternIndexByOrder(unsigned const char &order) const {return orders[order];}
 
@@ -237,8 +276,29 @@ Description:
 
 
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: getWaveTable() {return waveTable;
+
+Description:
+   Get a pointer to the wave table used by this song.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned short *getWaveTable() {return waveTable;}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: short getWaveEntry(unsigned short index) {return waveTable[index];
+
+Description:
+   Get the `index` entry of the wave table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned short getWaveEntry(unsigned short index) {return waveTable[index];}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void setWaveEntry(unsigned short index, unsigned short entry){waveTable[index] = entry;
+
+Description:
+   Set the `index` entry of the wave table with `entry`
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline void setWaveEntry(unsigned short index, unsigned short entry){waveTable[index] = entry;}
 
 /***\//////////////////////////////////////////////////////////////////////////        
@@ -268,8 +328,30 @@ Description:
 
 
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: getPulseTable() {return pulseTable;
+
+Description:
+   Get a pointer to this song's pulse table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned short *getPulseTable() {return pulseTable;}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: short getPulseEntry(unsigned short index) {return pulseTable[index];
+
+Description:
+   Get the `index` entry of this song's pulse table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned short getPulseEntry(unsigned short index) {return pulseTable[index];}
+
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void setPulseEntry(unsigned short index, unsigned short entry){pulseTable[index] = entry;
+
+Description:
+   Set the `index` entry of this song's pulse table with `entry`
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline void setPulseEntry(unsigned short index, unsigned short entry){pulseTable[index] = entry;}
 
 /***\//////////////////////////////////////////////////////////////////////////        
