@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+//Copy pattern data from src to dest
 void copyRegion(unsigned int **src, unsigned int **dest,
         const unsigned char &tracks, const unsigned char &rows)
 {
@@ -10,11 +11,13 @@ void copyRegion(unsigned int **src, unsigned int **dest,
             dest[i][j] = src[i][j];
 }
 
+//min defined on unsigned chars
 const unsigned char &min(const unsigned char &a, const unsigned char &b)
 {
     return (a<b)?a:b;
 }
 
+//absolute value of char
 char abs(char a)
 {
     return (a<0)?-a:a;
@@ -79,11 +82,12 @@ Pattern::~Pattern()
 
 std::ostream &Pattern::output(std::ostream &out) const
 {
-    out.write((char*)&tracks,1);
-    out.write((char*)&rows,1);
+    out.write((char*)&tracks, sizeof(char));
+    out.write((char*)&rows,   sizeof(char));
 
     for(int i = 0; i < tracks; i++)
         out.write((char*)(data[i]), sizeof(int)*rows);
+
     return out;
 }
 
@@ -96,8 +100,8 @@ std::istream &Pattern::input(std::istream &in)
         delete [] data;
     }
 
-    in.read((char*)&tracks, 1);
-    in.read((char*)&rows, 1);
+    in.read((char*)&tracks, sizeof(char));
+    in.read((char*)&rows,   sizeof(char));
     data = new unsigned int *[tracks];
     for(int i = 0; i < tracks; i++)
         data[i] = new unsigned int[rows];
@@ -117,6 +121,7 @@ void Pattern::setSize(const unsigned char &newtracks, const unsigned char &newro
     for(i = 0; i < tracks; i++)
         newdata[i] = new unsigned int[newrows];
 
+    //Find the amount of rows and tracks to copy over to the new pattern data
     const unsigned char &mintracks = min(newtracks, tracks);
     const unsigned char &minrows = min(newrows, rows);
 
@@ -359,13 +364,6 @@ unsigned int Pattern::at(const unsigned char &track, const unsigned char &row)
 unsigned int *Pattern::trackAt(const unsigned char &track)
 {
     return data[track];
-}
-
-void Pattern::transpose(const unsigned char &track, const unsigned char &row, const char &semitones)
-{
-    //nothing?
-
-
 }
 
 

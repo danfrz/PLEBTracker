@@ -190,13 +190,6 @@ Description:
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         void purgeInstrument(const unsigned char &inst);
 
-/***\//////////////////////////////////////////////////////////////////////////        
-Function: void transpose(const unsigned char &track, const unsigned char &row, const char &semitones)
-Description:
-   transposes one entry up or down a number of semitones
-*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-        void transpose(const unsigned char &track, const unsigned char &row, const char &semitones);
-
 };
 
 #endif
