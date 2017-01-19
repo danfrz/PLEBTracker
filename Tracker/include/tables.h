@@ -1,3 +1,11 @@
+//
+// tables.h contains all of the global variables used for the ncurses interface
+// as well as the headers for validation functions used throughout the interface
+//
+// the implementation of most of these fields can be found in externinit.cpp
+//
+
+
 #ifndef TABLES_H_
 #define TABLES_H_
 #include <map>
@@ -5,8 +13,10 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include <stdio.h>
+
 #include "song.h"
 #include "instrument.h"
+#include "pattern.h"
 
 #define TRACK_WIDTH 15
 #define TABLE_WIDTH 11
@@ -83,9 +93,11 @@ namespace editor
                                     //patternedtr::selinstrument is ever
                                     //changed, change this to that inst.
 
+    //Buffers for storing input before assigning to the destination
     extern int numBuffer;
     extern char charBuffer[CHARBUFFER_SIZE];
 
+    //cursor position within the charBuffer
     extern char textCursorPos;
     extern char charInputBuffer[CMDBAR_SIZE];
     extern char charInputHistory[HISTORY_SIZE][CMDBAR_SIZE]; //circular list
@@ -113,6 +125,7 @@ namespace editor
     char *shortString(char *string, unsigned short shrt, const unsigned int &strlen);
     char *intString(char *string,  unsigned int integer, const unsigned int &strlen);
 
+    //Implementations found in patternedtr.cpp
     char *noteString(char *string, unsigned int entry);
     char *instString(char *string, const unsigned int &entry);
     char *volString(char *string, const unsigned int &entry);
@@ -122,6 +135,13 @@ namespace editor
     //should be called after the editor changes the number of tracks within a song
     //one purpose of this is to keep editor::muted_tracks valid
     void trackNumChanged(unsigned int from, unsigned int to);
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: void setPID(int PID)
+
+Description:
+   Set the PID to append to the signal and excerpt song files.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void setPID(int PID);
    
 
@@ -154,9 +174,6 @@ Description:
    Displays the about window to the user until Space is pressed
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void displayAbout();
-
-    //TODO: does this do
-    const char *locateFile(bool save);
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
@@ -318,7 +335,7 @@ Description:
     extern unsigned char octave;
     extern unsigned char key;
     extern unsigned char scalespinner;
-    extern unsigned char scaleconst[12];//Scale construction pattern
+    extern unsigned char scaleconst[CHROMATIC_NOTES];//Scale construction pattern
 
 
     //PATTERN EDITOR CLIPBOARD
