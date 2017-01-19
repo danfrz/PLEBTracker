@@ -184,9 +184,9 @@ int main(int argc, char *argv[])
 
     patternedtr::key = 0;
     patternedtr::scalespinner = 0;
-    for(int i = 0; i < 11; i++)
+    for(int i = 0; i < CHROMATIC_NOTES-1; i++)
         patternedtr::scaleconst[i] = 1;
-    patternedtr::scaleconst[11] = 0;
+    patternedtr::scaleconst[CHROMATIC_NOTES-1] = 0;
 
     patternedtr::populateNoteMap();
     patternedtr::selptrn = editor::song->getPatternByOrder(0);
