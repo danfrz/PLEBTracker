@@ -81,7 +81,7 @@ Song::~Song()
 std::ostream &Song::output(std::ostream &out) const
 {
 
-    out.write(songname, SONGNAME_LENGTH);
+    out.write(songname, SONGNAME_LENGTH+1);
     out.write((char*)&bytes_per_row, sizeof(short));
     out.write((char*)&interrow_resolution, sizeof(char));
     out.write((char*)&tracks, sizeof(char));
@@ -103,6 +103,7 @@ std::ostream &Song::output(std::ostream &out) const
     out.write((char*)&num_patterns, sizeof(char));
     for(int i = 0; i < num_patterns; i++)
         (patterns[i])->output(out);
+
     return out;
 }
 
@@ -206,7 +207,7 @@ Song *Song::makeExcerpt(unsigned char orderstart, unsigned char orderend, unsign
         out->insertOrder(0,1);
         //Clear the default order and patterns
         out->removeOrder(1);
-        out->removePattern(0);
+        //out->removePattern(0);
 
     }
     else //play multiple orders
@@ -221,10 +222,10 @@ Song *Song::makeExcerpt(unsigned char orderstart, unsigned char orderend, unsign
 
         //Add the first pattern
         out->addPattern(first);
-        out->insertOrder(0,1);
+        out->removePattern(0);
+        out->insertOrder(0,0);
 
         //Remove the default pattern and order
-        out->removePattern(0);
         out->removeOrder(1);//default order
 
         //Add the final pattern at the end
