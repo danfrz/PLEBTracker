@@ -14,7 +14,7 @@ _DEPS = cmdbar.h instedtr.h instrument.h pattern.h patternedtr.h song.h tables.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 #Object files that need to be made, one per each cpp///////////////////////////
-_OBJ = cmdbar.o utility.o instedtr.o instrument.o meta.o pattern.o patternedtr.o song.o daemoncomm.o externinit.o
+_OBJ = cmdbar.o instedtr.o instrument.o meta.o pattern.o patternedtr.o song.o daemoncomm.o externinit.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
