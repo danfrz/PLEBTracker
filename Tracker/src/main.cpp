@@ -444,15 +444,19 @@ int main(int argc, char *argv[])
                         continue;
                     case '{'://Decrement Order
                         patternedtr::chgSelOrder(-1);
+                        patternedtr::display();
                         continue;
                     case '}'://Increment Order
                         patternedtr::chgSelOrder(1);
+                        patternedtr::display();
                         continue;
                     case '>'://Decrement Pattern
                         patternedtr::chgOrderPattern(-1);
+                        patternedtr::display();
                         continue;
                     case '?'://Increment Pattern
                         patternedtr::chgOrderPattern(1);
+                        patternedtr::display();
                         continue;
 
                     /*case 'K'://Quick Change Order
