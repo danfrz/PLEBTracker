@@ -442,6 +442,18 @@ int main(int argc, char *argv[])
                         else if(editor::wingroup == editor::instwin)
                             instedtr::display();
                         continue;
+                    case '{'://Decrement Order
+                        patternedtr::chgSelOrder(-1);
+                        continue;
+                    case '}'://Increment Order
+                        patternedtr::chgSelOrder(1);
+                        continue;
+                    case '>'://Decrement Pattern
+                        patternedtr::chgOrderPattern(-1);
+                        continue;
+                    case '?'://Increment Pattern
+                        patternedtr::chgOrderPattern(1);
+                        continue;
 
                     /*case 'K'://Quick Change Order
 

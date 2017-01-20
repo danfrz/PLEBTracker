@@ -920,19 +920,7 @@ void patternedtr::processPatternInput(wint_t in)
             octave = 6;
             break;
 
-        case '{'://Decrement Order
-            patternedtr::chgSelOrder(-1);
-            break;
-        case '}'://Increment Order
-            patternedtr::chgSelOrder(1);
-            break;
-        case '>'://Decrement Pattern
-            patternedtr::chgOrderPattern(-1);
-            break;
-        case '?'://Increment Pattern
-            patternedtr::chgOrderPattern(1);
-            break;
-
+        
 
         case 'M'://set mark
 
