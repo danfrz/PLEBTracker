@@ -373,8 +373,8 @@ bool Song::removePattern(unsigned char ptrn)
     //Set to the first pattern
     //so that it stands out and it would stand out looking through order list
     for(int i = 0; i < num_orders; i++)
-        if(orders[i] == ptrn)
-            orders[i] = 0;
+        if(orders[i] > ptrn)
+            orders[i]--;
 
     return true;
 }
