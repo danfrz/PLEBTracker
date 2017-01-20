@@ -196,8 +196,9 @@ void editor::inform(const char *message)
     mvprintw(6,4,"                                                                ",stdscr);
     mvprintw(7,4," Press [Space] to continue                                      ",stdscr);
     editor::lastwin = editor::dialog;
-    int ch;
-    while((ch=getch()) != ' ' && ch != '\n');
+    wint_t ch;
+    get_wch(&ch);
+    while(ch != ' ' && ch != '\n') get_wch(&ch);
     return;
 }
 bool editor::confirm(const char *message)
@@ -222,8 +223,10 @@ bool editor::confirm(const char *message)
     mvprintw(7,4," Are you sure? [y/n]                                            ",stdscr);
     editor::lastwin = editor::dialog;
 
-    int ch;
-    while((ch=getch()) != 'y' && ch != 'n' && ch != 27);
+    wint_t ch;
+    get_wch(&ch);
+    while(ch != 'y' && ch != 'n' && ch != 27) get_wch(&ch);
+
     if(ch == 'y')
         return true;
     return false;
@@ -248,8 +251,10 @@ void editor::displayAbout()
     mvprintw(13,4,"                                   ",stdscr);
     mvprintw(14,4," Press [Space] to continue         ",stdscr);
     editor::lastwin = editor::dialog;
-    int ch;
-    while((ch=getch()) != ' ' && ch != '\n');
+    wint_t ch;
+    get_wch(&ch);
+    while(ch != ' ' && ch != '\n') get_wch(&ch);
+
     return;
 }
 

@@ -111,7 +111,7 @@ bool editor::getCommand(const char * autocmd)
 {
     //Command bar displayed at the bottom
     int ypos = WIN_HEIGHT -1;
-    int in;      //to grab characters
+    wint_t in;      //to grab characters
     char sel[2]; //to display one character
     sel[1] = 0;
 
@@ -146,7 +146,8 @@ bool editor::getCommand(const char * autocmd)
     mvprintw(ypos, 1+textCursorPos, sel, stdscr);
 
     //loop until newline or tab character
-    while((in = getch()) != '\n' && in != '\t')
+    get_wch(&in);
+    while(in  != '\n' && in != '\t')
     {
         switch(in)
         {
@@ -191,6 +192,7 @@ bool editor::getCommand(const char * autocmd)
                     charInputBuffer[textCursorPos] = ' ';
                 }
             case KEY_DC://Move the rest of the characters in the inout buffer downwrds
+            case ALT_BACKSPACE:
                 {
                     int length = strlen(charInputBuffer);
                     for(int i = textCursorPos+1; i < length; i++)
@@ -224,8 +226,7 @@ bool editor::getCommand(const char * autocmd)
         attron(COLOR_PAIR(patternedtr::COL_CMDBAR_S));
         attron(A_BOLD);
         mvprintw(ypos, 1+textCursorPos, sel, stdscr);
-
-
+        get_wch(&in);
 
     }
 

@@ -657,6 +657,14 @@ void patternedtr::displayMeta()
 
     }
 
+    //Print metaobjedit information
+    if(metaobjedit)
+    {
+        attron(A_BOLD);
+        mvprintw(WIN_HEIGHT-1, 0, "Editing a field: Press TAB to cancel or ENTER to commit", stdscr);
+        attroff(A_BOLD);
+    }
+
 }
 void patternedtr::startMetaEditing()
 {
@@ -827,6 +835,8 @@ void patternedtr::startMetaEditing()
             editor::copy(editor::song->getName(), editor::charInputBuffer, SONGNAME_LENGTH);
 
             editor::textCursorPos = strlen(editor::song->getName());
+            if(editor::textCursorPos > SONGNAME_LENGTH-1)
+                editor::textCursorPos = SONGNAME_LENGTH-1;
 
             metaobjedit = true;
         }
@@ -855,7 +865,7 @@ void patternedtr::startMetaEditing()
             metaobjedit = true;
         }
     }
-    else	if(selrowmeta == 1) 
+    else if(selrowmeta == 1) 
     {
         //Selected instrument spinner
         if(selobjmeta == 4)
@@ -912,7 +922,7 @@ void patternedtr::startMetaEditing()
 
 }
 
-void patternedtr::metaEdit(int in)
+void patternedtr::metaEdit(wint_t in)
 {
     using namespace editor;
     bool ishex = editor::validateHexChar(in);
@@ -935,38 +945,61 @@ void patternedtr::metaEdit(int in)
                     }
                     else if(in == KEY_RIGHT)
                     {
-                        if(textCursorPos < SONGNAME_LENGTH-1)
-                            textCursorPos++;
+                        int length = strlen(charInputBuffer);
+
+                        if(textCursorPos < length)
+                            if(textCursorPos < SONGNAME_LENGTH-1)
+                                textCursorPos++;
                     }
+                }
+                else if(in == ALT_BACKSPACE)
+                {
+                    if(textCursorPos > 0)
+                    {
+                        int length = SONGNAME_LENGTH;
+                        for(int i = textCursorPos; i < length+1; i++)
+                            charInputBuffer[i-1] = charInputBuffer[i];
+                        textCursorPos--;
+                    }
+
                 }
                 else if(in == KEY_DC)
                 {
                     int length = strlen(charInputBuffer);
-                    for(int i = textCursorPos+1; i < length; i++)
+                    for(int i = textCursorPos+1; i < length+1; i++)
                         charInputBuffer[i-1] = charInputBuffer[i];
-                    charInputBuffer[length-1] = 0;
-                    if(textCursorPos >= length && length > 0)
+                    if(textCursorPos >= length-1 && textCursorPos > 0)
                         textCursorPos--;
 
                 }
                 else if(in == KEY_IC)
                 {
                     int length = strlen(charInputBuffer);
-                    for(int i = length; i > textCursorPos; i--)
+                    for(int i = length+1; i > textCursorPos; i--)
                         charInputBuffer[i] = charInputBuffer[i-1];
-                    charInputBuffer[length+1] = 0;
+                    charInputBuffer[length] = 0;
                     charInputBuffer[textCursorPos] = ' ';
 
                 }
                 else if(in == KEY_HOME)
                     textCursorPos = 0;
                 else if(in == KEY_END)
-                    textCursorPos = SONGNAME_LENGTH-1;
+                {
+                    int length = strlen(charInputBuffer);
+
+                    if(length < SONGNAME_LENGTH)
+                        textCursorPos = length;
+                    else textCursorPos = SONGNAME_LENGTH - 1;
+                }
                 else
                 {
                     if(in <= 'z' && in >= ' ')
                     {
+                        int length = SONGNAME_LENGTH;
+                        for(int i = length; i > textCursorPos; i--)
+                            charInputBuffer[i] = charInputBuffer[i-1];
                         charInputBuffer[textCursorPos] = in;
+                        charInputBuffer[length] = 0;
                         if(textCursorPos < SONGNAME_LENGTH-1)
                             textCursorPos++;
                     }
@@ -1306,6 +1339,7 @@ void patternedtr::metaEdit(int in)
                         numBuffer = CHROMATIC_NOTES-1;
                         break;
                     case KEY_DC:
+                    case ALT_BACKSPACE:
                     case ' ':
                         for(int i = 0; i < CHROMATIC_NOTES-1; i++)
                             scaleconst[i] = 1;
@@ -1365,6 +1399,7 @@ void patternedtr::metaEdit(int in)
                         textCursorPos++;
                         break;
                     case KEY_DC:
+                    case ALT_BACKSPACE:
                         for(int i = 0; i < CHROMATIC_NOTES-1; i++)
                             scaleconst[i] = 1;
                         key = 0;
@@ -1502,7 +1537,7 @@ void patternedtr::doneMetaEditing()
 }
 
 
-void patternedtr::processMetaInput(int in)
+void patternedtr::processMetaInput(wint_t in)
 {
 
     if(!metaobjedit)

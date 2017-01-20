@@ -234,11 +234,11 @@ int main(int argc, char *argv[])
     patternedtr::display();
 
     //Start the tracker's loop
-    int ch;
+    wint_t ch;
     editor::running = true;
     while(editor::running)
     {
-        ch = getch();
+        get_wch(&ch);
 
         //Update window geometry here
         //If the user resizes the terminal, plebtrk shouldn't crash
@@ -273,92 +273,94 @@ int main(int argc, char *argv[])
                 patternedtr::metaobjedit = false;
                 patternedtr::display();
                 continue;
-            } if(instedtr::instobjedit)
+            }
+            else if(instedtr::instobjedit)
             {
                 instedtr::instobjedit = false;
                 instedtr::display();
                 continue;
             }
-            else
+
+            attron(A_BOLD);
+            mvprintw(WIN_HEIGHT-1, 0, "[q]meta [w]ptrn [e/d]wave [a]vol [s]inst", stdscr);
+            attroff(A_BOLD);
+            while(ch == '\t')
             {
+                get_wch(&ch);
+            }
+            //TAB + Character changes the window
+            switch(ch)
+            {
+                case 's':
+                case 'S':
+                    //Instrument view
 
-                mvprintw(WIN_HEIGHT-1, 0, "[q]meta [w]ptrn [e/d]wave [a]vol [s]inst", stdscr);
-                while(ch == '\t')
-                    ch = getch();
-                //TAB + Character changes the window
-                switch(ch)
-                {
-                    case 's':
-                    case 'S':
-                        //Instrument view
+                    inputwin = instwin;
+                    wingroup = instwin;
+                    instedtr::display();
 
-                        inputwin = instwin;
-                        wingroup = instwin;
-                        instedtr::display();
+                    break;
+                case 'q':
+                case 'Q':
+                    //Meta / Menu : Pattern View
 
-                        break;
-                    case 'q':
-                    case 'Q':
-                        //Meta / Menu : Pattern View
+                    inputwin = metawin;
+                    wingroup = ptrnwin;
+                    patternedtr::display();
 
-                        inputwin = metawin;
-                        wingroup = ptrnwin;
-                        patternedtr::display();
+                    break;
+                case 'w':
+                case 'W':
+                    //Pattern View
 
-                        break;
-                    case 'w':
-                    case 'W':
-                        //Pattern View
+                    inputwin = ptrnwin;
+                    wingroup = ptrnwin;
+                    patternedtr::display();
 
-                        inputwin = ptrnwin;
-                        wingroup = ptrnwin;
-                        patternedtr::display();
+                    break;
+                    //Wave : Pattern View -- Wave : Instrument View
+                case 'e':
+                case 'E':
+                    inputwin = wavewin;
+                    wingroup = ptrnwin;
+                    patternedtr::display();
 
-                        break;
-                        //Wave : Pattern View -- Wave : Instrument View
-                    case 'e':
-                    case 'E':
-                        inputwin = wavewin;
-                        wingroup = ptrnwin;
-                        patternedtr::display();
+                    break;
+                case 'D':
+                case 'd':
+                    inputwin = wavewin;
+                    wingroup = instwin;
+                    instedtr::display();
 
-                        break;
-                    case 'D':
-                    case 'd':
-                        inputwin = wavewin;
-                        wingroup = instwin;
-                        instedtr::display();
+                    break;
+                case 'r':
+                case 'R':
+                    //Pulse : Pattern View
+                    inputwin = pulsewin;
+                    wingroup = ptrnwin;
+                    patternedtr::display();
 
-                        break;
-                    case 'r':
-                    case 'R':
-                        //Pulse : Pattern View
-                        inputwin = pulsewin;
-                        wingroup = ptrnwin;
-                        patternedtr::display();
+                    break;
+                case 'f':
+                case 'F':
+                    //Pulse : Instrument View
+                    inputwin = pulsewin;
+                    wingroup = instwin;
+                    instedtr::display();
 
-                        break;
-                    case 'f':
-                    case 'F':
-                        //Pulse : Instrument View
-                        inputwin = pulsewin;
-                        wingroup = instwin;
-                        instedtr::display();
-
-                        break;
-                    case 'a':
-                    case 'A':
-                        //Volume : Instrument View
-                        inputwin = volwin;
-                        wingroup = instwin;
-                        instedtr::display();
-                        break;
-                }
+                    break;
+                case 'a':
+                case 'A':
+                    //Volume : Instrument View
+                    inputwin = volwin;
+                    wingroup = instwin;
+                    instedtr::display();
+                    break;
             }
 
         }
         //Command bar
-        else if(ch == ':' && (!patternedtr::metaobjedit|| !instedtr::instobjedit) )
+        else if(ch == ':' && (!patternedtr::metaobjedit && !instedtr::instobjedit) )
         {
             //If command not cancelled attempt to do it
             if(editor::getCommand(""))
