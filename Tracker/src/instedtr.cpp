@@ -497,13 +497,13 @@ void instedtr::displayInst()
     mvprintw(2, x+8, "^", editor::instwin);
 
 
-    charBuffer[23] =0;
+    charBuffer[INST_NAME_SIZE] =0;
     //INST NAME
     isselected = setInstAttribs(0, 5);
     if(isselected && instobjedit)
     {
-        editor::copy(charInputBuffer, charBuffer, 23);
-        editor::makeUnderlines(charBuffer, 22);
+        editor::copy(charInputBuffer, charBuffer, INST_NAME_SIZE);
+        editor::makeUnderlines(charBuffer, INST_NAME_SIZE-1);
         mvprintw(2, x+10, charBuffer, instwin);
         attron(COLOR_PAIR(patternedtr::COL_META_UU));
         char sel[2];
@@ -513,8 +513,8 @@ void instedtr::displayInst()
     }
     else
     {
-        editor::copy(selinst->getName(), charBuffer, 23);
-        editor::makeUnderlines(charBuffer, 22);
+        editor::copy(selinst->getName(), charBuffer, INST_NAME_SIZE);
+        editor::makeUnderlines(charBuffer, INST_NAME_SIZE-1);
         mvprintw(2, x+10, charBuffer, editor::instwin);
     }
 
@@ -1353,9 +1353,10 @@ void instedtr::startInstEditing()
         }
         else if(selinstobj == 5)
         {
-            editor::copy(editor::selinst->getName(), editor::charInputBuffer, 23);
+            editor::copy(editor::selinst->getName(), editor::charInputBuffer, INST_NAME_SIZE);
             editor::textCursorPos = strlen(editor::selinst->getName());
-            //TODO:COPY inst name here
+            if(editor::textCursorPos > INST_NAME_SIZE-2)
+                editor::textCursorPos = INST_NAME_SIZE-2;
             instobjedit = true;
         }
     }
@@ -1399,28 +1400,17 @@ void instedtr::instEdit(int in)
                     }
                 else if(in == KEY_RIGHT)
                 {
-                    if(textCursorPos < strlen(charInputBuffer))
+                    if(textCursorPos < INST_NAME_SIZE-2)
                         textCursorPos++;
                 }
                 }
             else if(in == KEY_DC)
             {
-                int length = strlen(charInputBuffer);
+                int length = INST_NAME_SIZE;
                 for(int i = textCursorPos+1; i < length; i++)
-                    charInputBuffer[i-1] = charInputBuffer[i];
-                    charInputBuffer[length-1] = 0;
+                    charInputBuffer[i-1] = charInputBuffer[i];//this is okay because charInputBuffer is larger than INST_NAME_SIZE
                     if(textCursorPos >= length && length > 0)
                         textCursorPos--;
-
-            }
-            else if(in == KEY_IC)
-            {
-                int length = strlen(charInputBuffer);
-                for(int i = length; i > textCursorPos; i--)
-                    charInputBuffer[i] = charInputBuffer[i-1];
-                charInputBuffer[length+1] = 0;
-                charInputBuffer[textCursorPos] = ' ';
-
             }
             else if(in == KEY_HOME)
                 textCursorPos = 0;
@@ -1430,9 +1420,14 @@ void instedtr::instEdit(int in)
             {
                 if(in <= 'z' && in >= ' ')
                 {
+                    int length = INST_NAME_SIZE;
+                    for(int i = length-2; i > textCursorPos; i--)
+                        charInputBuffer[i] = charInputBuffer[i-1];
+                    charInputBuffer[length-1] = 0;
                     charInputBuffer[textCursorPos] = in;
-                    if(textCursorPos < strlen(charInputBuffer))
+                    if(textCursorPos < INST_NAME_SIZE-2)
                         textCursorPos++;
+
                 }
             }
         }
@@ -1593,8 +1588,7 @@ void instedtr::doneInstEditing()
     {
         if(selinstobj == 5)
         {
-            editor::copy(editor::charInputBuffer,editor::selinst->getName(), 23);
-            //TODO:COPY inst name here
+            editor::copy(editor::charInputBuffer,editor::selinst->getName(), INST_NAME_SIZE);
         }
         else if(selinstobj == 6)//spinner
         {
