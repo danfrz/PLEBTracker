@@ -25,6 +25,8 @@
 #define CMDBAR_SIZE 128
 #define LASTSONG_SIZE 128
 
+#define ALT_BACKSPACE 127
+
 struct WIN
 {
     public:
