@@ -281,7 +281,8 @@ namespace patternedtr
         COL_TABLE_UU  = 5,
         COL_TABLE_UU_JUMP  = 30,
 
-        COL_CMDBAR_S  = 28;
+        COL_CMDBAR_U  = 28,
+        COL_CMDBAR_S  = 31;
 
     const unsigned char
         COL_PTRN_SSS = 8,

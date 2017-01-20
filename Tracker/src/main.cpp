@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     noecho();
 
     clear();
-    printw("Welcome to PLEBTracker!  [Press any key to continue]  20160114-20160705\n\n");
+    printw("Welcome to PLEBTracker!  [Press any key to continue]  20160114-20170120\n\n");
     printw("To view logs produced by plebtrk see\n");
     printw("    /var/tmp/plebtrk/trklog.log and\n");
     printw("    /var/tmp/plebtrk/itplog.log");
@@ -131,6 +131,7 @@ int main(int argc, char *argv[])
         init_pair(COL_PTRN_MUTE_US  , COLOR_BLUE, COLOR_BLACK);
         init_pair(COL_PTRN_MUTE_UU  , COLOR_BLUE, COLOR_BLACK);
 
+        init_pair(COL_CMDBAR_U       , COLOR_WHITE, COLOR_BLUE);
         init_pair(COL_CMDBAR_S       , COLOR_BLACK, COLOR_WHITE);
 
         init_pair(COL_TABLE_SU_JUMP , COLOR_GREEN  , COLOR_BLACK);

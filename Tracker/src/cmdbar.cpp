@@ -135,6 +135,7 @@ bool editor::getCommand(const char * autocmd)
 
     //prepare cmdbar line  and charBuffer
     attroff(-1);
+    attron(COLOR_PAIR(patternedtr::COL_CMDBAR_U));
     mvprintw(ypos, 0, std::string(WIN_WIDTH, ' ').c_str(), stdscr);
     mvprintw(ypos, 0, ":", stdscr);
     mvprintw(ypos, 1, charBuffer, stdscr);
@@ -219,6 +220,7 @@ bool editor::getCommand(const char * autocmd)
         editor::copy(charInputBuffer, charBuffer, CMDBAR_SIZE);
         editor::makeUnderlines(charBuffer, CMDBAR_SIZE-1);
         attroff(-1);
+        attron(COLOR_PAIR(patternedtr::COL_CMDBAR_U));
         mvprintw(ypos, 1, charBuffer, stdscr);
 
         //print cursor
