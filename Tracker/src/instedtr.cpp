@@ -169,6 +169,29 @@ void instedtr::chgSelInstObj(int i)
 }
 
 
+void printline(const char *c, unsigned char y0, unsigned char y1)
+{
+    using editor::charBuffer;
+    int rem = editor::WIN_WIDTH % 8;
+    int div = editor::WIN_WIDTH / 8;
+
+    for(int i = 0; i < 8; i++)
+        charBuffer[i]=c[0];
+    charBuffer[9] = 0;
+
+    for(int i = 0; i < div; i++)
+    {
+        mvprintw(y1,8*i, charBuffer, editor::instwin);
+        mvprintw(y0,8*i, charBuffer, editor::instwin);
+    }
+    for(int i = 8*div; i < editor::WIN_WIDTH; i++)
+    {
+        mvprintw(y1,i, c, editor::instwin);
+        mvprintw(y0,i, c, editor::instwin);
+    }
+}
+
+
 
 
 void instedtr::display()
@@ -185,6 +208,8 @@ void instedtr::display()
         mvprintw(editor::WIN_HEIGHT-1, 0, "Editing a field: Press TAB to cancel or ENTER to commit", stdscr);
         attroff(A_BOLD);
     }
+
+    printline(" ", 0, editor::WIN_HEIGHT - 1);
 }
 
 void instedtr::displayWav()
@@ -411,27 +436,7 @@ void instedtr::displayPulse()
 
 
 
-void printline(const char *c, unsigned char y0, unsigned char y1)
-{
-    using editor::charBuffer;
-    int rem = editor::WIN_WIDTH % 8;
-    int div = editor::WIN_WIDTH / 8;
 
-    for(int i = 0; i < 8; i++)
-        charBuffer[i]=c[0];
-    charBuffer[9] = 0;
-
-    for(int i = 0; i < div; i++)
-    {
-        mvprintw(y1,8*i, charBuffer, editor::instwin);
-        mvprintw(y0,8*i, charBuffer, editor::instwin);
-    }
-    for(int i = 8*div; i < editor::WIN_WIDTH; i++)
-    {
-        mvprintw(y1,i, c, editor::instwin);
-        mvprintw(y0,i, c, editor::instwin);
-    }
-}
 
 
 void instedtr::displayInst()
@@ -577,7 +582,7 @@ void instedtr::displayInst()
 void instedtr::displayEnvelope()
 {
     int x = 11;
-    int y = 5;
+    int y = 8;
     int height = editor::WIN_HEIGHT - 4  - y;
     int width = editor::WIN_WIDTH   - 12 - 13 - 11;
 
@@ -628,23 +633,39 @@ void instedtr::displayEnvelope()
 
             if(i == selvolrow)
             {
-                attron(COLOR_PAIR(patternedtr::COL_META_SSS));
-                mvprintw(py, px, "#", editor::instwin);
-                attroff(COLOR_PAIR(patternedtr::COL_META_SSS));
+                attron(COLOR_PAIR(patternedtr::COL_CMDBAR_S));
+
+                mvprintw(py, px-1, "|#|", editor::instwin);
+
+                if(py < bot)
+                {
+                    mvprintw(py+1, px-1, "^^^", editor::instwin);
+                }
+                if(py > y)
+                {
+                    mvprintw(py-1, px-1, "vvv", editor::instwin);
+                }
+                attroff(COLOR_PAIR(patternedtr::COL_CMDBAR_S));
 
             }
             else
+            {
+                attron(COLOR_PAIR(patternedtr::COL_META_SSS));
                 mvprintw(py, px, "o", editor::instwin);
+                attroff(COLOR_PAIR(patternedtr::COL_META_SSS));
+            }
 
             px--;
             //draw lines
             if(lx != 0 && px > lx)//the envelope will never be at the left of the screen, okay to use as sentinel
             {
+                attron(COLOR_PAIR(patternedtr::COL_META_SSS));
                 float dif = px-lx;
                 for(int g = 0; g <= dif; g++)
                 {
                     mvprintw(ly + (py-ly)*(g/dif), lx+g, ".", editor::instwin);
                 }
+                attroff(COLOR_PAIR(patternedtr::COL_META_SSS));
             }
             lx = px+2;
             ly = py;
@@ -1674,7 +1695,6 @@ void instedtr::doneInstEditing()
         }
     }
 
-    mvprintw(editor::WIN_HEIGHT-1, 0, "                                                       ", stdscr);
 
 }
 
