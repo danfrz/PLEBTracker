@@ -226,34 +226,34 @@ Description:
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void processMetaInput(int in)
+Function: void processMetaInput(wint_t in)
 Description:
    Interprets input as input intended for the metadata window
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void processMetaInput(int in);
+    void processMetaInput(wint_t in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void processPatternInput(int in)
+Function: void processPatternInput(wint_t in)
 Description:
    Interprets input as input for the pattern editor
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void processPatternInput(int in);
+    void processPatternInput(wint_t in);
 
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void entryInput(int in)
+Function: void entryInput(wint_t in)
 Description:
    Evaluates the input when intended for an entry in the pattern editor
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void entryInput(int in);
+    void entryInput(wint_t in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void processInput(int in)
+Function: void processInput(wint_t in)
 Description:
     Sends the input to the appropriate window
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void processInput(int in);
+    void processInput(wint_t in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void startMetaEditing()
@@ -263,14 +263,14 @@ Description:
     void startMetaEditing();
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void metaEdit(int in)
+Function: void metaEdit(wint_t in)
 Description:
     An input event performed on objects in the meta window after
     a startEditing event has been fired and before doneEditing.
 
     Only buffers are modified, so that the user can back out of an edit.
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void metaEdit(int in);
+    void metaEdit(wint_t in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void doneMetaEditing()

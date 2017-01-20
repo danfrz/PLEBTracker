@@ -819,7 +819,7 @@ bool alphanumeric(int c)
     return(c >='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9');
 }
 
-void patternedtr::processPatternInput(int in)
+void patternedtr::processPatternInput(wint_t in)
 {
     switch(in)
     {
@@ -949,7 +949,7 @@ void patternedtr::processPatternInput(int in)
 
 }
 
-void patternedtr::entryInput(int in)
+void patternedtr::entryInput(wint_t in)
 {
     bool ishex = editor::validateHexChar(in);
     bool resolved = false;
@@ -998,7 +998,11 @@ void patternedtr::entryInput(int in)
                 }
                 catch(std::out_of_range &o) //notemap.at causes this if not found
                 {
-                    if(in == KEY_DC)
+                    if(in == ALT_BACKSPACE)
+                    {
+                        patternedtr::selptrn->deleteRow(patternedtr::seltrack, patternedtr::selrow, 1);
+                    }
+                    else if(in == KEY_DC)
                     {
                         unsigned int entry = selptrn->at(seltrack, selrow);
                         if((entry & R_INSTRUMENT) != R_INSTRUMENT)
@@ -1052,7 +1056,11 @@ void patternedtr::entryInput(int in)
             }
             else
             {
-                if(in == KEY_DC)//DELETE
+                if(in == ALT_BACKSPACE)
+                {
+                    patternedtr::selptrn->deleteRow(patternedtr::seltrack, patternedtr::selrow, 1);
+                }
+                else if(in == KEY_DC)//DELETE
                 {
                     unsigned int entry = selptrn->at(seltrack, selrow);
                     entry |= R_INSTRUMENT;
@@ -1083,7 +1091,11 @@ void patternedtr::entryInput(int in)
             }
             else
             {
-                if(in == KEY_DC)//DELETE
+                if(in == ALT_BACKSPACE)
+                {
+                    patternedtr::selptrn->deleteRow(patternedtr::seltrack, patternedtr::selrow, 1);
+                }
+                else if(in == KEY_DC)//DELETE
                 {
                     unsigned int entry = selptrn->at(seltrack, selrow);
                     entry = R_EMPTY;
@@ -1105,7 +1117,11 @@ void patternedtr::entryInput(int in)
             }
             else
             {
-                if(in == KEY_DC) //DELETE
+                if(in == ALT_BACKSPACE)
+                {
+                    patternedtr::selptrn->deleteRow(patternedtr::seltrack, patternedtr::selrow, 1);
+                }
+                else if(in == KEY_DC) //DELETE
                 {
                     unsigned int entry = selptrn->at(seltrack, selrow);
                     val = editor::charHex(in);
@@ -1131,7 +1147,11 @@ void patternedtr::entryInput(int in)
             }
             else
             {
-                if(in == KEY_DC)//DELETE
+                if(in == ALT_BACKSPACE)
+                {
+                    patternedtr::selptrn->deleteRow(patternedtr::seltrack, patternedtr::selrow, 1);
+                }
+                else if(in == KEY_DC)//DELETE
                 {
                     unsigned int entry = selptrn->at(seltrack, selrow);
                     val = editor::charHex(in);
@@ -1146,7 +1166,7 @@ void patternedtr::entryInput(int in)
 }
 
 
-void patternedtr::processInput(int in)
+void patternedtr::processInput(wint_t in)
 {
 
     if(editor::inputwin == editor::metawin)
