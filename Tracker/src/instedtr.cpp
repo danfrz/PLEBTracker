@@ -177,6 +177,14 @@ void instedtr::display()
     displayWav();
     displayPulse();
     displayVol();
+
+    //Print metaobjedit information
+    if(instobjedit)
+    {
+        attron(A_BOLD);
+        mvprintw(editor::WIN_HEIGHT-1, 0, "Editing a field: Press TAB to cancel or ENTER to commit", stdscr);
+        attroff(A_BOLD);
+    }
 }
 
 void instedtr::displayWav()
@@ -755,7 +763,7 @@ void instedtr::displayVol()
 
 }
 
-void instedtr::processInput(int in)
+void instedtr::processInput(wint_t in)
 {
     if(editor::inputwin == editor::instwin)
         processInputInst(in);    
@@ -768,7 +776,7 @@ void instedtr::processInput(int in)
 }
 
 
-void instedtr::processInputInst(int in)
+void instedtr::processInputInst(wint_t in)
 {
     using editor::song;
     bool ishex = editor::validateHexChar(in);
@@ -797,7 +805,7 @@ void instedtr::processInputInst(int in)
                 chgSelInstObj(0);
                 return;
             case KEY_END:
-                chgSelInstObj(18);
+                chgSelInstObj(18); //18 is fine because chgSel does verification anyways
                 return;
             case ' ':
                 if(selinstrow == 1 && selinstobj == 0)
@@ -823,7 +831,7 @@ void instedtr::processInputInst(int in)
 
 }
 
-void instedtr::processInputVol(int in)
+void instedtr::processInputVol(wint_t in)
 {
     using editor::song;
     using editor::selinst;
@@ -869,7 +877,13 @@ void instedtr::processInputVol(int in)
             if(entries != 1)
                 selinst->removeVolEntry(selvolrow);
             chgSelVolRow(0);
-            //TODO: go through instruments and increment WAV indicies accordingly
+            return;
+        case ALT_BACKSPACE: 
+            if(selvolrow >= entries)
+                return;
+            if(entries != 1)
+                selinst->removeVolEntry(selvolrow);
+            chgSelVolRow(-1);
             return;
         case  '\n':
             volclipboard = selinst->getVolEntry(selvolrow);
@@ -923,7 +937,7 @@ void instedtr::processInputVol(int in)
 
 
 }
-void instedtr::processInputWav(int in)
+void instedtr::processInputWav(wint_t in)
 {
     using editor::song;
     bool ishex = editor::validateHexChar(in);
@@ -966,12 +980,21 @@ void instedtr::processInputWav(int in)
                     song->insertWaveEntry(selwavrow, song->getWaveEntry(selwavrow));
                 return;
             case KEY_DC: 
+
                 if(selwavrow >= entries)
                     return;
                 if(entries != 0)
                     song->removeWaveEntry(selwavrow);
                 chgSelWavRow(0);
                 return;
+            case ALT_BACKSPACE: 
+                if(selwavrow >= entries)
+                    return;
+                if(entries != 0)
+                    song->removeWaveEntry(selwavrow);
+                chgSelWavRow(-1);
+                return;
+
             case  '\n':
                 waveclipboard = song->getWaveEntry(selwavrow);
                 chgSelWavRow(1);
@@ -1026,7 +1049,7 @@ void instedtr::processInputWav(int in)
 
 }
 
-void instedtr::processInputPulse(int in)
+void instedtr::processInputPulse(wint_t in)
 {
     using editor::song;
     bool ishex = editor::validateHexChar(in);
@@ -1068,12 +1091,19 @@ void instedtr::processInputPulse(int in)
                 else
                     song->insertPulseEntry(selpulrow, song->getPulseEntry(selpulrow));
                 return;
-            case KEY_DC: //"Delete Character"? (rolls eyes) come on guys.
+            case KEY_DC: 
                 if(selpulrow >= entries)
                     return;
                 if(entries != 0)
                     song->removePulseEntry(selpulrow);
                 chgSelPulRow(0);
+                return;
+            case ALT_BACKSPACE:
+                if(selpulrow >= entries)
+                    return;
+                if(entries != 0)
+                    song->removePulseEntry(selpulrow);
+                chgSelPulRow(-1);
                 return;
             case  '\n':
                 pulseclipboard = song->getPulseEntry(selpulrow);
@@ -1378,7 +1408,7 @@ void instedtr::startInstEditing()
     }
 }
 
-void instedtr::instEdit(int in)
+void instedtr::instEdit(wint_t in)
 {
     using namespace editor;
     bool ishex = editor::validateHexChar(in);
@@ -1400,22 +1430,42 @@ void instedtr::instEdit(int in)
                     }
                 else if(in == KEY_RIGHT)
                 {
-                    if(textCursorPos < INST_NAME_SIZE-2)
-                        textCursorPos++;
+                    int length = strlen(charInputBuffer);
+
+                    if(textCursorPos < length)
+                        if(textCursorPos < INST_NAME_SIZE-2)
+                            textCursorPos++;
                 }
+            }
+
+            else if(in == ALT_BACKSPACE)
+            {
+                if(textCursorPos > 0)
+                {
+                    int length = INST_NAME_SIZE;
+                    for(int i = textCursorPos; i < length; i++)
+                        charInputBuffer[i-1] = charInputBuffer[i];//this is okay because charInputBuffer is larger than INST_NAME_SIZE
+                    textCursorPos--;
                 }
+            }
             else if(in == KEY_DC)
             {
-                int length = INST_NAME_SIZE;
-                for(int i = textCursorPos+1; i < length; i++)
+                int length = strlen(charInputBuffer);
+                for(int i = textCursorPos+1; i <= length; i++)
                     charInputBuffer[i-1] = charInputBuffer[i];//this is okay because charInputBuffer is larger than INST_NAME_SIZE
-                    if(textCursorPos >= length && length > 0)
-                        textCursorPos--;
+                if(textCursorPos >= length-1 && textCursorPos > 0)
+                    textCursorPos--;
             }
             else if(in == KEY_HOME)
                 textCursorPos = 0;
             else if(in == KEY_END)
-                textCursorPos = strlen(charInputBuffer);
+            {
+                int length = strlen(charInputBuffer);
+
+                if(length < INST_NAME_SIZE-1)
+                    textCursorPos = length;
+                else textCursorPos = INST_NAME_SIZE - 2;
+            }
             else
             {
                 if(in <= 'z' && in >= ' ')
@@ -1423,8 +1473,9 @@ void instedtr::instEdit(int in)
                     int length = INST_NAME_SIZE;
                     for(int i = length-2; i > textCursorPos; i--)
                         charInputBuffer[i] = charInputBuffer[i-1];
-                    charInputBuffer[length-1] = 0;
+
                     charInputBuffer[textCursorPos] = in;
+                    charInputBuffer[length-1] = 0;
                     if(textCursorPos < INST_NAME_SIZE-2)
                         textCursorPos++;
 
@@ -1551,6 +1602,7 @@ void instedtr::instEdit(int in)
                     numBuffer = song->numPulseEntries()-1;
                     break;
                 case KEY_DC:
+                case ALT_BACKSPACE:
                 case ' ':
                     numBuffer = 0xFFFF;
                     break;
@@ -1621,6 +1673,8 @@ void instedtr::doneInstEditing()
             }
         }
     }
+
+    mvprintw(editor::WIN_HEIGHT-1, 0, "                                                       ", stdscr);
 
 }
 

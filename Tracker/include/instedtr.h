@@ -180,41 +180,41 @@ Description:
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void processInput(int in)
+Function: void processInput(wint_t in)
 Description:
   Diverges keyboard input to other processInput functions depending on
   selected window (editor::inputwin)
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void processInput(int in);
+    void processInput(wint_t in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void processInputWav(int in)
+Function: void processInputWav(wint_t in)
 Description:
    Process keyboard input for the wave table
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void processInputWav(int in);
+    void processInputWav(wint_t in);
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void processInputPulse(int in)
+Function: void processInputPulse(wint_t in)
 Description:
    Process keyboard input for the wave table
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void processInputPulse(int in);
+    void processInputPulse(wint_t in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void processInputVol(int in)
+Function: void processInputVol(wint_t in)
 Description:
    Process keyboard input for the volume table
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void processInputVol(int in);
+    void processInputVol(wint_t in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void processInputInst(int in)
+Function: void processInputInst(wint_t in)
 Description:
    Process keyboard input for the instrument editor window
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void processInputInst(int in);
+    void processInputInst(wint_t in);
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
@@ -231,14 +231,14 @@ Description:
     void startInstEditing();
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void instEdit(int in)
+Function: void instEdit(wint_t in)
 Description:
    This is the function that handles keyboard events while the input window
    is consuming input.
    Fields that are numeric use numBuffer while editing.
    Fields that are textual use charInputBuffer while editing.
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void instEdit(int in);
+    void instEdit(wint_t in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void doneInstEditing()
