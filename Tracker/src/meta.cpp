@@ -241,7 +241,7 @@ unsigned char patternedtr::inferScaleType(unsigned char *scale)
 }
 
 
-void patternedtr::generateScaleFromType(unsigned char *scale, unsigned char scalespnr)
+bool patternedtr::generateScaleFromType(unsigned char *scale, unsigned char scalespnr)
 {
 
     using namespace editor;
@@ -278,12 +278,15 @@ void patternedtr::generateScaleFromType(unsigned char *scale, unsigned char scal
         case SCALE_LOCRIAN:
             strcpy((char*)scale, "1221222");
             break;
+        default:
+            return false;
     }
     int i;
     for(i = 0; i < CHROMATIC_NOTES && scale[i] != 0; i++)
         scale[i] -= '0';
     for(; i < CHROMATIC_NOTES; i++)
         scale[i] = 0;
+    return true;
 
 }
 

@@ -12,6 +12,7 @@
 #include "instedtr.h"
 #include "daemoncomm.h"
 #include "cmdbar.h"
+#include <algorithm>
 
 namespace patternedtr
 {
@@ -166,7 +167,7 @@ Description:
    Based on the scale type populated the scale with the appropriate
    semitone offsets.
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void generateScaleFromType(unsigned char *scale, unsigned char scalespnr);
+    bool generateScaleFromType(unsigned char *scale, unsigned char scalespnr);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void display()

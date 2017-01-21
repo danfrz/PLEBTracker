@@ -66,77 +66,55 @@ const int white_octswitch = 10;
 //Needs testing ---v
 unsigned int patternedtr::toKey(const unsigned int &entry, const unsigned char *scale, const unsigned char &key)
 {
-    unsigned int notes_in_key[12];
-    unsigned int note = entry & R_NOTE;
+    unsigned int notes_in_key[CHROMATIC_NOTES];
+    unsigned int note = (entry & R_NOTE) >> RI_NOTE;
     unsigned int last;
     unsigned int lower = 0;
-    unsigned int higher = -1;
 
-    unsigned int base = key*0x02000000;
+    unsigned int base = key;
     int acc, entries;
-    for(acc = 0, entries = 0; acc < 12 && entries < 11 && scale[entries] != 0; entries++)
+    for(acc = 0, entries = 0; acc < CHROMATIC_NOTES && entries < CHROMATIC_NOTES-1 && scale[entries] != 0; entries++)
         acc += scale[entries];
-    if(entries > 11)
-        entries = 11;
-    entries-=1;
+    if(entries > CHROMATIC_NOTES-1)
+        entries = CHROMATIC_NOTES-1;
 
-    last = addNotes(base, 0x00000000) & R_NOTE;
+    last = base; 
     notes_in_key[0]= last;
 
     for(int j  = 0; j < entries; j++)
     {
-        last = addNotes(last, scale[j]*0x02000000) & R_NOTE;
+        last = (last + scale[j]) % CHROMATIC_NOTES;
         notes_in_key[j+1] = last;
     }
 
+    // Don't use std::end here because that includes unused fields
+    std::sort(std::begin(notes_in_key), std::begin(notes_in_key)+entries);
+
+
+    if(note < notes_in_key[0])
+    {
+        //Return notes_in_key[entries-1]
+        //Subtract one octave from the entry, then cut out the note of the entry
+        //and set the note to the highest note in the notes_in_key
+        return ((entry - 0x20000000) & (~R_NOTE)) | (notes_in_key[entries-1]*0x02000000);
+    }
+
+    lower = notes_in_key[0];
     for(int i = 0; i < entries; i++)
     {
         if(notes_in_key[i] == note)
             return entry;
 
-        //Because note_in_key arent sorted. Sorting them would be helpful
-        //and invalidate a lot of unneccessary validation in this function
 
-        if(notes_in_key[i] > lower && notes_in_key[i] < note)
-            lower = notes_in_key[i];
-        else if(notes_in_key[i] < higher && notes_in_key[i] > note)
-            higher = notes_in_key[i];
+        if(notes_in_key[i] > note) 
+            break;
+        lower = notes_in_key[i];
     }
 
-    float dif = higher - lower;
-    int x = note - lower;
-
-
-    //clear note to set to higher or lower note in the key
-    //std::cerr << "ENTRY:" << std::hex << entry << ", " << note << '\n';
-    //Im a little dubious about this, it seems to only go low
-    if( (x / dif) > .5f)
-    {
-        
-        note = entry & R_OCTAVE;
-        note |= higher;
-        //Correct octave, note must be higher,
-        //this is a consequence of omitting octaves in notes_in_key
-        if(note < entry)
-            note = (note + 0x20000000) & R_PITCHSEG;
-        //std::cerr << "HIGH:" << std::hex << note <<'\n';
-        return (entry & (~R_PITCHSEG)) | note;
-    }
-    else
-    {
-        note = entry & (~R_NOTE);
-        note |= lower;
-        //Correct octave, note must be lower
-        if(note > entry)
-            note = (note - 0x20000000) & R_PITCHSEG;
-        //std::cerr << "LOW :" << std::hex << note <<'\n';
-        return (entry & (~R_PITCHSEG)) | note;
-    }
-
+    //use lower's note
+    //keeps the octave, clears the old note, and sets the new note
+    return (entry & (~R_NOTE)) | (lower*0x02000000);
 }   
-
-
-
 
 
 

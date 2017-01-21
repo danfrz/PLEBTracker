@@ -112,16 +112,26 @@ void testToKey()
     using namespace patternedtr;
     using std::cout;
 
+    editor::initializeScaleMap();
+
     unsigned char scale[12];
     unsigned char spinner = 0;
     //Need a char (not const) for parseScale
     char a[24];
-    const char *scalename = "major";
+    const char *scalename = "maj";
     for(int i = 0; i < strlen(scalename); i++)
         a[i] = scalename[i];
     a[strlen(scalename)] = 0;
-    editor::parseScale(a, spinner, scale);
+    bool scc = editor::parseScale(a, spinner, scale);
 
+    if(!scc)
+    {
+        cout << "Failed to parse scale using " << a << '\n';
+        return;
+    }
+    for(int i = 0; i < 12; i++)
+        cout << (char)(scale[i] + '0');
+    cout << '\n';
 
     unsigned int basenote;
     unsigned int out;

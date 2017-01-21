@@ -29,7 +29,7 @@ $(ODIR)/%.o: tests/%.cpp $(DEPS)
 plebtrkraw: $(OBJ) ../obj/main.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-cmdbartest: $(OBJ) ../obj/transposeBugFix.o
+transposeTest: $(OBJ) ../obj/transposeBugFix.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 

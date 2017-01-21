@@ -334,7 +334,7 @@ void editor::initializeScaleMap()
     scalenamemap["LOC"] = SCALE_LOCRIAN;
     scalenamemap["LOCR"] = SCALE_LOCRIAN;
 }
-
+#include <iostream>
 
 bool editor::parseScale(char *str, unsigned char &spinner, unsigned char *bfr)
 {
@@ -343,20 +343,20 @@ bool editor::parseScale(char *str, unsigned char &spinner, unsigned char *bfr)
         //parse as sequence
         int acc, i;
 
-        for(acc = 0, i = 0; acc < 12 && i < 11 && str[i] != 0; i++)
+        for(acc = 0, i = 0; acc < CHROMATIC_NOTES && i < CHROMATIC_NOTES-1 && str[i] != 0; i++)
         {
             bfr[i] = str[i]- '0';
             acc += bfr[i];
         }
-        if(acc > 12)
-            bfr[i-1] -= acc - 12;
-        else if(acc < 12)
+        if(acc > CHROMATIC_NOTES)
+            bfr[i-1] -= acc - CHROMATIC_NOTES;
+        else if(acc < CHROMATIC_NOTES)
         {
-            bfr[i] = 12 - acc;
+            bfr[i] = CHROMATIC_NOTES - acc;
             acc += bfr[i];
             i++;
         }
-        for(;i < 12; i++)
+        for(;i < CHROMATIC_NOTES; i++)
             bfr[i] = 0;
         patternedtr::inferScaleType(bfr);
     }
@@ -372,9 +372,9 @@ bool editor::parseScale(char *str, unsigned char &spinner, unsigned char *bfr)
        
         try
         {
-            int num = scalenamemap[std::string(str)];
-            spinner = num;
-            patternedtr::generateScaleFromType(bfr, spinner);
+            spinner = scalenamemap.at(std::string(str));
+            bool scc = patternedtr::generateScaleFromType(bfr, spinner);
+            return scc;
         }
         catch(const std::out_of_range &e)
         {
@@ -1569,7 +1569,7 @@ void editor::handle_transkey(std::vector<char*> &params)
     if(params.size() > 0)
     {
 
-        unsigned char scalebuffer[12]; //in case the user specifies a scale
+        unsigned char scalebuffer[CHROMATIC_NOTES]; //in case the user specifies a scale
         unsigned char spinner = patternedtr::scalespinner;
 
         unsigned char *scale = patternedtr::scaleconst;
@@ -1995,14 +1995,14 @@ void editor::handle_key(std::vector<char*> &params)
         patternedtr::key = parseKeySignature(params.at(0));
         if(params.size() > 1)
         {
-            unsigned char scalebfr[12];
+            unsigned char scalebfr[CHROMATIC_NOTES];
             bool scc = parseScale(params.at(1), scalespinner, scalebfr);
             if(!scc)
             {
                 inform("Key (key): param 2(scale) not recognized");
                 return;
             }
-            for(int i = 0; i < 12; i++)
+            for(int i = 0; i < CHROMATIC_NOTES; i++)
                 scaleconst[i] = scalebfr[i];
             scalespinner = patternedtr::inferScaleType(scaleconst);
         }
@@ -2020,14 +2020,14 @@ void editor::handle_scale(std::vector<char*> &params)
     using patternedtr::scaleconst;
     if(params.size() > 0)
     {
-            unsigned char scalebfr[12];
+            unsigned char scalebfr[CHROMATIC_NOTES];
             bool scc = parseScale(params.at(0), scalespinner, scalebfr);
             if(!scc)
             {
                 inform("Set Scale (scale): param 1(scale) not recognized");
                 return;
             }
-            for(int i = 0; i < 12; i++)
+            for(int i = 0; i < CHROMATIC_NOTES; i++)
                 scaleconst[i] = scalebfr[i];
             scalespinner = patternedtr::inferScaleType(scaleconst);
     }
