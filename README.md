@@ -3,7 +3,8 @@ PLEBTracker is a linux console based audio tracker program inspired by goattrack
 ![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/images/PLEBTracker_MainScreen.png)
 *Pattern editor, main song editor window*
 ![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/images/PLEBTracker_InstrumentEditor.png)
-*Instrument Editor, with volume envelope visualization*
+*Instrument Editor, with volume envelope visualization. The Volume table on the left determines the shape of the envelope*
+
 PLEBTracker is something I wrote because I wanted to have some experience with audio,
 and wanted to implement what I've been learning by using other trackers and studying music theory with the help of my piano teacher.
 
