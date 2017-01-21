@@ -1,7 +1,9 @@
 # PLEBTracker
 PLEBTracker is a linux console based audio tracker program inspired by goattracker and milkytracker.
-![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/images/plebtracker.png)
-
+![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/images/PLEBTracker_MainScreen.png)
+*Pattern editor, main song editor window*
+![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/images/PLEBTracker_InstrumentEditor.png)
+*Instrument Editor, with volume envelope visualization*
 PLEBTracker is something I wrote because I wanted to have some experience with audio,
 and wanted to implement what I've been learning by using other trackers and studying music theory with the help of my piano teacher.
 
@@ -9,11 +11,15 @@ With this program, like other trackers, you can compose music (.plb modules) and
 All of the sounds produced in this tracker are synthesized, meaning there are no samples.
 
 ##Requirements
-   program...  (package...   )                       
-   ncurses     (ncurses      )                       
-   aplay       (alsa-utils   )                       
-   inotifywait (inotify-tools)                       
-   sudo        (sudo         )                       
+   program...  (package...   )
+
+   ncurses     (ncurses)    
+   aplay       (alsa-utils) 
+   inotifywait (inotify-tools)
+   sudo        (sudo)
+
+Some distributions may not have these exact package names but
+these names should work for at least Archlinux and Debian.
 
 ##Installation
 Clone this project from git
