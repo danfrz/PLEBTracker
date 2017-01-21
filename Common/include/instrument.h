@@ -8,6 +8,10 @@
 #define INST_VOL_SIZE 256
 #define INST_VOL_LOOP_MAX_JUMPS 64
 
+typedef unsigned char sample_res; //The sample resolution used for most of the interpreter
+typedef unsigned char sample_res_unsigned; //The resolution that is gauranteed to be unsigned
+typedef char sample_res_signed; //The resolution that is gauranteed to be signed
+
 class Instrument
 {
     private:
@@ -172,7 +176,7 @@ Description
    seg should be an accumulation of the number of row segments that have passed
    since the last time the inst changed current vol table index (cur)
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-        unsigned char getVolume(unsigned char &index, unsigned char &seg, unsigned char &jump_param, unsigned char &last);
+        sample_res_unsigned getVolume(unsigned char &index, unsigned char &seg, unsigned char &jump_param, sample_res_unsigned &last);
 
 };
 

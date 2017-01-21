@@ -2,22 +2,23 @@
 #define GENERATOR_H_
 #include <cmath>
 #include <random>
+#include "instrument.h"
 
-#define PARAM_PULSE 0       //use index to param[] casted as short[]
-#define PARAM_CUSTOM_JUMP 1 //short
-#define PARAM_LOOP 4        //byte
-#define PARAM_WAVE1 5       //byte
-#define PARAM_WAVE2 6       //byte
-#define PARAM_CHAIN 7       //byte
-#define PARAM_LAST 8        //byte
-#define PARAM_PULSE2 5       //short
-#define PARAM_CUSTOM_JUMP2 6 //short
-#define PARAM_LOOP2 0xE      //byte
-#define PARAM_LOOP3 0xF      //byte
-#define PARAM_LOOP4 0x10      //byte
+struct paramtable
+{
+    unsigned short PULSE1;
+    unsigned short PULSE2;
+    unsigned short CUSTOM_JUMP, CUSTOM_JUMP2;
+    unsigned char LOOP, WAVE1, WAVE2, LOOP2, LOOP3, LOOP4;
+    sample_res CHAIN, LAST;
+
+    
+
+
+};
 
 //Form of a wave generator function 
-typedef void (*generator)(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+typedef void (*generator)(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
 //Two generator functions are used for multiplexing
 extern generator GEN_MUX1, GEN_MUX2;
@@ -27,9 +28,9 @@ extern generator GEN_MUX1, GEN_MUX2;
 //SAW WAVES||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 //|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-void genSaw(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSaw(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSawPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSawPulse(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
 
 
@@ -44,21 +45,21 @@ Function: void genSqr(uchar *bfr, uint period, uint amplitude, const ulong &len
 Description:
    Populate a buffer with a square wave
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-void genSqr(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSqr(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSqrPulse(unsigned char *bfr,  unsigned char *ptbl,const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSqrPulse(sample_res *bfr,  paramtable *ptbl,const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSqrPulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSqrPulse2(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSqrPulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSqrPulseHybrid(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSqrNES(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSqrNES(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSqrPulseNES(unsigned char *bfr,  unsigned char *ptbl,const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSqrPulseNES(sample_res *bfr,  paramtable *ptbl,const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSqrVTX(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSqrVTX(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSqrPulseVTX(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSqrPulseVTX(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
 
 //|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -72,65 +73,65 @@ Function: void genTri(uchar *bfr, uint period, uint amplitude, const ulong &len
 Description:
    Populate a buffer with a triangle wave
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-void genTri(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genTri(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genTriPulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genTriPulse(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
 
 //|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 //SINE WAVES|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 //|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-void genSine(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSine(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSinePulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSinePulse(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSinePulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSinePulse2(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genSinePulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genSinePulseHybrid(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genHalfSine(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genHalfSine(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genHalfSinePulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genHalfSinePulse(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genNSine(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genNSine(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genNSinePulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genNSinePulse(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genNSinePulse2(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genNSinePulse2(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genNSinePulseHybrid(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genNSinePulseHybrid(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genNHalfSine(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genNHalfSine(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
-void genNHalfSinePulse(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genNHalfSinePulse(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
 
 //|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 //NOISE WAVES||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 //|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-void genSilence(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genSilence(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &height, float &phase, const unsigned long &len);
 
-void genNoise_White(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
-void genNoise0(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
-void genNoise1(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
-void genNoise2(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
-void genNoise3(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
+void genNoise_White(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
+void genNoise0(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
+void genNoise1(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
+void genNoise2(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
+void genNoise3(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
 
 
 
-void genBongo(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genBongo(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &height, float &phase, const unsigned long &len);
 
-void genMuxShared(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
-void genMuxSwap(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
-void genMuxSwap2(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
-void genMuxPCTRL(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
-void genMuxP2CTRL(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
-void genMuxHPCTRL(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genMuxShared(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &height, float &phase, const unsigned long &len);
+void genMuxSwap(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &height, float &phase, const unsigned long &len);
+void genMuxSwap2(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &height, float &phase, const unsigned long &len);
+void genMuxPCTRL(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &height, float &phase, const unsigned long &len);
+void genMuxP2CTRL(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &height, float &phase, const unsigned long &len);
+void genMuxHPCTRL(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &height, float &phase, const unsigned long &len);
 
-void genWavePiecewise(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
-void genWavePiecewisePCTRL(unsigned char *bfr, unsigned char *ptbl,  const float &period, const unsigned char &amplitude, float &phase, const unsigned long &len);
-void genBlacmange(unsigned char *bfr, unsigned char *ptbl, const float &period, const unsigned char &height, float &phase, const unsigned long &len);
+void genWavePiecewise(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
+void genWavePiecewisePCTRL(sample_res *bfr, paramtable *ptbl,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);
+void genBlacmange(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &height, float &phase, const unsigned long &len);
 
 #endif

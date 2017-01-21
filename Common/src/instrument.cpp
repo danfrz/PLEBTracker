@@ -89,7 +89,7 @@ void Instrument::setVolTable(unsigned short *table)
         volTable[i] = table[i];
 }
 
-unsigned char Instrument::getVolume(unsigned char &index, unsigned char &seg, unsigned char &jump_param, unsigned char &last)
+sample_res_unsigned Instrument::getVolume(unsigned char &index, unsigned char &seg, unsigned char &jump_param, sample_res_unsigned &last)
 {
     //Destination time, the total amount of time it should take to get to the destination volume
     float desttime = (volTable[index] & 0x00FF);
@@ -165,7 +165,7 @@ unsigned char Instrument::getVolume(unsigned char &index, unsigned char &seg, un
         seg= 0;
         if(index < volEntries-1)
             index++;
-        last = destvol;
+        last = ((sample_res_unsigned) -1)*(destvol/255.0);
         return last;
     }
     
@@ -173,10 +173,17 @@ unsigned char Instrument::getVolume(unsigned char &index, unsigned char &seg, un
     //Interpolate between the previous volume and destination volume over the duration
     if(index >0)
     {
+
+        //last = last + ((0xFFFF*(dest/255.0) - last) * (seg/desttime));
+        //return  last; 
+
+        return last + ((((sample_res_unsigned)-1)*(destvol/255.0)-last)*(seg/desttime));
+
         //interpolate
-        return last + ((static_cast<float>(destvol) - last) * (seg/desttime));
+        //return last + ((static_cast<float>(destvol) - last) * (seg/desttime));
     }
-    last = destvol;
+
+    last = ((sample_res_unsigned) -1)*(destvol/255.0);
     return last;
 }
 

@@ -22,7 +22,7 @@ namespace itrp
 
     struct Track
     {
-        unsigned char *ptbl;
+        paramtable *ptbl;
         float lastfrq;
         float frq;
         float nextfrq;
@@ -44,7 +44,7 @@ namespace itrp
         unsigned char ptrnlastvol;
         unsigned char voljump;
 
-        unsigned char lastvol;
+        sample_res_unsigned lastvol;
         unsigned char voli;
         unsigned char volduracc;
     };
@@ -99,7 +99,7 @@ Function: void renderTick(unsigned char *buffer, const unsigned char &track, con
 Description:
    Render one segment (row subdivision)
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void renderTick(unsigned char *buffer, const unsigned char &track, const unsigned int &bytes);
+    void renderTick(sample_res *buffer, const unsigned char &track, const unsigned int &bytes);
 
 
 
@@ -109,7 +109,7 @@ Description:
     Render a pattern from row start to end.
     Returns a new unsigned byte array and sets bytes to the number of bytes initialized
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    unsigned char *renderPattern(int start, int end, unsigned int &bytes);
+   sample_res *renderPattern(int start, int end, unsigned int &bytes);
 
 
 
@@ -119,7 +119,7 @@ Description:
     Renders itrp::song, returns a new 2D unsigned 8 bit array, and remembers the
     amount of bytes in each one by storing them in `bytes`
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    unsigned char **renderSong(unsigned int *bytes);
+    sample_res **renderSong(unsigned int *bytes);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: unsigned char **renderSong(unsigned int *bytes, int start_order, int end_order, int start_row, int end_row)
@@ -127,7 +127,7 @@ Description:
     Renders itrp::song within the region provided, returns a new 2D unsigned 8 bit array,
     and remembers the amount of bytes in each one by storing them in `bytes`
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    unsigned char **renderSong(unsigned int *bytes, int start_order, int end_order, int start_row, int end_row);
+    sample_res **renderSong(unsigned int *bytes, int start_order, int end_order, int start_row, int end_row);
 
 
 
@@ -145,14 +145,14 @@ Function: void play(unsigned char **buffer, const unsigned int orders, unsigned 
 Description:
    Outputs the buffer to stdout
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void play(unsigned char **buffer, const unsigned int orders, unsigned int *bytes);
+    void play(sample_res **buffer, const unsigned int orders, unsigned int *bytes);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void play(unsigned char *buffer, unsigned int bytes)
 Description:
     Outputs the buffer to stdout
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void play(unsigned char *buffer, unsigned int bytes);
+    void play(sample_res *buffer, unsigned int bytes);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void print(unsigned char **buffer, const unsigned int orders, unsigned int *bytes)
@@ -160,7 +160,7 @@ Description:
     Outputs a visualization of each resulting byte to stdout, recommend
     piping the data into less.
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void print(unsigned char **buffer, const unsigned int orders, unsigned int *bytes);
+    void print(sample_res **buffer, const unsigned int orders, unsigned int *bytes);
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
@@ -171,7 +171,7 @@ Description:
    using the specified character
    where each character represents 'res' units
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void printByte(unsigned char &b, const char &character, const unsigned char &res);
+    void printSample(sample_res &b, const char &character, const unsigned int &res);
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
@@ -180,7 +180,7 @@ Function: void printBuffer(unsigned char *bfr, const unsigned long &len
 Description:
    Prints a whole buffer to the console
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void printBuffer(unsigned char *bfr, const unsigned long &len);
+    void printBuffer(sample_res *bfr, const unsigned long &len);
 
 
 /***\//////////////////////////////////////////////////////////////////////////    

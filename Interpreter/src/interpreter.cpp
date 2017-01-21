@@ -17,14 +17,14 @@ double logbase(double base, double val)
 }
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void printByte(uchar &b, const char &character, const uchar &res
+Function: void printSample(uchar &b, const char &character, const uchar &res
 
 Description:
    Prints a graphic for the height of a single byte to cout
    using the specified character.
    Each character represents 'res' (resolution) units.
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-void itrp::printByte(unsigned char &b, const char &character, const unsigned char &res)
+void itrp::printSample(sample_res &b, const char &character, const unsigned int &res)
 {
     while(b > res)
     {
@@ -41,10 +41,10 @@ Function: void printBuffer(unsigned char *bfr, const unsigned long &len
 Description:
    Prints a graphic for an entire byte buffer to the stdout
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-void itrp::printBuffer(unsigned char *bfr, const unsigned long &len)
+void itrp::printBuffer(sample_res *bfr, const unsigned long &len)
 {
     for(unsigned long i = 0; i < len; i++)
-        printByte(bfr[i], '#', 4);
+        printSample(bfr[i], '#', 4);
 }
 
 
@@ -61,7 +61,7 @@ void printWaveTable(unsigned short *tbl, unsigned short entries)
 
 }
 
-void itrp::play(unsigned char **buffer, const unsigned int orders, unsigned int *bytes)
+void itrp::play(sample_res **buffer, const unsigned int orders, unsigned int *bytes)
 {
     //std::cerr << "playing\n";
     
@@ -70,23 +70,26 @@ void itrp::play(unsigned char **buffer, const unsigned int orders, unsigned int 
     for(unsigned int orderi = 0; orderi < orders; orderi++)
     {
         
-        unsigned char *order = buffer[orderi];
+        sample_res *order = buffer[orderi];
         //std::cerr << "rows=" << int(curpattern->numRows()) << '\n';
         //std::cerr << "playing buffer " << orderi << ' ' << bytes[orderi] << " bytes\n";
+        std::cout.write((char*)order, bytes[orderi]*sizeof(sample_res));
 
         //Export each of the bytes from the byte buffers to stdout
         for(unsigned int i = 0; i < bytes[orderi]; i++)
         {
-            putchar(order[i]);
-            //std::cerr << order[i];
+            //TODO: Unfortunately, this will need to be
+            //revised if sample_res is ever changed
+            //putchar(order[i]);
+            //putchar((char)((static_cast<unsigned short>(order[i] & 0xFF00) >> 8))); //the cast to unsigned short is necessary because how C implements bitwise shift
+            //putchar((char)(order[i] & 0x00FF));
         }
-        //std::cerr << "gothere "<< '\n';
         
     }
 
 }
 
-void itrp::print(unsigned char **buffer, const unsigned int orders, unsigned int *bytes)
+void itrp::print(sample_res **buffer, const unsigned int orders, unsigned int *bytes)
 {
     //std::cerr << "printing\n";
 
@@ -95,7 +98,7 @@ void itrp::print(unsigned char **buffer, const unsigned int orders, unsigned int
     for(unsigned int orderi = 0; orderi < orders; orderi++)
     {
         
-        unsigned char *order = buffer[orderi];
+        sample_res *order = buffer[orderi];
         curpattern = song->getPatternByOrder(orderi);
         //std::cerr << int(curpattern->numRows()) << " ? " << song->getBytesPerRow() <<'\n';
         //std::cerr << "playing order " << orderi << ' ' << bytes << " bytes\n";
@@ -109,15 +112,25 @@ void itrp::print(unsigned char **buffer, const unsigned int orders, unsigned int
 }
 
 
-void itrp::play(unsigned char *buffer, unsigned int bytes)
+void itrp::play(sample_res *buffer, unsigned int bytes)
 {
     //Output all of the data from one byte buffer to stdout
     for(unsigned int i = 0; i < bytes; i++)
-        putchar(buffer[i]);
+    {
+        //TODO will need to be revised if sample_res ever changes
+        if(sizeof(sample_res) ==1)
+            putchar(buffer[i]);
+        else if(sizeof(sample_res) == 2)
+        {
+            putchar((char)(buffer[i]&0xFF)); 
+            putchar((char)((buffer[i]&0xFF00) >> 8));
+        }
+    }
+
 }
 
 
-void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const unsigned int &bytes)
+void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsigned int &bytes)
 {
     //std::cerr << "renderTick0\n";
     Track *seltrk = &tracks[track];
@@ -127,7 +140,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 
     //defer to Instrument::getVolume(...) for determining instrument volume at
     //this point in time
-    unsigned char amp = seltrk->inst->getVolume(seltrk->voli, seltrk->volduracc, seltrk->voljump, seltrk->lastvol);
+    sample_res_unsigned amp = seltrk->inst->getVolume(seltrk->voli, seltrk->volduracc, seltrk->voljump, seltrk->lastvol);
     seltrk->volduracc++;
 
     //std::cerr << "renderTick2 getVolume=" << int(amp) << " ptrnvol=" << int(seltrk->ptrnvol) <<"\n";
@@ -195,10 +208,10 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
             } else if(cmd == 0xA) //Repeat Counter
             {
                 if((_wav & 0xFF) == 0)
-                    seltrk->ptbl[PARAM_LOOP3] = 1;
+                    seltrk->ptbl->LOOP3 = 1;
                 else
-                    seltrk->ptbl[PARAM_LOOP3] = _wav & 0xFF;
-                seltrk->waveduracc = seltrk->ptbl[PARAM_LOOP3];
+                    seltrk->ptbl->LOOP3 = _wav & 0xFF;
+                seltrk->waveduracc = seltrk->ptbl->LOOP3;
                 //waveduracc will control how many ticks have passed
                 //until the wave table index should iterate
 
@@ -207,13 +220,13 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 
             } else if(cmd == 0xB) //Set loop Counter
             {
-                seltrk->ptbl[PARAM_LOOP] = _wav & 0xFF;
+                seltrk->ptbl->LOOP = _wav & 0xFF;
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
             } else if(cmd == 0xC) //decrement loop ctr, jump if != 0
             {
-                seltrk->ptbl[PARAM_LOOP]--;
-                if(seltrk->ptbl[PARAM_LOOP]!=0)
+                seltrk->ptbl->LOOP--;
+                if(seltrk->ptbl->LOOP!=0)
                 {
 
                     //jump 
@@ -257,16 +270,16 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
             
             } else if(cmd == 0x2) //F2, SET MISC WAVE PARAM 1
             {
-                if(((_wav & 0xFF) != seltrk->ptbl[PARAM_WAVE1]) && resetsPhaseOnWave1Set(seltrk->lastwave))
+                if(((_wav & 0xFF) != seltrk->ptbl->WAVE1) && resetsPhaseOnWave1Set(seltrk->lastwave))
                     seltrk->phase = 0;
 
-                seltrk->ptbl[PARAM_WAVE1] = _wav; 
+                seltrk->ptbl->WAVE1 = _wav; 
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
 
             } else if(cmd == 0x3) //F3, SET MISC WAVE PARAM 2
             {
-                seltrk->ptbl[PARAM_WAVE2] = _wav; 
+                seltrk->ptbl->WAVE2 = _wav; 
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
                 
@@ -286,7 +299,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
             {
                 char params = (_wav & 0x00FF);
                 if(params == 0)
-                    params = seltrk->ptbl[PARAM_WAVE1];
+                    params = seltrk->ptbl->WAVE1; //When did I add this feature?
 
                 frq *= std::pow(NOTEMULT, (params / 128.0f));
                 //Count F6 as a note by breaking from the loop
@@ -300,21 +313,21 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                     unsigned short nxtwav = song->getWaveEntry(seltrk->wavei + 1);
                     if((nxtwav & 0xFF00) == 0xFD00)
                     {
-                        ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP] = ((_wav & 0x00FF) << 8) | (nxtwav & 0x00FF);
+                        seltrk->ptbl->CUSTOM_JUMP = ((_wav & 0x00FF) << 8) | (nxtwav & 0x00FF);
                         seltrk->wavei++;
                     }
                     else
-                        ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP] = (_wav & 0x00FF);
+                        seltrk->ptbl->CUSTOM_JUMP = (_wav & 0x00FF);
                 }
                 else
-                    ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP] = (_wav & 0x00FF);
-                std::cerr << " SET=" << std::hex << ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP] << " FROM=" << _wav;
+                    seltrk->ptbl->CUSTOM_JUMP = (_wav & 0x00FF);
+                std::cerr << " SET=" << std::hex << seltrk->ptbl->CUSTOM_JUMP << " FROM=" << _wav;
 
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
             } else if(cmd == 0xE) //FE, PERFORM CUSTOM JUMP
             {
-                seltrk->wavei = ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP] + (_wav & 0xFF);
+                seltrk->wavei = seltrk->ptbl->CUSTOM_JUMP + (_wav & 0xFF);
                 std::cerr << " JUMP=" << seltrk->wavei;
                 _wav = song->getWaveEntry(seltrk->wavei);
             }
@@ -360,7 +373,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 {
                     std::cerr << "Oh dear! Infinite loop! Pulse set to 0.\n";
                     seltrk->pulsei--;
-                    ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] = 0;
+                    seltrk->ptbl->PULSE1 = 0;
                     break;
                 }
 
@@ -395,23 +408,23 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                 {
 
                     if((_pulse & 0xFF) == 0)
-                        seltrk->ptbl[PARAM_LOOP4] = 1;
+                        seltrk->ptbl->LOOP4 = 1;
                     else
-                        seltrk->ptbl[PARAM_LOOP4] = _pulse & 0xFF;
-                    seltrk->pulseduracc = seltrk->ptbl[PARAM_LOOP4];
+                        seltrk->ptbl->LOOP4 = _pulse & 0xFF;
+                    seltrk->pulseduracc = seltrk->ptbl->LOOP4;
 
                     seltrk->pulsei++;
                     _pulse = song->getPulseEntry(seltrk->pulsei);
 
                 } else if(cmd == 0xB) //Set loop Counter
                 {
-                    seltrk->ptbl[PARAM_LOOP2] = _pulse & 0xFF;
+                    seltrk->ptbl->LOOP2 = _pulse & 0xFF;
                     seltrk->pulsei++;
                     _pulse = song->getPulseEntry(seltrk->pulsei);
                 } else if(cmd == 0xC) //decrement loop ctr, jump if != 0
                 {
-                    seltrk->ptbl[PARAM_LOOP2]--;
-                    if(seltrk->ptbl[PARAM_LOOP2]!=0)
+                    seltrk->ptbl->LOOP2--;
+                    if(seltrk->ptbl->LOOP2 !=0)
                     {
 
                         //jump 
@@ -455,13 +468,13 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 
                 } else if(cmd == 0x0) //F0, SET PULSE2 
                 {
-                    ((unsigned short*)seltrk->ptbl)[PARAM_PULSE2] = (_pulse & 0x00FF) << 8;
+                    seltrk->ptbl->PULSE2 = (_pulse & 0x00FF) << 8;
 
                     seltrk->pulsei++;
                     _pulse = song->getPulseEntry(seltrk->pulsei);
                 } else if(cmd == 0x1) //F1, ADD PULSE2
                 {
-                    ((short*)seltrk->ptbl)[PARAM_PULSE2] += static_cast<char>(_pulse & 0x00FF)*0x10; //shift once to the left
+                    seltrk->ptbl->PULSE2 = ((short)seltrk->ptbl->PULSE2) + static_cast<char>(_pulse & 0x00FF)*0x10; //shift once to the left
 
                     seltrk->pulsei++;
                     _pulse = song->getPulseEntry(seltrk->pulsei);
@@ -474,20 +487,21 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
                         unsigned short nxtpls = song->getPulseEntry(seltrk->pulsei + 1);
                         if((nxtpls & 0xFF00) == 0xFD00)
                         {
-                            ((unsigned short*)seltrk->ptbl)[1] = ((_pulse & 0x00FF) << 8) | (nxtpls & 0x00FF);
+                            seltrk->ptbl->CUSTOM_JUMP = ((_pulse & 0x00FF) << 8) | (nxtpls & 0x00FF);
                             seltrk->pulsei++;
                         }
                         else
-                            ((unsigned short*)seltrk->ptbl)[1] = (_pulse & 0x00FF);
+                            seltrk->ptbl->CUSTOM_JUMP = (_pulse & 0x00FF);
+
                     }
                     else
-                        ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP2] = (_pulse & 0x00FF);
+                        seltrk->ptbl->CUSTOM_JUMP2 = (_pulse & 0x00FF);
 
                     seltrk->pulsei++;
                     _pulse = song->getPulseEntry(seltrk->pulsei);
                 } else if(cmd == 0xE) //FE, JUMP CUSTOM JUMP
                 {
-                    seltrk->pulsei = ((unsigned short*)seltrk->ptbl)[PARAM_CUSTOM_JUMP2] + (_pulse & 0xFF);
+                    seltrk->pulsei = seltrk->ptbl->CUSTOM_JUMP2 + (_pulse & 0xFF);
                     _pulse = song->getPulseEntry(seltrk->pulsei);
                 }
                 else
@@ -507,14 +521,14 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
             if(_pulse >= 0x7000) //Negative
             {
                 unsigned short offset = _pulse + 0x2000; // this would make 0xDFFF into 0xFFFF which is -1
-                ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] += static_cast<short>(offset);
+                seltrk->ptbl->PULSE1 += static_cast<short>(offset);
             }
             else
-                ((short*)seltrk->ptbl)[PARAM_PULSE] += _pulse; //shift once to the left
+                seltrk->ptbl->PULSE1 = ((short)seltrk->ptbl->PULSE1) + _pulse; //shift once to the left
         }
         else if(_pulse < 0xF000) // 0xE___, set pulse
         {
-            ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] = (_pulse & 0x0FFF) << 4;
+            seltrk->ptbl->PULSE1 = (_pulse & 0x0FFF) << 4;
 
         }
         //if(seltrk->pulsei != 0xFFFF) std::cerr << " pulse=" <<  ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] << " " << seltrk->pulsei << "pulseval=" << song->getPulseEntry(seltrk->pulsei ) <<'\n';
@@ -680,7 +694,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
     if(seltrk->pulsei != 0xFFFF)
     {
         //Do pulseduracc handling
-        if((unsigned char)seltrk->ptbl[PARAM_LOOP4] < 2)
+        if(seltrk->ptbl->LOOP4 < 2)
         {
             seltrk->pulsei++;
             seltrk->pulseduracc = 1;
@@ -691,14 +705,14 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
             if(seltrk->pulseduracc == 0)
             {
                 seltrk->pulsei++;
-                seltrk->pulseduracc = seltrk->ptbl[PARAM_LOOP4];
+                seltrk->pulseduracc = seltrk->ptbl->LOOP4;
             }
         }
         seltrk->pulseduracc--;
     }
     if(frq < 1)
         frq = 1;
-    if((unsigned char)seltrk->ptbl[PARAM_LOOP3] < 2)
+    if(seltrk->ptbl->LOOP3 < 2)
     {
         seltrk->wavei++;
         seltrk->waveduracc = 1;
@@ -708,7 +722,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
         if(seltrk->waveduracc == 0)
         {
             seltrk->wavei++;
-            seltrk->waveduracc = seltrk->ptbl[PARAM_LOOP3];
+            seltrk->waveduracc = seltrk->ptbl->LOOP3;
         }
     }
     seltrk->waveduracc--; 
@@ -730,7 +744,7 @@ void itrp::renderTick(unsigned char *buffer, const unsigned char &track, const u
 
     //Generate the actual sound
     generators[waveform](buffer, seltrk->ptbl,  frq, amp, seltrk->phase, bytes);
-    seltrk->ptbl[PARAM_CHAIN] = buffer[bytes-1];
+    seltrk->ptbl->CHAIN = buffer[bytes-1];
 
     seltrk->lastwave =  waveform;
     seltrk->segments++;
@@ -837,6 +851,7 @@ void itrp::initializeRender()
 {
     order = 0;
     curpattern = song->getPatternByOrder(0);
+    int ptbl_size = sizeof(paramtable);
     for(int i = 0; i < song->numTracks(); i++)
     {
         unsigned int firstrow = curpattern->at(i,0);
@@ -866,27 +881,11 @@ void itrp::initializeRender()
         tracks[i].fx = (firstrow & R_EFFECT) >> RI_EFFECT;
         tracks[i].fxparam = firstrow & R_FXPARAM;
         tracks[i].segments = 0;
-        tracks[i].ptbl = new unsigned char[32];
+        tracks[i].ptbl = new paramtable;
         tracks[i].lastwave = 0;
 
-
-        tracks[i].ptbl[2*PARAM_PULSE  ] = 0x00; //Pulse param (part 1)
-        tracks[i].ptbl[2*PARAM_PULSE+1] = 0x10; //Pulse param (part 2), a small value so you can hear it, but doesnt sound correct. better than nothing
-
-        tracks[i].ptbl[2*PARAM_PULSE2  ] = 0x00; //Pulse param (part 1)
-        tracks[i].ptbl[2*PARAM_PULSE2+1] = 0x10; //Pulse param (part 1)
-
-        tracks[i].ptbl[2] = 0; //Custom jump (part 1)
-        tracks[i].ptbl[3] = 0; //Custom jump (part 2)
-
-        tracks[i].ptbl[PARAM_LOOP] = 0; //Wave Loop counter
-        tracks[i].ptbl[PARAM_WAVE1] = 127; //Wave misc param 1
-        tracks[i].ptbl[PARAM_WAVE2] = 0x80; //Wave misc param 2
-        tracks[i].ptbl[PARAM_CHAIN] = 127; //Chain
-        tracks[i].ptbl[PARAM_LAST] = 127; //Track Interp
-        tracks[i].ptbl[PARAM_LOOP2] = 0; //Pulse loop counter
-        tracks[i].ptbl[PARAM_LOOP3] = 1; //Wave repeat counter
-        tracks[i].ptbl[PARAM_LOOP4] = 1; //Pulse repeat counter
+        for(int j = 0; j < ptbl_size; j++)
+            *((char*)tracks[i].ptbl +j) = 0;
 
         tracks[i].ptrnvol = (firstrow & R_VOLUME) >> RI_VOLUME;
         tracks[i].ptrnlastvol = tracks[i].ptrnvol;
@@ -900,7 +899,7 @@ void itrp::initializeRender()
     //std::cerr << "initialized render\n";
 }
 
-unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
+sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
 {
 
     unsigned int row;
@@ -927,7 +926,7 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
     int rows = end - start;
     bytes = rows*bytesperrow;
 
-    unsigned char *buffer = new unsigned char[bytes];
+    sample_res *buffer = new sample_res[bytes];
     for(int i = 0; i < bytes; i++)
         buffer[i]=127;
 
@@ -979,12 +978,12 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                             //std::cerr << "INSTSET pulsei " << seltrk->pulsei << '\n';
                         }
                         seltrk->waveduracc = 0;
-                        seltrk->ptbl[PARAM_LOOP3] = 1;
+                        seltrk->ptbl->LOOP3 = 1;
 
                         if(seltrk->inst->getPulseIndex() < 0xFFFF)
                         {
                             seltrk->pulseduracc = 0;
-                            seltrk->ptbl[PARAM_LOOP4] = 1;
+                            seltrk->ptbl->LOOP4 = 1;
                         }
                         
                         seltrk->voli = 0;
@@ -1031,17 +1030,17 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
                 if(_fx == 5)
                 { 
                     _fxp1 = row & R_FXPARAM;
-                    seltrk->ptbl[5] = _fxp1;
+                    seltrk->ptbl->WAVE1 = _fxp1;
                 }
                 else if(_fx == 6)
                 { 
                     _fxp1 = row & R_FXPARAM;
-                    seltrk->ptbl[6] = _fxp1; 
+                    seltrk->ptbl->WAVE2 = _fxp1; 
                 }
                 else if(_fx == 8)
                 { 
                     _fxp1 = row & R_FXPARAM;
-                   ((unsigned short*)seltrk->ptbl)[0] = (((unsigned short)_fxp1)<< 8); //oh dear.
+                   seltrk->ptbl->PULSE1 = (((unsigned short)_fxp1)<< 8); 
                 }
                 else if(_fx == 7)
                 { 
@@ -1078,17 +1077,17 @@ unsigned char *itrp::renderPattern(int start, int end, unsigned int &bytes)
     return buffer;
 }
 
-unsigned char **itrp::renderSong(unsigned int *bytes)
+sample_res **itrp::renderSong(unsigned int *bytes)
 {
     
     //std::cerr << "renderSong creating buffers \n";
 
-    unsigned char **buffers = new unsigned char*[song->numOrders()];
+    sample_res **buffers = new sample_res*[song->numOrders()];
     //std::cerr << "renderSong1\n";
     for(unsigned int orderi = 0; orderi < song->numOrders(); orderi++)
     {
         curpattern = song->getPatternByOrder(orderi);
-        unsigned char *buffer = renderPattern(0, curpattern->numRows(), bytes[orderi]);
+        sample_res *buffer = renderPattern(0, curpattern->numRows(), bytes[orderi]);
         buffers[orderi] = buffer;
     }
     //std::cerr << "renderSong END\n";
@@ -1133,7 +1132,7 @@ void testWaveTable()
     int step = bytes / waves / 16;
 
 
-    unsigned char *bfr = new unsigned char[bytes];
+    sample_res *bfr = new sample_res[bytes];
     for(int i = 0; i < waves; i++)
     {
         float phase = 0;
@@ -1181,7 +1180,7 @@ void testLoadWholeSong()
     //std::cerr << "main2 initialized render\n";
 
     unsigned int *bytes = new unsigned int[itrp::song->numOrders()];
-    unsigned char **bfrs = itrp::renderSong(bytes);
+    sample_res **bfrs = itrp::renderSong(bytes);
     //std::cerr << "main3 finished render!\n";
 
     itrp::play(bfrs, itrp::song->numOrders(),  bytes);
@@ -1195,14 +1194,14 @@ void testLoadWholeSong()
     itrp::purgeSong();
 }
 
-unsigned char **itrp::renderSong(unsigned int *bytes, int start_order, int end_order, int start_row, int end_row)
+sample_res **itrp::renderSong(unsigned int *bytes, int start_order, int end_order, int start_row, int end_row)
 {
     if(end_row >= 0)
     {
         //Only play start order
-        unsigned char **buffers = new unsigned char*[1];
+        sample_res **buffers = new sample_res*[1];
         curpattern = song->getPatternByOrder(start_order);
-        unsigned char *buffer = renderPattern(start_row, end_row, bytes[0]);
+        sample_res *buffer = renderPattern(start_row, end_row, bytes[0]);
         buffers[0] = buffer;
         return buffers;
     }
@@ -1210,13 +1209,13 @@ unsigned char **itrp::renderSong(unsigned int *bytes, int start_order, int end_o
     {
         //play through order
         int orders = end_order - start_order + 1;
-        unsigned char **buffers = new unsigned char*[orders];
+        sample_res **buffers = new sample_res*[orders];
 
         int bfri = 0;
         for(unsigned int orderi = start_order; orderi <= end_order; orderi++)
         {
             curpattern = song->getPatternByOrder(orderi);
-            unsigned char *buffer = renderPattern(start_row, curpattern->numRows(), bytes[bfri]);
+            sample_res *buffer = renderPattern(start_row, curpattern->numRows(), bytes[bfri]);
             start_row = 0;
             buffers[bfri] = buffer;
             bfri++;
@@ -1355,7 +1354,7 @@ bool parseParams(int argc, const char* argv[])
     }
 
     
-    unsigned char **bfrs = itrp::renderSong(bytes, start_order, end_order, start_row, end_row);
+    sample_res **bfrs = itrp::renderSong(bytes, start_order, end_order, start_row, end_row);
     itrp::play(bfrs, orders, bytes);
     //itrp::print(bfrs, orders, bytes);
 
@@ -1383,8 +1382,10 @@ int main(int argc, const char* argv[])
         itrp::initializeWaveTable();
         itrp::initializeRender();
 
+        std::cerr << "GOT HERE\n";
         //Has parameters
         parseParams(argc, argv);
+        std::cerr << "GOT HERE\n";
     }
     delete [] itrp::songpaths;
 
