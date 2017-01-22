@@ -9,5 +9,6 @@ LOGPATH="/var/tmp/plebtrk/itplog.log"
 
 echo "" >"$LOGPATH"
 plebitp 2>>"$LOGPATH" "$@" | aplay --rate=44100 2>>"$LOGPATH"
+#plebitpb16 2>>"$LOGPATH" "$@" | aplay --rate=44100 --format=S16_LE 2>>"$LOGPATH"
 
 

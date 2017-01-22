@@ -13,6 +13,7 @@ esac
 
 fi
 
+postfix=$1
 
 echo
 
@@ -29,12 +30,12 @@ touch /var/tmp/plebtrk/itplog.log
 touch /var/tmp/plebtrk/trklog.log
 
 echo "Copying executables into /usr/bin/..."
-sudo cp ./plebplay /usr/bin/plebplay
-echo "/usr/bin/plebplay"
-sudo cp ./plebitp /usr/bin/plebitp
-echo "/usr/bin/plebitp"
-sudo cp ./plebrender /usr/bin/plebrender
-echo "/usr/bin/plebrender"
+sudo cp ./plebplay /usr/bin/plebplay$postfix
+echo "/usr/bin/plebplay$postfix"
+sudo cp ./plebitp /usr/bin/plebitp$postfix
+echo "/usr/bin/plebitp$postfix"
+sudo cp ./plebrender /usr/bin/plebrender$postfix
+echo "/usr/bin/plebrender$postfix"
 echo ""
 
 mkdir /usr/local/man/man1 2>/dev/null
