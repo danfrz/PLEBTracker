@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <ctgmath> //logb
+#include <complex>
 
 #include "song.h"
 #include "instrument.h"

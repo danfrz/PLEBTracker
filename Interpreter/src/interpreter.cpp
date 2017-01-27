@@ -16,6 +16,49 @@ double logbase(double base, double val)
 
 }
 
+std::complex<double> *ditfft2(double *x, int N, int s)
+{
+    std::cout << "Entered with N=" << N << " and s=" << s << '\n';
+    std::complex<double> *out = new std::complex<double>[N];
+    if(N == 1)
+        out[0] = x[0];
+    else
+    {
+        std::cout << "GOT HERE -1\n";
+        std::complex<double> *half = ditfft2(x,N/2, 2*s);
+        std::cout << "GOT HERE 0\n";
+        for(int i = 0; i < N/2; i++)
+            out[i] = half[i];
+        std::cout << "GOT HERE 1\n";
+        delete [] half;
+
+        std::cout << "GOT HERE 2\n";
+        half = ditfft2(x+s, N/2, 2*s);
+        std::cout << "GOT HERE 3\n";
+        for(int i = N/2; i < N; i++)
+            out[i] = half[i-N/2];
+        std::cout << "GOT HERE 4\n";
+        delete [] half;
+        std::cout << "GOT HERE 5\n";
+
+
+        for(int k = 0; k < N/2; k++)
+        {
+            //* and / operators are defined on complex numbers, but none of them are defined with a non-complex
+            //term on the right hand side...
+            //-2*PI*k*i/N
+            //Rearranging operations like this might amplify rounding error
+            std::complex<double> twiddle_factor = std::exp((-2*M_PI*k/((double)N))*std::complex<double>(0,1));
+            std::complex<double> t = out[k];
+
+            out[k] = t + twiddle_factor*out[k+N/2];
+            out[k+N/2] = t - twiddle_factor*out[k+N/2];
+        }
+    }
+}
+
+
+
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void printSample(uchar &b, const char &character, const uchar &res
 
@@ -1373,6 +1416,7 @@ bool parseParams(int argc, const char* argv[])
 
 int main(int argc, const char* argv[])
 { 
+    /*
     itrp::songpaths = new char*[64]; //TODO
     itrp::amplifyall = 1;
     if(argc > 1)
@@ -1388,9 +1432,16 @@ int main(int argc, const char* argv[])
         std::cerr << "GOT HERE\n";
     }
     delete [] itrp::songpaths;
+    */
+    double in[] = {1,2,3,4};
+    std::complex<double> *FFT = ditfft2(in, 4, 1);
+    for(int i = 0; i < 4; i++)
+    {
+        std::cout << FFT[i] << ' ';
+    }
+    std::cout << '\n';
 
-
-
+    return EXIT_SUCCESS;
 }
 
 
