@@ -23,7 +23,7 @@ SHIFT +
  ..l    Quick Change Wave Index
  ..j    Quick Change Pattern
  
-
+ 
 
 ||||||||||||Pattern Editor||||||||||||||||||||||||||||||||||||||||
 > Pattern Editor supports HOME, END, PGUP, PGDN
@@ -43,6 +43,9 @@ In pattern editor, press ENTER to copy an entry
    pointed to by that entry's instrument.
    Press SPACE to paste the entry.
 
+ Press P to play the currently selected row(s) of a song
+ Press M to set the "mark" to the currently highlighted row.
+ If you place a mark, when you press P it plays the part of the song between the mark and the selected row.
 
 ||||||||||||||Wave Table||||||||||||||||||||||||||||||||||||||||||
 > Wave Table supports HOME, END, PGUP, PGDN, INS, DEL
