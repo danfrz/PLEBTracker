@@ -1449,7 +1449,7 @@ bool parseParams(int argc, const char* argv[])
 
     unsigned int filterLen = 0;
     fftw_complex *fft = itrp::fourierTransform(bfr, filterLen, totalBytes);
-    fftw_complex *lowp = itrp::filter_highpass(fft, filterLen*1, filterLen);
+    fftw_complex *lowp = itrp::filter_highpass(fft, filterLen*.2, filterLen);
     itrp::filter_lowpass(lowp, 500, filterLen);
     delete [] bfr;
     bfr = itrp::backFourierTransform(lowp, filterLen, totalBytes);
@@ -1472,24 +1472,47 @@ bool parseParams(int argc, const char* argv[])
 
 }
 
+int isnum(const char *str)
+{
+  while(*str)
+  {
+    if(!isdigit(*str))
+      return 0;
+    str++;
+  }
 
+  return 1;
+}
 
 
 int main(int argc, const char* argv[])
 { 
-    
+    int exit_status = EXIT_SUCCESS;
     itrp::songpaths = new char*[64]; //TODO
     itrp::amplifyall = 1;
-    if(argc > 1)
+    if(argc > 2)
     {
-        itrp::load(argv[1]);
+        //set BASEFRQ
+        if(isnum(argv[1]))
+        {
+            BASEFRQ = atoi(argv[1]);
+            itrp::load(argv[2]);
 
-        itrp::initializeWaveTable();
-        itrp::initializeRender();
+            itrp::initializeWaveTable();
+            itrp::initializeRender();
 
-        //Has parameters
-        parseParams(argc, argv);
+            //Has parameters
+            parseParams(argc, argv);
+        }
+        else
+        {
+            exit_status = EXIT_FAILURE;
+        }
+
     }
+    else
+        exit_status = EXIT_FAILURE;
+    
     delete [] itrp::songpaths;
     
     //double in[] = {1,2,3,4,5,6,7,8};

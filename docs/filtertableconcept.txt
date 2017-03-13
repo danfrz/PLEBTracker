@@ -1,0 +1,58 @@
+
+This document describes different table operations
+for the to-be-introduced filter table.
+
+The following pseudocode is something that should
+be possible in the system. The tables afterward
+are potential ways to represent this pseudocode.
+
+//Pseudocode for 
+// Loop forever
+//	Loop 10 times
+// 		Hard pass parameter goes down
+// 		Low pass parameter goes up
+		Iterate
+// 	Reset filter parameters
+
+//INTERFACE TYPE 1
+
+Explicit scoping of filters
+Explicit iteration
+Allows you to work on one filter at a time
+Easier to understand
+Annoyingly verbose
+
+0001 F4 01	//SET FILTER 0 to 01 (HARD LOW PASS)
+0002 F4 12	//SET FILTER 1 to 02 (HARD HIGH PASS)
+0004 FB 10	//	SET INNER LOOP TO HAPPEN 0x10 times
+0005 F0 01	//		SET SCOPE FILTER 1
+0006 00 08	//		INCREASE FILTER PARAM (FILTER 1)
+0007 F0 02	//		SET SCOPE FILTER 2
+0008 DF F8	//		DECREASE FILTER PARAM (FILTER 2)
+0009 00 00	//		ITERATE
+000A FC 05	//		LOOP [05-0A], happens 0x10 times
+000B F0 01	//	SET SCOPE FILTER 1
+000C EF FF	//	SET FILTER 1 TO FFF0
+000D F0 02	//	SET SCOPE FILTER 2
+000E E0 00	//	SET FILTER 2 to 0000
+000F 00 00	//	ITERATE
+0010 FF 04	//LOOP
+
+//INTERFACCE TYPE 2
+
+Aligns with the operations of the other filters
+Less verbose
+You only use x many filters at a time, so it makes sense to implicitly iterate after x rows
+
+
+0001 F0 02	//Set filters active to 2
+0002 F4 01	//SET FILTER 0 to 01 (HARD LOW PASS)
+0003 F4 12	//SET FILTER 1 to 02 (HARD HIGH PASS)
+0005 FB 10	//	SET INNER LOOP TO HAPPEN 0x10 times
+0007 00 08	//		INCREASE FILTER PARAM (FILTER 1)
+0009 DF F8	//		DECREASE FILTER PARAM (FILTER 2) (implicit iteration:every 2 non-functions)
+000A FC 07	//		LOOP [07-09], happens 0x10 times
+000B 00 00	//	SET FILTER 1 TO 0000
+000C EF FF	//	SET FILTER 2 TO FFF0 (implicit iteration)
+000D FF 05	//LOOP
+
