@@ -9,7 +9,7 @@
 #define CHROMATIC_NOTES 12
 //more or less arbitrary
 //44100 (hz) / 10
-float BASEFRQ;
+static float BASEFRQ;
 
 //Integer segment masks
 #define R_OCTAVE      0xE0000000
