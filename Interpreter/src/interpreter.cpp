@@ -40,19 +40,17 @@ fftw_complex *itrp::fourierTransform(sample_res *bfr, unsigned int &filter_len, 
 
 fftw_complex *itrp::filter_lowpass(fftw_complex *in, const unsigned int &lowpass, const unsigned int &filter_len)
 {
-    fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
-    for(int i = 0; i < filter_len; i++)
-    {
-        out[i][0] = in[i][0];
-        out[i][1] = in[i][1];
-    }
+    //fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
+    fftw_complex *out = in;
 
     unsigned int minpass = std::min(filter_len, lowpass);
 
-    for(int i = 0; i < minpass; i++)
+    //index 0 contains important information
+    //so skip it
+    for(int i = 1; i < minpass; i++)
     {
-        //out[i][0] = 0;
-        //out[i][1] = 0;
+        out[i][0] = 0;
+        out[i][1] = 0;
     }
 
     return out;
@@ -62,12 +60,7 @@ fftw_complex *itrp::filter_highpass(fftw_complex *in, const unsigned int &highpa
 {
     //fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
     fftw_complex *out = in;
-    /*
-    for(int i = 0; i < filter_len; i++)
-    {
-        out[i][0] = in[i][0];
-        out[i][1] = in[i][1];
-    }*/
+    
 
     for(int i = highpass; i < filter_len; i++)
     {
@@ -87,7 +80,7 @@ sample_res *itrp::backFourierTransform(fftw_complex *in, const unsigned int &fil
     fftw_destroy_plan( plan_backward);
     sample_res *aout = new sample_res[len];
     for(int i = 0; i < len; i++)
-        aout[i] = out[i];
+        aout[i] = out[i]/len;
     fftw_free(out);
     return aout; 
 
@@ -1456,9 +1449,10 @@ bool parseParams(int argc, const char* argv[])
 
     unsigned int filterLen = 0;
     fftw_complex *fft = itrp::fourierTransform(bfr, filterLen, totalBytes);
-    //fftw_complex *lowp = itrp::filter_lowpass(fft, 0, filterLen);
-    //delete [] bfr;
-    bfr = itrp::backFourierTransform(fft, filterLen, totalBytes);
+    fftw_complex *lowp = itrp::filter_highpass(fft, filterLen*1, filterLen);
+    itrp::filter_lowpass(lowp, 500, filterLen);
+    delete [] bfr;
+    bfr = itrp::backFourierTransform(lowp, filterLen, totalBytes);
 
 
 
