@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <ctgmath> //logb
-#include <complex>
+#include <fftw3.h>
 
 #include "song.h"
 #include "instrument.h"
@@ -84,6 +84,25 @@ Postcondition:
     void initializeRender();
 
 
+
+
+/***\//////////////////////////////////////////////////////////////////////////    
+    Function: ::linearize(sample_res **buffer, const unsigned int orders, unsigned int *bytes, unsigned int &total_bytes
+
+Description:
+   Linearizes all play buffers.
+   Returns a dynamic array of samples
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+sample_res *linearize(sample_res **buffer, const unsigned int orders, unsigned int *bytes, unsigned int &total_bytes);
+
+fftw_complex *fourierTransform(sample_res *bfr, unsigned int &filter_len, const unsigned int &len);
+
+
+fftw_complex *filter_lowpass(fftw_complex *in, const unsigned int &lowpass, const unsigned int &filter_len);
+fftw_complex *filter_highpass(fftw_complex *in, const unsigned int &highpass, const unsigned int &filter_len);
+
+
+sample_res *backFourierTransform(fftw_complex *in, const unsigned int &filter_len, const unsigned int &len);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: bool resetsPhaseOnWave1Set(const unsigned char &wave)

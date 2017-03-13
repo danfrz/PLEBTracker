@@ -13,50 +13,85 @@ double logbase(double base, double val)
         throw 10; 
     }
     return log2(val) / b;
-
 }
 
-std::complex<double> *ditfft2(double *x, int N, int s)
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: fourierTransform(sample_res *bfr, unsigned int &filter_len, const unsigned int &len
+
+Description:
+   Modifies filter_len to be the length of the filter returned.
+   Remember to fftw_free on the fftw_complex* returned from this function!
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+fftw_complex *itrp::fourierTransform(sample_res *bfr, unsigned int &filter_len, const unsigned int &len)
 {
-    std::cout << "Entered with N=" << N << " and s=" << s << '\n';
-    std::complex<double> *out = new std::complex<double>[N];
-    if(N == 1)
-        out[0] = x[0];
-    else
-    {
-        std::cout << "GOT HERE -1\n";
-        std::complex<double> *half = ditfft2(x,N/2, 2*s);
-        std::cout << "GOT HERE 0\n";
-        for(int i = 0; i < N/2; i++)
-            out[i] = half[i];
-        std::cout << "GOT HERE 1\n";
-        delete [] half;
+    double *in = (double*)fftw_malloc (  sizeof ( double ) * len );
+    for(int i = 0; i < len; i++)
+        in[i] = bfr[i];
 
-        std::cout << "GOT HERE 2\n";
-        half = ditfft2(x+s, N/2, 2*s);
-        std::cout << "GOT HERE 3\n";
-        for(int i = N/2; i < N; i++)
-            out[i] = half[i-N/2];
-        std::cout << "GOT HERE 4\n";
-        delete [] half;
-        std::cout << "GOT HERE 5\n";
-
-
-        for(int k = 0; k < N/2; k++)
-        {
-            //* and / operators are defined on complex numbers, but none of them are defined with a non-complex
-            //term on the right hand side...
-            //-2*PI*k*i/N
-            //Rearranging operations like this might amplify rounding error
-            std::complex<double> twiddle_factor = std::exp((-2*M_PI*k/((double)N))*std::complex<double>(0,1));
-            std::complex<double> t = out[k];
-
-            out[k] = t + twiddle_factor*out[k+N/2];
-            out[k+N/2] = t - twiddle_factor*out[k+N/2];
-        }
-    }
+    filter_len = (len/2) + 1;
+    fftw_complex *out = (fftw_complex *)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
+    fftw_plan plan_forward = fftw_plan_dft_r2c_1d ( len, in, out, FFTW_ESTIMATE );
+    fftw_execute ( plan_forward );
+    fftw_destroy_plan( plan_forward );
+    delete [] in;
+    return out;
 }
 
+fftw_complex *itrp::filter_lowpass(fftw_complex *in, const unsigned int &lowpass, const unsigned int &filter_len)
+{
+    fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
+    for(int i = 0; i < filter_len; i++)
+    {
+        out[i][0] = in[i][0];
+        out[i][1] = in[i][1];
+    }
+
+    unsigned int minpass = std::min(filter_len, lowpass);
+
+    for(int i = 0; i < minpass; i++)
+    {
+        //out[i][0] = 0;
+        //out[i][1] = 0;
+    }
+
+    return out;
+}
+
+fftw_complex *itrp::filter_highpass(fftw_complex *in, const unsigned int &highpass, const unsigned int &filter_len)
+{
+    //fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
+    fftw_complex *out = in;
+    /*
+    for(int i = 0; i < filter_len; i++)
+    {
+        out[i][0] = in[i][0];
+        out[i][1] = in[i][1];
+    }*/
+
+    for(int i = highpass; i < filter_len; i++)
+    {
+        out[i][0] = 0;
+        out[i][1] = 0;
+    }
+
+    return out;
+}
+
+sample_res *itrp::backFourierTransform(fftw_complex *in, const unsigned int &filter_len, const unsigned int &len)
+{
+    double *out = (double*)fftw_malloc ( sizeof ( double ) * len);
+    fftw_plan plan_backward = fftw_plan_dft_c2r_1d ( len, in, out, FFTW_ESTIMATE);
+    fftw_execute ( plan_backward );
+
+    fftw_destroy_plan( plan_backward);
+    sample_res *aout = new sample_res[len];
+    for(int i = 0; i < len; i++)
+        aout[i] = out[i];
+    fftw_free(out);
+    return aout; 
+
+}
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
@@ -130,6 +165,25 @@ void itrp::play(sample_res **buffer, const unsigned int orders, unsigned int *by
         
     }
 
+}
+
+sample_res *itrp::linearize(sample_res **buffer, const unsigned int orders, unsigned int *bytes, unsigned int &total_bytes)
+{
+    total_bytes = 0;
+    for(unsigned int orderi = 0; orderi < orders; orderi++)
+        total_bytes += bytes[orderi];
+    sample_res *out = new sample_res[total_bytes];
+
+    unsigned int i = 0;
+    for(unsigned int orderi = 0; orderi < orders; orderi++)
+    {
+        sample_res *order = buffer[orderi];
+
+        for(unsigned int j = 0; j < bytes[orderi]; j++)
+            out[i++] = order[j];
+
+    }
+    return out;
 }
 
 void itrp::print(sample_res **buffer, const unsigned int orders, unsigned int *bytes)
@@ -1396,14 +1450,27 @@ bool parseParams(int argc, const char* argv[])
         bytes = new unsigned int[orders];
     }
 
-    
+    unsigned int totalBytes = 0;
     sample_res **bfrs = itrp::renderSong(bytes, start_order, end_order, start_row, end_row);
-    itrp::play(bfrs, orders, bytes);
+    sample_res * bfr = itrp::linearize(bfrs, orders, bytes, totalBytes);
+
+    unsigned int filterLen = 0;
+    fftw_complex *fft = itrp::fourierTransform(bfr, filterLen, totalBytes);
+    //fftw_complex *lowp = itrp::filter_lowpass(fft, 0, filterLen);
+    //delete [] bfr;
+    bfr = itrp::backFourierTransform(fft, filterLen, totalBytes);
+
+
+
+    itrp::play(bfr, totalBytes);
+    
+    //itrp::play(bfrs, orders, bytes);
     //itrp::print(bfrs, orders, bytes);
 
     for(int i = 0; i < orders; i++)
         delete [] bfrs[i];
-    delete [] bytes; //Why does thia cause double free corruption??
+    delete [] bfr; 
+    delete [] bytes; 
 
 
     itrp::purgeSong();
@@ -1416,7 +1483,7 @@ bool parseParams(int argc, const char* argv[])
 
 int main(int argc, const char* argv[])
 { 
-    /*
+    
     itrp::songpaths = new char*[64]; //TODO
     itrp::amplifyall = 1;
     if(argc > 1)
@@ -1426,20 +1493,24 @@ int main(int argc, const char* argv[])
         itrp::initializeWaveTable();
         itrp::initializeRender();
 
-        std::cerr << "GOT HERE\n";
         //Has parameters
         parseParams(argc, argv);
-        std::cerr << "GOT HERE\n";
     }
     delete [] itrp::songpaths;
-    */
-    double in[] = {1,2,3,4};
-    std::complex<double> *FFT = ditfft2(in, 4, 1);
-    for(int i = 0; i < 4; i++)
+    
+    //double in[] = {1,2,3,4,5,6,7,8};
+        
+        //First component is DC value (constant)
+        //Omega is the highest frequency 
+        //Nyquist 2/t (time interal)
+        //Sine is real part
+        //Cosine is imaginary part
+    /*std::complex<double> *FFT = ditfft2(in, 8, 1);
+    for(int i = 0; i < 8; i++)
     {
         std::cout << FFT[i] << ' ';
-    }
-    std::cout << '\n';
+    }*/
+    //std::cout << '\n';
 
     return EXIT_SUCCESS;
 }

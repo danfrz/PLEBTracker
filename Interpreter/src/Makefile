@@ -7,7 +7,7 @@ ODIR=../obj
 #Library directory for project (non-system libs)
 LDIR=../lib
 #Include libraries e.g. -lncurses
-LIBS=
+LIBS= -lfftw3
 
 #Header files that need to be tracked//////////////////////////////////////////
 _DEPS = generator.h instrument.h interpreter.h pattern.h song.h
@@ -24,7 +24,7 @@ $(ODIR)/%.o: %.cpp $(DEPS)
 
 #Creates the final executable, linking the .o files
 plebitp: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -g -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 
