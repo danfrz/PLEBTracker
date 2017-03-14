@@ -15,6 +15,7 @@ namespace editor
     WIN *volwin;
     WIN *wavewin;
     WIN *pulsewin;
+    WIN *filterwin;
     WIN *dialog;
 
     WIN *wingroup;
@@ -86,20 +87,24 @@ namespace instedtr
 {
     unsigned short waveclipboard;
     unsigned short pulseclipboard;
+    unsigned short filterclipboard;
     unsigned short volclipboard;
 
     bool instobjedit;
     unsigned char selinstrow;
     unsigned char selinstobj;
+
     unsigned short selwavrow;
+    unsigned char selwavseg;
     unsigned short selpulrow;
     unsigned char selpulseg;
+    unsigned short selfltrow;
+    unsigned char selfltseg;
 
-
-    unsigned char selwavseg;
     unsigned short viewportwave;
     unsigned short viewportpulse;
     unsigned char viewportvol;
+    unsigned short viewportfilter;
 
 
     unsigned char selvolrow;

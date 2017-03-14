@@ -1,5 +1,4 @@
 #include "patternedtr.h"
-
 #include <iostream>
 
 void patternedtr::chgSelMetaObj(int i)
