@@ -298,10 +298,10 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
             } else if(cmd == 0xA) //Repeat Counter
             {
                 if((_wav & 0xFF) == 0)
-                    seltrk->ptbl->LOOP3 = 1;
+                    seltrk->ptbl->LOOP_FA_WAVE = 1;
                 else
-                    seltrk->ptbl->LOOP3 = _wav & 0xFF;
-                seltrk->waveduracc = seltrk->ptbl->LOOP3;
+                    seltrk->ptbl->LOOP_FA_WAVE = _wav & 0xFF;
+                seltrk->waveduracc = seltrk->ptbl->LOOP_FA_WAVE;
                 //waveduracc will control how many ticks have passed
                 //until the wave table index should iterate
 
@@ -310,13 +310,13 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
 
             } else if(cmd == 0xB) //Set loop Counter
             {
-                seltrk->ptbl->LOOP = _wav & 0xFF;
+                seltrk->ptbl->LOOP_WAVE = _wav & 0xFF;
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
             } else if(cmd == 0xC) //decrement loop ctr, jump if != 0
             {
-                seltrk->ptbl->LOOP--;
-                if(seltrk->ptbl->LOOP!=0)
+                seltrk->ptbl->LOOP_WAVE--;
+                if(seltrk->ptbl->LOOP_WAVE!=0)
                 {
 
                     //jump 
@@ -403,21 +403,21 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
                     unsigned short nxtwav = song->getWaveEntry(seltrk->wavei + 1);
                     if((nxtwav & 0xFF00) == 0xFD00)
                     {
-                        seltrk->ptbl->CUSTOM_JUMP = ((_wav & 0x00FF) << 8) | (nxtwav & 0x00FF);
+                        seltrk->ptbl->CUSTOM_JUMP_WAV = ((_wav & 0x00FF) << 8) | (nxtwav & 0x00FF);
                         seltrk->wavei++;
                     }
                     else
-                        seltrk->ptbl->CUSTOM_JUMP = (_wav & 0x00FF);
+                        seltrk->ptbl->CUSTOM_JUMP_WAV = (_wav & 0x00FF);
                 }
                 else
-                    seltrk->ptbl->CUSTOM_JUMP = (_wav & 0x00FF);
-                std::cerr << " SET=" << std::hex << seltrk->ptbl->CUSTOM_JUMP << " FROM=" << _wav;
+                    seltrk->ptbl->CUSTOM_JUMP_WAV = (_wav & 0x00FF);
+                std::cerr << " SET=" << std::hex << seltrk->ptbl->CUSTOM_JUMP_WAV << " FROM=" << _wav;
 
                 seltrk->wavei++;
                 _wav = song->getWaveEntry(seltrk->wavei);
             } else if(cmd == 0xE) //FE, PERFORM CUSTOM JUMP
             {
-                seltrk->wavei = seltrk->ptbl->CUSTOM_JUMP + (_wav & 0xFF);
+                seltrk->wavei = seltrk->ptbl->CUSTOM_JUMP_WAV + (_wav & 0xFF);
                 std::cerr << " JUMP=" << seltrk->wavei;
                 _wav = song->getWaveEntry(seltrk->wavei);
             }
@@ -443,10 +443,10 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
 
     if(waveform == 0xF6) 
         waveform = seltrk->lastwave;
-
     //////////////////////////////////////////
     //////PULSE TABLE IMPLEMENTATION//////////
     //////////////////////////////////////////
+    depth = 0;
 
     //All of the jumps operate identically to the wave table jumps but these
     //operations perform on pulse related fields
@@ -498,23 +498,23 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
                 {
 
                     if((_pulse & 0xFF) == 0)
-                        seltrk->ptbl->LOOP4 = 1;
+                        seltrk->ptbl->LOOP_FA_PULSE = 1;
                     else
-                        seltrk->ptbl->LOOP4 = _pulse & 0xFF;
-                    seltrk->pulseduracc = seltrk->ptbl->LOOP4;
+                        seltrk->ptbl->LOOP_FA_PULSE = _pulse & 0xFF;
+                    seltrk->pulseduracc = seltrk->ptbl->LOOP_FA_PULSE;
 
                     seltrk->pulsei++;
                     _pulse = song->getPulseEntry(seltrk->pulsei);
 
                 } else if(cmd == 0xB) //Set loop Counter
                 {
-                    seltrk->ptbl->LOOP2 = _pulse & 0xFF;
+                    seltrk->ptbl->LOOP_PULSE = _pulse & 0xFF;
                     seltrk->pulsei++;
                     _pulse = song->getPulseEntry(seltrk->pulsei);
                 } else if(cmd == 0xC) //decrement loop ctr, jump if != 0
                 {
-                    seltrk->ptbl->LOOP2--;
-                    if(seltrk->ptbl->LOOP2 !=0)
+                    seltrk->ptbl->LOOP_PULSE--;
+                    if(seltrk->ptbl->LOOP_PULSE !=0)
                     {
 
                         //jump 
@@ -577,21 +577,21 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
                         unsigned short nxtpls = song->getPulseEntry(seltrk->pulsei + 1);
                         if((nxtpls & 0xFF00) == 0xFD00)
                         {
-                            seltrk->ptbl->CUSTOM_JUMP = ((_pulse & 0x00FF) << 8) | (nxtpls & 0x00FF);
+                            seltrk->ptbl->CUSTOM_JUMP_PLS = ((_pulse & 0x00FF) << 8) | (nxtpls & 0x00FF);
                             seltrk->pulsei++;
                         }
                         else
-                            seltrk->ptbl->CUSTOM_JUMP = (_pulse & 0x00FF);
+                            seltrk->ptbl->CUSTOM_JUMP_PLS = (_pulse & 0x00FF);
 
                     }
                     else
-                        seltrk->ptbl->CUSTOM_JUMP2 = (_pulse & 0x00FF);
+                        seltrk->ptbl->CUSTOM_JUMP_PLS = (_pulse & 0x00FF);
 
                     seltrk->pulsei++;
                     _pulse = song->getPulseEntry(seltrk->pulsei);
                 } else if(cmd == 0xE) //FE, JUMP CUSTOM JUMP
                 {
-                    seltrk->pulsei = seltrk->ptbl->CUSTOM_JUMP2 + (_pulse & 0xFF);
+                    seltrk->pulsei = seltrk->ptbl->CUSTOM_JUMP_PLS + (_pulse & 0xFF);
                     _pulse = song->getPulseEntry(seltrk->pulsei);
                 }
                 else
@@ -621,6 +621,203 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
             seltrk->ptbl->PULSE1 = (_pulse & 0x0FFF) << 4;
 
         }
+        //if(seltrk->pulsei != 0xFFFF) std::cerr << " pulse=" <<  ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] << " " << seltrk->pulsei << "pulseval=" << song->getPulseEntry(seltrk->pulsei ) <<'\n';
+    
+    
+    
+    }
+
+    //////////////////////////////////////////
+    //////FILTER TABLE IMPLEMENTATION//////////
+    //////////////////////////////////////////
+    depth = 0;
+
+    //This needs to happen outside of the followinbg loop
+    //in case filters_active is 0
+    if(seltrk->filteri != 0xFFFF)
+    {
+        unsigned short _filter = song->getFilterEntry(seltrk->filteri);
+
+        if((_filter  & 0xFF00) == 0xF000)
+        {
+            seltrk->filters_active = _filter & 0xF;
+            seltrk->filteri++;
+        }
+
+    }
+            //std::cerr << "  aylmao " << '\n';
+    //All of the jumps operate identically to the wave table jumps but these
+    //operations perform on filter related fields
+    if(seltrk->filters_active && seltrk->filteri != 0xFFFF)
+    {
+
+        unsigned short filterduracc = 0;
+        while(filterduracc < seltrk->filters_active)
+        {
+            unsigned short _filter = song->getFilterEntry(seltrk->filteri);
+            
+            if(_filter > 0xEFFF)
+            {
+                while((_filter & 0xF000) == 0xF000)
+                {
+                    depth++;
+                    if(depth > 64)
+                    {
+                        std::cerr << "Oh dear! Infinite loop in Filter table!\n";
+                        seltrk->filteri--;
+                        break;
+                    }
+
+                    //Get which pulse function it is
+                    unsigned char cmd = (_filter & 0x0F00) >> 8;
+                    if(cmd == 0xF) //FF, JUMP
+                    {
+                        //If there is a Jump instruction immediately following this pulse
+                        //entry then concatenate the destinations of these wave entries
+                        if(seltrk->filteri < 0xFFFF) //edge case
+                        {
+                            unsigned short nxtflt = song->getFilterEntry(seltrk->filteri + 1);
+                            if((nxtflt & 0xFF00) == 0xFF00)
+                            {
+                                seltrk->filteri = ((_filter & 0x00FF) << 8) | (nxtflt & 0x00FF);
+                                _filter = song->getFilterEntry(seltrk->filteri);
+                            }
+                            else
+                            {
+                                //Next entry wasn't the FF function
+                                seltrk->filteri = _filter & 0x00FF;
+                                _filter = song->getFilterEntry(seltrk->filteri);
+                            }
+                        }
+                        else
+                        {
+                            //Just jump to where it says
+                            seltrk->filteri = _filter & 0x00FF;
+                            _filter = song->getFilterEntry(seltrk->filteri);
+                        }
+                    }else if(cmd == 0xB) //Set loop Counter
+                    {
+                        seltrk->ptbl->LOOP_FILTER = _filter & 0xFF;
+                        seltrk->filteri++;
+                        _filter = song->getFilterEntry(seltrk->filteri);
+                    } else if(cmd == 0xC) //decrement loop ctr, jump if != 0
+                    {
+                        seltrk->ptbl->LOOP_FILTER--;
+                        if(seltrk->ptbl->LOOP_FILTER !=0)
+                        {
+
+                            //jump 
+                            if(seltrk->filteri < 0xFFFF)
+                            {
+
+                                unsigned short nxtflt = song->getFilterEntry(seltrk->filteri + 1);
+                                if((nxtflt & 0xFF00) == 0xFC00)
+                                {
+                                    seltrk->filteri = ((_filter & 0x00FF) << 8) | (nxtflt & 0x00FF);
+                                    _filter = song->getFilterEntry(seltrk->filteri);
+                                }
+                                else
+                                {
+                                    seltrk->filteri = _filter & 0x00FF;
+                                    _filter = song->getFilterEntry(seltrk->filteri);
+                                }
+                            }
+                            else
+                            {
+                                seltrk->filteri = _filter & 0x00FF;
+                                _filter = song->getFilterEntry(seltrk->filteri);
+                            }
+                        }
+                        else
+                        {
+                            //Concatenate destinations if adjacent to another FC function
+                            if(seltrk->filteri < 0xFFFF)
+                            {
+                                unsigned short nxtflt = song->getFilterEntry(seltrk->filteri + 1);
+                                if((nxtflt & 0xFF) == 0xFC)
+                                    seltrk->filteri+=2;
+                                else
+                                    seltrk->filteri++;
+                            }
+                            else
+                                seltrk->filteri++;
+
+                            _filter = song->getFilterEntry(seltrk->filteri);
+                        }
+                    } else if(cmd == 0x0) //F0, SET ACTIVE FILTERS
+                    {
+
+                        seltrk->filters_active = _filter & 0xF;
+                        seltrk->filteri++;
+
+                    } else if(cmd == 0x4) //F4, SET FILTER
+                    {
+
+                        seltrk->ptbl->FILTER[(_filter & 0xF0) >> 8] = _filter & 0xF;
+                        seltrk->filteri++;
+
+                    } else if(cmd == 0xD) //FD, SET CUSTOM JUMP
+                    {
+                        if(seltrk->filteri < 0xFFFF)
+                        {
+                            unsigned short nxtflt = song->getFilterEntry(seltrk->filteri + 1);
+                            if((nxtflt & 0xFF00) == 0xFD00)
+                            {
+                                seltrk->ptbl->CUSTOM_JUMP_FLT = ((_filter & 0x00FF) << 8) | (nxtflt & 0x00FF);
+                                seltrk->filteri++;
+                            }
+                            else
+                                seltrk->ptbl->CUSTOM_JUMP_FLT = (_filter & 0x00FF);
+
+                        }
+                        else
+                            seltrk->ptbl->CUSTOM_JUMP_FLT = (_filter & 0x00FF);
+
+                        seltrk->filteri++;
+                        _filter = song->getFilterEntry(seltrk->filteri);
+                    } else if(cmd == 0xE) //FE, JUMP CUSTOM JUMP
+                    {
+                        seltrk->filteri = seltrk->ptbl->CUSTOM_JUMP_FLT + (_filter & 0xFF);
+                        _filter = song->getFilterEntry(seltrk->filteri);
+                    }
+                    else
+                    {
+                        seltrk->filteri++;
+                        _filter = song->getFilterEntry(seltrk->filteri);
+                    }
+
+                }
+
+
+            }
+
+            //For the filter table, iterations happen inside the loop for however
+            //many active filters there are
+
+            if(_filter < 0xE000) //0x0000 to 0xDFFF add pulse
+            {
+                if(_filter >= 0x7000) //Negative
+                {
+                    unsigned short offset = _filter + 0x2000; // this would make 0xDFFF into 0xFFFF which is -1
+                    seltrk->ptbl->FILTERP[filterduracc] += static_cast<short>(offset);
+                }
+                else
+                    seltrk->ptbl->FILTERP[filterduracc] = ((short)seltrk->ptbl->FILTERP[filterduracc]) + _filter; //shift once to the left
+            }
+            else if(_filter < 0xF000) // 0xE___, set pulse
+            {
+                seltrk->ptbl->FILTERP[filterduracc] = (_filter & 0x0FFF) << 4;
+            }
+
+            std::cerr << "please tell me this is working " << filterduracc << " " << _filter << " " << seltrk->ptbl->FILTERP[filterduracc] << '\n';
+
+            //Filteri iterates, but remains in the loop
+            //until filterduracc is >= the number of active filters
+            seltrk->filteri++;
+            filterduracc++;
+        }
+
+
         //if(seltrk->pulsei != 0xFFFF) std::cerr << " pulse=" <<  ((unsigned short*)seltrk->ptbl)[PARAM_PULSE] << " " << seltrk->pulsei << "pulseval=" << song->getPulseEntry(seltrk->pulsei ) <<'\n';
     
     
@@ -781,10 +978,33 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
     }
 
 
+    
+    //Iterate final wave index
+
+
+    if(frq < 1)
+        frq = 1;
+    if(seltrk->ptbl->LOOP_FA_WAVE < 2)
+    {
+        seltrk->wavei++;
+        seltrk->waveduracc = 1;
+    }
+    else
+    {
+        if(seltrk->waveduracc == 0)
+        {
+            seltrk->wavei++;
+            seltrk->waveduracc = seltrk->ptbl->LOOP_FA_WAVE;
+        }
+    }
+    seltrk->waveduracc--; 
+
+    //Iterate final pulse index
+    //
     if(seltrk->pulsei != 0xFFFF)
     {
         //Do pulseduracc handling
-        if(seltrk->ptbl->LOOP4 < 2)
+        if(seltrk->ptbl->LOOP_FA_PULSE < 2)
         {
             seltrk->pulsei++;
             seltrk->pulseduracc = 1;
@@ -795,28 +1015,14 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
             if(seltrk->pulseduracc == 0)
             {
                 seltrk->pulsei++;
-                seltrk->pulseduracc = seltrk->ptbl->LOOP4;
+                seltrk->pulseduracc = seltrk->ptbl->LOOP_FA_PULSE;
             }
         }
         seltrk->pulseduracc--;
     }
-    if(frq < 1)
-        frq = 1;
-    if(seltrk->ptbl->LOOP3 < 2)
-    {
-        seltrk->wavei++;
-        seltrk->waveduracc = 1;
-    }
-    else
-    {
-        if(seltrk->waveduracc == 0)
-        {
-            seltrk->wavei++;
-            seltrk->waveduracc = seltrk->ptbl->LOOP3;
-        }
-    }
-    seltrk->waveduracc--; 
 
+
+    //Scale the volume
     amp *= seltrk->ptrnvol / 63.0f;
     amp *= amplifyall;
 
@@ -949,7 +1155,9 @@ void itrp::initializeRender()
         tracks[i].lastfrq = 1;
         tracks[i].nextfrq = 1;
         tracks[i].phase = 0;
+        tracks[i].filters_active = 0;
 
+        //Set the instrument to the instrument in first row of this track
         if(((firstrow & R_INSTRUMENT) >> RI_INSTRUMENT) < song->numInstruments())
             tracks[i].inst = song->getInstrument((firstrow & R_INSTRUMENT) >> RI_INSTRUMENT);
         else
@@ -958,12 +1166,14 @@ void itrp::initializeRender()
         {
             tracks[i].wavei = tracks[i].inst->getWaveIndex();
             tracks[i].pulsei = tracks[i].inst->getPulseIndex();
+            tracks[i].filteri = tracks[i].inst->getFilterIndex();
             tracks[i].voli = tracks[i].inst->getVolEntry(0);
         }
         else
         {
             tracks[i].wavei = 0;
-            tracks[i].pulsei = 0;
+            tracks[i].pulsei = 0xFFFF;
+            tracks[i].filteri = 0xFFFF;
             tracks[i].voli = 0;
 
         }
@@ -1068,12 +1278,12 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
                             //std::cerr << "INSTSET pulsei " << seltrk->pulsei << '\n';
                         }
                         seltrk->waveduracc = 0;
-                        seltrk->ptbl->LOOP3 = 1;
+                        seltrk->ptbl->LOOP_FA_WAVE = 1;
 
                         if(seltrk->inst->getPulseIndex() < 0xFFFF)
                         {
                             seltrk->pulseduracc = 0;
-                            seltrk->ptbl->LOOP4 = 1;
+                            seltrk->ptbl->LOOP_FA_PULSE = 1;
                         }
                         
                         seltrk->voli = 0;

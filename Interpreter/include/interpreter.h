@@ -28,6 +28,7 @@ namespace itrp
         float frq;
         float nextfrq;
         float phase;
+        unsigned char filters_active;
 
         unsigned short segments;
         unsigned char fx;
@@ -36,6 +37,7 @@ namespace itrp
 
         unsigned short wavei;
         unsigned short pulsei;
+        unsigned short filteri;
         unsigned char lastwave;
         unsigned char waveduracc;
         unsigned char pulseduracc;
