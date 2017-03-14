@@ -8,12 +8,12 @@ struct paramtable
 {
     unsigned short PULSE1;
     unsigned short PULSE2;
-    unsigned short CUSTOM_JUMP, CUSTOM_JUMP2;
-    unsigned char LOOP, WAVE1, WAVE2, LOOP2, LOOP3, LOOP4;
+    unsigned short CUSTOM_JUMP_WAV, CUSTOM_JUMP_PLS, CUSTOM_JUMP_FLT;
+    unsigned char LOOP_WAVE, WAVE1, WAVE2, LOOP_PULSE, LOOP_FA_WAVE, LOOP_FA_PULSE, LOOP_FILTER;
     sample_res CHAIN, LAST;
 
-    
-
+    unsigned char FILTER[0x10];
+    float         FILTERP[0x10];
 
 };
 

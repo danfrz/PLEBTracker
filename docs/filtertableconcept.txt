@@ -52,7 +52,7 @@ You only use x many filters at a time, so it makes sense to implicitly iterate a
 0007 00 08	//		INCREASE FILTER PARAM (FILTER 1)
 0009 DF F8	//		DECREASE FILTER PARAM (FILTER 2) (implicit iteration:every 2 non-functions)
 000A FC 07	//		LOOP [07-09], happens 0x10 times
-000B 00 00	//	SET FILTER 1 TO 0000
+000B E0 00	//	SET FILTER 1 TO 0000
 000C EF FF	//	SET FILTER 2 TO FFF0 (implicit iteration)
 000D FF 05	//LOOP
 
