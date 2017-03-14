@@ -51,6 +51,14 @@ Song::Song()
     pulseTable[1] = 0xFF00;
     for(int i = 2; i < pulseEntries; i++)
         pulseTable[i] = 0;
+
+    filterEntries = 2;
+    filterTable = new unsigned short[256];
+    filterTable[0] = 0x0000;
+    filterTable[1] = 0xFF00;
+    for(int i = 2; i < filterEntries; i++)
+        filterTable[i] = 0;
+
 }
 
 Song::Song(std::istream &in)
@@ -60,8 +68,10 @@ Song::Song(std::istream &in)
     orders = new unsigned char[256];
     waveTable = new unsigned short[256];
     pulseTable = new unsigned short[256];
+    filterTable = new unsigned short[256];
 
     pulseEntries = 0;
+    filterEntries = 0;
 
     input(in);
 }
@@ -73,6 +83,7 @@ Song::~Song()
     delete [] orders;
     delete [] waveTable;
     delete [] pulseTable;
+    delete [] filterTable;
 
 }
 
@@ -94,6 +105,9 @@ std::ostream &Song::output(std::ostream &out) const
 
     out.write((char*)&pulseEntries, sizeof(short));
     out.write((char*)pulseTable, pulseEntries*sizeof(short));
+
+    out.write((char*)&filterEntries, sizeof(short));
+    out.write((char*)filterTable, filterEntries*sizeof(short));
 
     out.write((char*)&num_instruments, sizeof(char));
     for(int i = 0; i < num_instruments; i++)
@@ -134,7 +148,11 @@ std::istream &Song::input(std::istream &in)
     in.read((char*)pulseTable, pulseEntries*sizeof(short));
     for(int i = pulseEntries; i < 256; i++)
         pulseTable[i] = 0;
-        
+     
+    in.read((char*)&filterEntries, sizeof(short));
+    in.read((char*)filterTable, filterEntries*sizeof(short));
+    for(int i = filterEntries; i < 256; i++)
+        filterTable[i] = 0;   
 
     instruments = new Instrument*[256];
     in.read((char*)&num_instruments, sizeof(char));
@@ -169,6 +187,11 @@ void Song::copyCommutable(Song *other)
     for(int i = 0; i < pulseEntries; i++)
         other->setPulseEntry(i,pulseTable[i]);
     other->pulseEntries = pulseEntries;
+
+    unsigned short *otrfilterbl = other->getFilterTable();
+    for(int i = 0; i < filterEntries; i++)
+        other->setFilterEntry(i,filterTable[i]);
+    other->filterEntries = filterEntries;
 
     //Copy important song data to the other song
     other->setInterRowResolution(interrow_resolution);
@@ -814,3 +837,198 @@ bool Song::removePulseEntry(unsigned short index)
     fixPulseJumps(index, -1);
     return true;
 }
+
+
+
+
+
+
+
+
+
+
+bool Song::insertFilterEntry(unsigned short index, unsigned short entry)
+{
+    if(filterEntries == 0xFFFF)
+        return false;
+    for(unsigned short last = ++filterEntries; last > index; last--)
+        filterTable[last] = filterTable[last-1];
+
+    fixFilterJumps(index, 1);
+    
+    filterTable[index] = entry;
+    return true;
+}
+
+void Song::fixFilterJumps(const unsigned short &index, short difference)
+{
+
+    if(difference == 0) return;
+
+    //Fix instrument pulse index references
+    unsigned short instflt;
+    if(difference > 0)
+    {
+        for(unsigned char i = 0; i < num_instruments; i++)
+        {
+            instflt = instruments[i]->getFilterIndex();
+            // > 0 because the first instrument's wave pointer shouldn't
+            // realistically change due to insertions at index 0
+            if(instflt > 0 && instflt >= index && instflt < 0xFFFF-difference && instflt != 0xFFFF)
+            {
+                instruments[i]->setFilterIndex(instflt+difference);
+            }
+        }
+    }
+    else
+    {
+        for(unsigned char i = 0; i < num_instruments; i++)
+        {
+            instflt = instruments[i]->getFilterIndex();
+            if(instflt >= index && instflt != 0xFFFF)
+            {
+                if(instflt >= -difference)
+                    instruments[i]->setFilterIndex(instflt +difference);
+                else
+                    instruments[i]->setFilterIndex(0);
+            }
+        }
+    }
+
+    //Fix Pulse jumps
+    unsigned short jumptype;
+    unsigned short dest;
+    if(difference > 0)
+    {
+        for(unsigned short i = 0; i < filterEntries; i++)
+        {
+            if( isJumpFunc_Volatile(filterTable[i]))//is jump, correct it
+            {
+                jumptype = filterTable[i] & 0xFF00;
+                if( (i < filterEntries-1) && ((filterTable[i+1]&0xFF00) == jumptype))//Long jump
+                {
+                    dest = ((filterTable[i] & 0xFF) << 8) | (filterTable[i+1] & 0xFF);
+                    if(dest >= index && dest < 0xFFFF-difference) 
+                    {
+                        dest += difference;
+                        filterTable[i] = jumptype | ((dest & 0xFF00) >> 8);
+                        filterTable[i+1] = jumptype | (dest & 0xFF);
+                    }
+                    i++;
+                }
+                else
+                {
+                    dest = filterTable[i] & 0xFF;
+                    if(dest >= index)
+                    {
+                        if(dest >= 0xFF - difference)
+                        {
+
+                            if(waveEntries < 0xFFFF)
+                            {
+                                dest += difference;
+                                filterTable[i] &= 0xFF00;
+                                filterTable[i] |= ((dest & 0xFF00) >> 8);
+                                insertFilterEntry(i+1,jumptype | (dest & 0xFF));
+                            }
+                        }
+                        else
+                            filterTable[i]+=difference;
+                    }
+                }
+            }
+        }
+    }
+
+    else //difference negative
+    {
+        for(unsigned short i = 0; i < filterEntries; i++)
+        {
+            if( isJumpFunc_Volatile(filterTable[i]))//is jump, correct it
+            {
+                jumptype = filterTable[i] & 0xFF00;
+            
+                if( (i < filterEntries-1) && ((filterTable[i+1] & 0xFF00) == jumptype) )//Long jump
+                {
+                    dest = ((filterTable[i] & 0xFF) << 8) | (filterTable[i+1] & 0xFF);
+                    if(dest >= index && dest >= -difference) 
+                    {
+                        dest +=  difference;
+
+                        filterTable[i] = jumptype | ((dest & 0xFF00) >> 8);
+                        filterTable[i+1] = jumptype | (dest & 0xFF);
+                    }
+                    i++;
+                }
+                else
+                {
+                    dest = filterTable[i] & 0xFF;
+                    if(dest >= index)
+                    {
+                        if(dest >= -difference)
+                            filterTable[i]+= difference;
+                        else
+                            filterTable[i] &= 0xFF00;
+                    }
+                }
+
+            }
+        }
+    }
+
+    Pattern *p;
+    for(int i = 0; i < num_patterns; i++)
+    {
+        p = patterns[i];
+        for(int trk = 0; trk < p->numTracks(); trk++)
+        {
+            for(int row = 0; row < p->numRows(); row++)
+            {
+                unsigned int entry = p->at(trk,row);
+                if((entry & 0xF00) == 0x900)
+                {
+                    unsigned char fltjump = entry & 0xFF;
+
+                    if(difference > 0)
+                    {
+                        if(fltjump > 0 &&fltjump >= index && fltjump < 0xFF-difference)
+                        {
+                            fltjump +=difference;
+                        }
+                    }
+                    else
+                    {
+                        if(fltjump >= index)
+                        {
+                            if(fltjump >= -difference)
+                                fltjump +=difference;
+                            else
+                                fltjump = 0;
+                        }
+                    }
+                    entry &= ~0xFF;
+                    entry |= fltjump;
+                    p->setAt(trk,row,entry);
+                }
+            }
+        }
+    }
+
+}
+
+bool Song::removeFilterEntry(unsigned short index)
+{
+    if(filterEntries == 0)
+        return false;
+
+    for(unsigned short i = index+1; i < filterEntries; i++)
+        filterTable[i-1] = filterTable[i];
+    filterTable[--filterEntries] = 0;
+    fixFilterJumps(index, -1);
+    return true;
+}
+
+
+
+
+
