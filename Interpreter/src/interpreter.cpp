@@ -146,16 +146,6 @@ void itrp::play(sample_res **buffer, const unsigned int orders, unsigned int *by
         //std::cerr << "playing buffer " << orderi << ' ' << bytes[orderi] << " bytes\n";
         std::cout.write((char*)order, bytes[orderi]*sizeof(sample_res));
 
-        //Export each of the bytes from the byte buffers to stdout
-        for(unsigned int i = 0; i < bytes[orderi]; i++)
-        {
-            //TODO: Unfortunately, this will need to be
-            //revised if sample_res is ever changed
-            //putchar(order[i]);
-            //putchar((char)((static_cast<unsigned short>(order[i] & 0xFF00) >> 8))); //the cast to unsigned short is necessary because how C implements bitwise shift
-            //putchar((char)(order[i] & 0x00FF));
-        }
-        
     }
 
 }
@@ -214,6 +204,13 @@ void itrp::play(sample_res *buffer, unsigned int bytes)
         {
             putchar((char)(buffer[i]&0xFF)); 
             putchar((char)((buffer[i]&0xFF00) >> 8));
+        }
+        else if(sizeof(sample_res) == 4)
+        {
+            putchar((char)(buffer[i] &0x000000FF)); 
+            putchar((char)((buffer[i]&0x0000FF00) >> 8));
+            putchar((char)((buffer[i]&0x00FF0000) >> 16));
+            putchar((char)((buffer[i]&0xFF000000) >> 24));
         }
     }
 
@@ -1224,11 +1221,18 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
     if(end < start)
         end = curpattern->numRows();
     int rows = end - start;
-    bytes = rows*bytesperrow;
+    bytes = rows*bytesperrow;//TODO refactor "bytes" to be "samples", as in the number of samples
 
-    sample_res *buffer = new sample_res[bytes];
+    sample_res *buffer = new sample_res[bytes]; //TODO change this so that you can chind numRows mid-song
+#if SAMPLE_RES_IS_UNSIGNED
+    unsigned long middle = std::pow(2, sizeof(sample_res)*8) / 2;
+        for(int i = 0; i < bytes; i++)
+            buffer[i]=middle;
+#else
     for(int i = 0; i < bytes; i++)
-        buffer[i]=127;
+            buffer[i]=0;
+
+#endif
 
     //Loop through tracks
     for(unsigned int tracki = 0; tracki < song->numTracks(); tracki++)
