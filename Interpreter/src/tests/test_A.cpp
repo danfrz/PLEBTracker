@@ -6,24 +6,6 @@
 typedef unsigned char sample_res;
 typedef unsigned char sample_res_unsigned;
 
-std::vector<sample_res> song_buffer;
-std::vector<sample_res> *track_buffers;
-
-
-void mix(int index, int tracks, std::vector<sample_res> *track_buffers)
-{
-
-    for(int t = 0; t < tracks; t++)
-    {
-        sample_res sum = 0;
-        for(std::vector<sample_res>::iterator it = track_buffers[t].begin() + index;
-                it != track_buffers[t].end();
-                it++)
-            sum += *it;
-        song_buffer.push_back(sum);
-    }
-}
-
 void genSqr(sample_res *bfr,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len)
 {
     if(period == 0 || amplitude == 0)
@@ -158,10 +140,6 @@ void play(sample_res *buffer, unsigned int bytes)
 
 
 
-
-
-
-
 void performFilter(sample_res *bfr, int bytes)
 {
     int bytespersub = 8192;
@@ -189,6 +167,8 @@ void performFilter(sample_res *bfr, int bytes)
         }
     }
 }
+
+
 
 void test_ProgressiveFilter()
 {
