@@ -11,7 +11,7 @@ and wanted to implement what I've been learning by using other trackers and stud
 With this program, like other trackers, you can compose music (.plb modules) and listen to them.
 All of the sounds produced in this tracker are synthesized, meaning there are no samples.
 
-##Requirements
+## Requirements
    program...  (package...   )
 
    ncurses     (ncurses)    
@@ -22,7 +22,7 @@ All of the sounds produced in this tracker are synthesized, meaning there are no
 Some distributions may not have these exact package names but
 these names should work for at least Archlinux and Debian.
 
-##Installation
+## Installation
 Clone this project from git
 ```
 git clone https://github.com/danfrz/PLEBTracker
@@ -37,7 +37,7 @@ make ; ./INSTALL.sh;
 ```
 
 
-##Usage
+## Usage
 To open a song within the tracker, the easiest way is from the commandline:
 ```
    plebtrk song.plb
