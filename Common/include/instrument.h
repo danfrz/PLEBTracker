@@ -12,7 +12,7 @@ typedef unsigned char sample_res; //The sample resolution used for most of the i
 typedef unsigned char sample_res_unsigned; //The resolution that is gauranteed to be unsigned
 typedef char sample_res_signed; //The resolution that is gauranteed to be signed
 
-#define SAMPLE_RES_IS_UNSIGNED 0
+#define SAMPLE_RES_IS_UNSIGNED 1
 
 class Instrument
 {
