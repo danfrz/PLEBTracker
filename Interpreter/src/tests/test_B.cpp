@@ -300,9 +300,10 @@ void test_ProgressiveFilter()
         for(int t = 0; t < tracks; t++)
             tmp += track_buffers[t].at(i);
         //IMPORTANTE:
+#if SAMPLE_RES_IS_UNSIGNED
         if( (tracks % 2) == 0)
             tmp += std::pow(2,sizeof(sample_res)*8)/2;
-
+#endif
         song_buffer[i] = tmp;
     }
 
