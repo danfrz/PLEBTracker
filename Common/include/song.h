@@ -3,6 +3,7 @@
 
 #include "instrument.h"
 #include "pattern.h"
+#include "math.h"
 #include <istream>
 #include <ostream>
 
@@ -25,6 +26,7 @@ class Song{
         unsigned char tracks;
         unsigned short  bytes_per_row;
         unsigned char interrow_resolution;
+        unsigned char fourier_buffer_size;
 
         unsigned char num_orders;
         unsigned char num_patterns;
@@ -64,7 +66,7 @@ Description:
     patterns is initialized to an array of 256 pattern pointers
     and pattern 0 is set to an empty pattern
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-        Song();
+        Song(bool fill_defaults=true);
 
 
 /***\//////////////////////////////////////////////////////////////////////////        
@@ -130,14 +132,46 @@ Function: void setInterRowResolution(unsigned char res)
 Description:
    Sets the subdivision of the bytes per row 
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\__///
-        inline void setInterRowResolution(unsigned char res){interrow_resolution = res;}
+        inline void setInterRowResolution(const unsigned char &res){interrow_resolution = res;}
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void setNumBitsFourierBufferSize(unsigned char size){fourier_buffer_size = size;
+
+Description:
+   Sets the number of bits used to represent the fourier bufffer size
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        void setNumBitsFourierBufferSize(const unsigned char &size);
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: char getInterRowResolution()
 Description:
    Get the number of segments in a row
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_///
         inline unsigned char getInterRowResolution(){return interrow_resolution;}
+
+
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: char getNumBitsFourierBufferSize(){return fourier_buffer_size;
+
+Description:
+   Get the number representing how many bits represent the size of the fourier
+   buffer
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        inline unsigned char getNumBitsFourierBufferSize(){
+            return fourier_buffer_size;
+        }
+
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: int getFourierBufferSize()
+
+Description:
+    Get the actual size of the fourier buffer
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        inline unsigned long getFourierBufferSize(){
+            return std::pow(2,fourier_buffer_size);
+        }
 
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: void setTrackNum(const unsigned newtracks)
