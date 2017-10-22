@@ -165,6 +165,7 @@ int main(int argc, char *argv[])
     editor::pulsewin = new WIN(editor::WIN_HEIGHT-5, 10,                   3, editor::WIN_WIDTH-20);
     editor::filterwin = new WIN(editor::WIN_HEIGHT-5, 10,                   3, editor::WIN_WIDTH-10);
     editor::dialog  = new WIN(8, 60,             editor::WIN_HEIGHT/3, editor::WIN_WIDTH/3); //good enough
+
     editor::selinst = editor::song->getInstrument(0);
 
     editor::wingroup = editor::ptrnwin;
@@ -510,6 +511,17 @@ int main(int argc, char *argv[])
 
     }
     delete editor::song;
+    delete editor::metawin;
+    delete editor::ptrnwin;
+    delete editor::instwin;
+    delete editor::wavewin;
+    delete editor::pulsewin;
+    delete editor::filterwin;
+    delete editor::dialog;
+    delete [] editor::muted_tracks;
+
+
+
 
     //shutdown ncurses
     endwin();
