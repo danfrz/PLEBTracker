@@ -13,7 +13,7 @@ struct paramtable
     sample_res CHAIN, LAST;
 
     unsigned char FILTER[0x10];
-    float         FILTERP[0x10];
+    short         FILTERP[0x10];
 
 };
 
