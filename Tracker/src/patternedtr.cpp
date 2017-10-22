@@ -756,7 +756,7 @@ void patternedtr::displayPattern()
         else
             xoff = 3+TRACK_WIDTH*maxtracksviewport-1;
 
-        int spacerwidth = w - xoff - 11;
+        int spacerwidth = w - xoff; //Why does this 11 go here?
         char *spacebuffer = new char[spacerwidth+1];
         makeSpaceBuffer(spacebuffer, spacerwidth);
         attroff(-1);
