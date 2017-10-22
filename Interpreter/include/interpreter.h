@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <ctgmath> //logb
 #include <fftw3.h>
+#include <chrono>
 
 #include "song.h"
 #include "instrument.h"
@@ -50,6 +51,7 @@ namespace itrp
         sample_res_unsigned lastvol;
         unsigned char voli;
         unsigned char volduracc;
+        sample_res *fourier_buffer;
     };
 
     //not implemented yet
@@ -64,6 +66,8 @@ namespace itrp
     generator *generators;
     bool trackmute[256];
     float amplifyall;
+    unsigned int fourier_buffer_size;
+    std::chrono::system_clock::time_point begin_time;
 
 
 
@@ -105,6 +109,9 @@ fftw_complex *filter_highpass(fftw_complex *in, const unsigned int &highpass, co
 
 
 sample_res *backFourierTransform(fftw_complex *in, const unsigned int &filter_len, const unsigned int &len);
+
+
+void performFilter(sample_res *bfr, paramtable *ptbl, int bytes);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: bool resetsPhaseOnWave1Set(const unsigned char &wave)

@@ -86,6 +86,28 @@ sample_res *itrp::backFourierTransform(fftw_complex *in, const unsigned int &fil
 
 }
 
+void itrp::performFilter(sample_res *bfr, paramtable *ptbl, int bytes)
+{
+    std::cerr << "performFilter begin, performing transform\n";
+    sample_res *outbfr;
+
+    unsigned int filter_len = 0;
+    fftw_complex *transform = fourierTransform(bfr, filter_len, bytes);
+
+    std::cerr << "performFilter performing filter\n";
+    filter_highpass(transform, ptbl->FILTERP[0], filter_len);
+
+    std::cerr << "performFilter performing back-transform\n";
+    outbfr = backFourierTransform(transform, filter_len, bytes);
+    for(int j = 0; j < bytes; j++)
+        bfr[j] = outbfr[j];
+
+    fftw_free(transform);
+
+    fftw_free(outbfr);
+    std::cerr << "performFilter end\n";
+}
+
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void printSample(uchar &b, const char &character, const uchar &res
@@ -628,6 +650,7 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
     //////FILTER TABLE IMPLEMENTATION//////////
     //////////////////////////////////////////
     depth = 0;
+    std::cerr << "filteri " << std::hex << seltrk->filteri << " \n";
 
     //This needs to happen outside of the followinbg loop
     //in case filters_active is 0
@@ -635,18 +658,20 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
     {
         unsigned short _filter = song->getFilterEntry(seltrk->filteri);
 
-        if((_filter  & 0xFF00) == 0xF000)
+        std::cerr << "what " << _filter << '\n';
+
+        if((_filter & 0xFF00) == 0xF000)
         {
-            seltrk->filters_active = _filter & 0xF;
+            seltrk->filters_active = _filter & 0x00FF;
+            std::cerr << "SETTING FILTERS ACTIVE=" << seltrk->filters_active << " from " << _filter << '\n';
             seltrk->filteri++;
         }
-
     }
-            //std::cerr << "  aylmao " << '\n';
     //All of the jumps operate identically to the wave table jumps but these
     //operations perform on filter related fields
     if(seltrk->filters_active && seltrk->filteri != 0xFFFF)
     {
+        std::cerr << "  Filters Active " << '\n';
 
         unsigned short filterduracc = 0;
         while(filterduracc < seltrk->filters_active)
@@ -744,13 +769,13 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
                     } else if(cmd == 0x0) //F0, SET ACTIVE FILTERS
                     {
 
-                        seltrk->filters_active = _filter & 0xF;
+                        seltrk->filters_active = (_filter & 0x00FF);
                         seltrk->filteri++;
 
                     } else if(cmd == 0x4) //F4, SET FILTER
                     {
 
-                        seltrk->ptbl->FILTER[(_filter & 0xF0) >> 8] = _filter & 0xF;
+                        seltrk->ptbl->FILTER[(_filter & 0xF0) >> 4] = _filter & 0xF;
                         seltrk->filteri++;
 
                     } else if(cmd == 0xD) //FD, SET CUSTOM JUMP
@@ -790,8 +815,7 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
 
             //For the filter table, iterations happen inside the loop for however
             //many active filters there are
-
-            if(_filter < 0xE000) //0x0000 to 0xDFFF add pulse
+            if(_filter < 0xE000) //0x0000 to 0xDFFF add filter
             {
                 if(_filter >= 0x7000) //Negative
                 {
@@ -1042,7 +1066,7 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
     seltrk->lastwave =  waveform;
     seltrk->segments++;
 
-    //std::cerr << "renderTick END\n";
+    std::cerr << "renderTick END\n";
 }
 
 void itrp::initializeWaveTable()
@@ -1142,9 +1166,13 @@ bool itrp::resetsPhaseOnWave1Set(const unsigned char &wave)
 
 void itrp::initializeRender()
 {
+            std::cerr << "INITRENDER" << song->numOrders() << "\n";
     order = 0;
     curpattern = song->getPatternByOrder(0);
     int ptbl_size = sizeof(paramtable);
+    std::cerr << "meow\n";
+    unsigned long fourier_buffer_size = song->getFourierBufferSize();
+            std::cerr << "meow2\n";
     for(int i = 0; i < song->numTracks(); i++)
     {
         unsigned int firstrow = curpattern->at(i,0);
@@ -1192,6 +1220,18 @@ void itrp::initializeRender()
         tracks[i].volduracc = 0;
         tracks[i].lastvol = 0;
         tracks[i].voljump = 1;
+
+        tracks[i].fourier_buffer = new sample_res[fourier_buffer_size];
+#if SAMPLE_RES_IS_UNSIGNED
+        unsigned long middle = std::pow(2, sizeof(sample_res)*8) / 2;
+        for(int s = 0; s < fourier_buffer_size; s++)
+            tracks[i].fourier_buffer[s]=middle;
+#else
+        for(int s = 0; s < fourier_buffer_size; s++)
+            tracks[i].fourier_buffer[s]=0;
+#endif
+
+
     }
     //std::cerr << "initialized render\n";
 }
@@ -1204,7 +1244,7 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
     const unsigned char  subdiv = song->getInterrowRes();
     const unsigned short segment = bytesperrow / subdiv;
 
-    //std::cerr << "renderSong0 orders:" << int(song->numOrders()) <<" \n";
+    std::cerr << "renderPattern0 \n";
 
     unsigned char _oct;
     unsigned char _note;
@@ -1223,21 +1263,38 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
     int rows = end - start;
     bytes = rows*bytesperrow;//TODO refactor "bytes" to be "samples", as in the number of samples
 
-    sample_res *buffer = new sample_res[bytes]; //TODO change this so that you can chind numRows mid-song
-#if SAMPLE_RES_IS_UNSIGNED
-    unsigned long middle = std::pow(2, sizeof(sample_res)*8) / 2;
-        for(int i = 0; i < bytes; i++)
-            buffer[i]=middle;
-#else
-    for(int i = 0; i < bytes; i++)
-            buffer[i]=0;
+    sample_res *out_buffer = new sample_res[bytes]; //TODO change this so that you can chind numRows mid-song
+                                                    //easy way to do that would be to introduce a function
+    
+    unsigned long buffer_size = song->getFourierBufferSize();
+    unsigned long offset = buffer_size - segment;
 
+    std::cerr << "renderPattern1: " << buffer_size << " " << segment << " " << offset << "\n";
+    //This relies on the assumption that integer overflow for the
+    //datatype of sample_res performs the modulo operation accurately
+#if SAMPLE_RES_IS_UNSIGNED
+    if( (song->numTracks() % 2) == 0)
+    {
+        const sample_res middle = std::pow(2,sizeof(sample_res)*8)/2;
+        for(int b = 0; b < bytes; b++)
+            out_buffer[b] = middle;
+    }
+    else
+    {
+        for(int b = 0; b < bytes; b++)
+            out_buffer[b] = 0;
+    }
+#else
+    for(int b = 0; b < bytes; b++)
+            out_buffer[b] = 0;
 #endif
 
+    std::cerr << "renderPattern2 \n";
     //Loop through tracks
     for(unsigned int tracki = 0; tracki < song->numTracks(); tracki++)
     {
-        //if track muted, go to next track
+
+                //if track muted, go to next track
         if(trackmute[tracki])
             continue;
 
@@ -1245,6 +1302,7 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
 
         seltrk = &tracks[tracki];
 
+        
         //std::cerr << "renderSong2 track=" << tracki << '\n';
         for(unsigned int rowi = start; rowi < end; rowi++)
         {
@@ -1281,6 +1339,11 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
                             seltrk->pulsei = seltrk->inst->getPulseIndex();
                             //std::cerr << "INSTSET pulsei " << seltrk->pulsei << '\n';
                         }
+                        if (seltrk->inst->getFilterIndex() < song->numFilterEntries())
+                        {
+                            seltrk->filteri = seltrk->inst->getFilterIndex();
+                            //std::cerr << "INSTSET filteri " << seltrk->filteri << '\n';
+                        }
                         seltrk->waveduracc = 0;
                         seltrk->ptbl->LOOP_FA_WAVE = 1;
 
@@ -1313,6 +1376,7 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
 
             }
             seltrk->ptrnlastvol = seltrk->ptrnvol;
+            std::cerr << "meow \n";
 
             //Handle instant effects that happen once immediately per row
             if(row & R_EFFECTSEG) // Handle effects seperately
@@ -1355,12 +1419,25 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
                     seltrk->pulsei = row & R_FXPARAM;
                 }
                 else if(_fx == 0xC)
+                { 
+                    seltrk->filteri = row & R_FXPARAM;
+                }
+                else if(_fx == 0xD)
+                { 
+                    //Set Filter X's filter value to Y000
+                    _fxp1 = row & 0xF0;
+                    _fxp2 = row & 0xF;
+                   seltrk->ptbl->FILTERP[ (_fxp1 >> 4)] = (((unsigned short)_fxp2)<< 12);
+                }
+
+                else if(_fx == 0xE)
                 {
                     seltrk->voli = row & R_FXPARAM;
                     if(seltrk->voli >= seltrk->inst->numVolEntries())
                         seltrk->voli = seltrk->inst->numVolEntries()-1;
                     seltrk->volduracc = 0;
                 }
+
 
             }
 
@@ -1371,14 +1448,43 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
             }
             seltrk->fxparam = row & R_FXPARAM;
 
+
+
             //std::cerr << "renderSong4 starting segloop subdiv=" << int(subdiv) << " segment=" << segment << '\n';
             for(unsigned int subi = 0; subi < subdiv; subi++)
             {
-                renderTick(buffer + (rowi - start)*bytesperrow + subi*segment,  tracki, segment);
+                //std::cerr << "SHIFTING... " << segment << " : " << offset << '\n' ;
+                for(int i = segment; i < offset; i++)
+                    seltrk->fourier_buffer[i-segment] = seltrk->fourier_buffer[i];
+
+#if SAMPLE_RES_IS_UNSIGNED
+                {
+                    unsigned long middle = std::pow(2, sizeof(sample_res)*8) / 2;
+                    for(int i = offset; i < buffer_size; i++)
+                        seltrk->fourier_buffer[i]=middle;
+                }
+#else
+                {
+                    for(int i = offset; i < buffer_size; i++)
+                        seltrk->fourier_buffer[i]=0;
+                }
+#endif
+                //std::cerr << "DONE\n";
+
+
+                renderTick(seltrk->fourier_buffer + offset,  tracki, segment);
+                if (seltrk->filters_active)
+                    performFilter(seltrk->fourier_buffer, seltrk->ptbl, buffer_size);
+
+                for(int b = 0; b < segment; b++)
+                    *(out_buffer + (rowi - start)*bytesperrow + subi*segment + b) += seltrk->fourier_buffer[b+offset];
             }
         }
     }
-    return buffer;
+
+
+    std::cerr << "renderPattern END\n";
+    return out_buffer;
 }
 
 sample_res **itrp::renderSong(unsigned int *bytes)
@@ -1417,7 +1523,10 @@ bool itrp::load(const char *file)
 void itrp::purgeSong()
 {
     for(int i = 0; i < song->numTracks(); i++)
-        delete [] tracks[i].ptbl;
+    {
+        delete tracks[i].ptbl;
+        delete [] tracks[i].fourier_buffer;
+    }
     delete song;
     delete [] tracks;
     delete [] generators;
@@ -1506,7 +1615,10 @@ sample_res **itrp::renderSong(unsigned int *bytes, int start_order, int end_orde
         sample_res **buffers = new sample_res*[1];
         curpattern = song->getPatternByOrder(start_order);
         sample_res *buffer = renderPattern(start_row, end_row, bytes[0]);
+        std::cerr << "okay1\n";
         buffers[0] = buffer;
+
+        std::cerr << "Render finished after " << (std::chrono::system_clock::now() - itrp::begin_time).count() << '\n';
         return buffers;
     }
     else
@@ -1518,12 +1630,15 @@ sample_res **itrp::renderSong(unsigned int *bytes, int start_order, int end_orde
         int bfri = 0;
         for(unsigned int orderi = start_order; orderi <= end_order; orderi++)
         {
+            std::cerr<< "hmm0: " << orders << " " << orderi << " " << song->getPatternIndexByOrder(orderi) << '\n';
             curpattern = song->getPatternByOrder(orderi);
             sample_res *buffer = renderPattern(start_row, curpattern->numRows(), bytes[bfri]);
             start_row = 0;
             buffers[bfri] = buffer;
             bfri++;
+            std::cerr<< "hmm1\n";
         }
+        std::cerr << "Render finished after " << (std::chrono::system_clock::now() - itrp::begin_time).count() << '\n';
         return buffers;
     }
 
@@ -1532,6 +1647,7 @@ sample_res **itrp::renderSong(unsigned int *bytes, int start_order, int end_orde
 bool parseParams(int argc, const char* argv[])
 {
 
+    std::cerr << "PARSE PARAMS!\n";
 
     int start_order = 0;
     int start_row = 0;
@@ -1629,6 +1745,7 @@ bool parseParams(int argc, const char* argv[])
 
     }
     
+    std::cerr << "ONE!\n";
 
 
 
@@ -1659,25 +1776,17 @@ bool parseParams(int argc, const char* argv[])
 
     unsigned int totalBytes = 0;
     sample_res **bfrs = itrp::renderSong(bytes, start_order, end_order, start_row, end_row);
-    sample_res * bfr = itrp::linearize(bfrs, orders, bytes, totalBytes);
+    //sample_res * bfr = itrp::linearize(bfrs, orders, bytes, totalBytes);
 
-    unsigned int filterLen = 0;
-    fftw_complex *fft = itrp::fourierTransform(bfr, filterLen, totalBytes);
-    fftw_complex *lowp = itrp::filter_highpass(fft, filterLen*.2, filterLen);
-    itrp::filter_lowpass(lowp, 500, filterLen);
-    delete [] bfr;
-    bfr = itrp::backFourierTransform(lowp, filterLen, totalBytes);
-
-
-
-    itrp::play(bfr, totalBytes);
+    //itrp::play(bfr, totalBytes);
     
-    //itrp::play(bfrs, orders, bytes);
+    std::cerr << "PLAYING!\n";
+    itrp::play(bfrs, orders, bytes);
     //itrp::print(bfrs, orders, bytes);
 
     for(int i = 0; i < orders; i++)
         delete [] bfrs[i];
-    delete [] bfr; 
+    delete [] bfrs;
     delete [] bytes; 
 
 
@@ -1701,6 +1810,8 @@ int isnum(const char *str)
 
 int main(int argc, const char* argv[])
 { 
+    itrp::begin_time = std::chrono::system_clock::now(); 
+         
     int exit_status = EXIT_SUCCESS;
     itrp::songpaths = new char*[64]; //TODO
     itrp::amplifyall = 1;
@@ -1710,10 +1821,14 @@ int main(int argc, const char* argv[])
         if(isnum(argv[1]))
         {
             BASEFRQ = atoi(argv[1]);
+            std::cerr << "loading!\n";
             itrp::load(argv[2]);
+            std::cerr << "done loading\n";
 
             itrp::initializeWaveTable();
+            std::cerr << "done loading\n";
             itrp::initializeRender();
+            std::cerr << "done loading\n";
 
             //Has parameters
             parseParams(argc, argv);
@@ -1727,6 +1842,7 @@ int main(int argc, const char* argv[])
     else
         exit_status = EXIT_FAILURE;
     
+    std::cerr << "Exit fialed = " << (exit_status==EXIT_FAILURE) << "\n";
     delete [] itrp::songpaths;
     
     //double in[] = {1,2,3,4,5,6,7,8};
