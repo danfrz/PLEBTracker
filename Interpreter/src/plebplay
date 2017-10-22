@@ -8,6 +8,6 @@ fi
 LOGPATH="/var/tmp/plebtrk/itplog.log"
 
 echo "" >"$LOGPATH"
-plebitp 4410 2>>"$LOGPATH" "$@"  | aplay --rate=44100 2>>"$LOGPATH"
+plebitp 4800 2>>"$LOGPATH" "$@"  | aplay --rate=48000 2>>"$LOGPATH"
 
 
