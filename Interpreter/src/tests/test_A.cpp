@@ -56,10 +56,9 @@ fftw_complex *filter_lowpass(fftw_complex *in, unsigned int lowpass, const unsig
 
 
     unsigned int minpass = std::min((unsigned int)(righthalf), lowpass);
-    //OOOH. It never filters anything if minpass<2
-    if(minpass < 2) //Yes 2
-        minpass = 2;
-    for(int i = 1; i < minpass; i++)
+    if(minpass < 1) 
+        minpass = 1;
+    for(int i = 0; i < minpass; i++)
     {
         out[i][0] = 0;
         out[i][1] = 0;
@@ -76,14 +75,11 @@ fftw_complex *filter_highpass(fftw_complex *in, unsigned int highpass, const uns
         return out;
 
     //The higher end sounds nicer. So lets transform it by x=y^2, y=sqrt(x) [0,1]
-    double flavor_highpass = highpass/window_half;
+    double flavor_highpass = highpass/window_len;
     flavor_highpass= std::sqrt(flavor_highpass);
-    highpass = flavor_highpass*window_half;
+    highpass = flavor_highpass*window_len;
     
-    if(highpass < 2)//Yes 2
-        highpass = 2;
-    
-    for(int i = highpass; i < window_half+1; i++)
+    for(int i = highpass; i < window_len; i++)
     {
         out[i][0] = 0;
         out[i][1] = 0;
@@ -91,28 +87,6 @@ fftw_complex *filter_highpass(fftw_complex *in, unsigned int highpass, const uns
 
     return out;
 }
-
-fftw_complex *filter_modulopass(fftw_complex *in, unsigned int mod, const unsigned int &filter_len)
-{
-    //fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
-    fftw_complex *out = in;
-    if(mod == 0)
-        mod = 1;
-    
-
-    for(int i = 1; i < window_half; i++)
-    {
-        if((i % mod) == 0)
-        {
-            out[i][0] = 0;
-            out[i][1] = 0;
-        }
-    }
-
-    return out;
-}
-
-
 fftw_complex *fourierTransform(sample_res *bfr, const unsigned int &len)
 {
     //Copy sample data into input fft and window it with global window
@@ -137,9 +111,11 @@ sample_res *backFourierTransform(sample_res *buffer, const unsigned int &len)
     fftw_destroy_plan( plan_backward);
     for(int i = 0; i < len; i++)
     {
-        //std::cerr << fft_result[i][0]/window_len << '\n';
+        double result = (fft_result[i][0]/window_len)/window[i];
+        if(result > 255 || result < 0)
+            std::cerr << result << '\n';
         //buffer[i] = out[i]/len_dbl;
-        buffer[i] = ((fft_result[i][0]/window_len)/window[i]);
+        buffer[i] = result; 
     }
     return buffer; 
 
@@ -172,8 +148,6 @@ void hamming() {
     }
 }
 
-
-
 unsigned int chooseWindowLength(unsigned int a)
 {
     unsigned int i = 1;
@@ -185,11 +159,12 @@ unsigned int chooseWindowLength(unsigned int a)
 
 int main()
 {
+    //Play at a rate of 44100
+    //GOAL: Filter chunks of signal by different filter values at each subdivision
     int seconds = 8;
     int bytes = seconds*44100;
     int subdivisions = (bytes)/0x1CB0;
-    int bytespersub = bytes/subdivisions;
-
+    int bytespersub = bytes/subdivisions; //Bytes in a subdivision
 
     window_len = chooseWindowLength(bytespersub);
     window_half = window_len/2;
@@ -199,30 +174,35 @@ int main()
     fft_samples = new sample_res[bytespersub];
     window = new float[(long)window_len];
     //std::cerr << "ALLOCATED\n";
+
+    //Zero out the section of the input fft that will never ve written by a subdivision to 0
+    //(The subdivisions are ALL the same size, even the final one)
     for(int i = bytespersub; i < window_len; i++)
     {
         fft_in[i][0] = 0.0;
         fft_in[i][1] = 0.0;
     }
-    //std::cerr << "INITIALIZED fft_in\n";
     hamming();
-    //std::cerr << "HAMMED\n";
+    //std::cerr << "COOKED UP A HAM FOR LATER USE\n";
 
     //How many more of the available frequencies are we removing at each iteration:
     float filterstep = (1.25f/subdivisions)*(window_half);
-    //float filterstep = 90;
-
 
     sample_res bfr[bytes];
-    float phase = 0;
     for(int i = 0 ; i < bytes; i++)
         bfr[i] = 128;
+
+    //Generate a waveform in a `bytes` long sample_res buffer
     //genNoise_White(bfr, 256, 255, phase, bytes);
-    genSqr(bfr, 256, 250, phase, bytes);
+    float phase = 0;
+    genSqr(bfr, 256, 100, phase, bytes);
 
     //std::cerr << "GENERATED\n";
 
-
+    //Loop through each subdivision cutting out the appropriate bytes
+    //  Create a fourierTransform which populates fft_in and forward transforms it into fft_out
+    //  Filter the fourier transform by zeroing terms
+    //  Convert transform back into sample_res buffer
     for(int i = 0; i < subdivisions; i++)
     {
         int lstbfr = (i)*bytespersub;
@@ -230,10 +210,11 @@ int main()
 
 
         fourierTransform(bfr+lstbfr, bytespersub);
-        filter_highpass(fft_out, filterstep*(i), bytespersub);
+        filter_lowpass(fft_out, filterstep*(i), bytespersub);
         backFourierTransform(bfr+lstbfr, bytespersub);
     }
 
+    //Free memory and play filterred buffer
     fftw_free(fft_in);
     fftw_free(fft_out);
     delete [] fft_result;
@@ -244,6 +225,28 @@ int main()
 }
 
 
+
+
+
+fftw_complex *filter_modulopass(fftw_complex *in, unsigned int mod, const unsigned int &filter_len)
+{
+    //fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
+    fftw_complex *out = in;
+    if(mod == 0)
+        mod = 1;
+    
+
+    for(int i = 1; i < window_half; i++)
+    {
+        if((i % mod) == 0)
+        {
+            out[i][0] = 0;
+            out[i][1] = 0;
+        }
+    }
+
+    return out;
+}
 
 
 
