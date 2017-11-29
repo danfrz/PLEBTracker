@@ -57,57 +57,117 @@ void genSine(sample_res *bfr,  const float &period, const sample_res_unsigned &a
 }
 
 
-fftw_complex *filter_highpass(fftw_complex *in, unsigned int lowpass, const unsigned int &filter_len)
+fftw_complex *filter_highpass(fftw_complex *in, unsigned int cutoff, const unsigned int &filter_len)
 {
     //fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
     fftw_complex *out = in;
     
     int righthalf=window_half+1;
 
-    //double flavor_lowpass = lowpass/window_half;
-    //flavor_lowpass*= flavor_lowpass;
-    //lowpass = flavor_lowpass*window_half;
+    double flavor_cutoff = cutoff/window_half;
+    flavor_cutoff*= flavor_cutoff;
+    cutoff = flavor_cutoff*window_half;
+    std::cerr << "HIGHPASS CUTOFF: " << cutoff << '\n';
 
 
-    unsigned int minpass = std::min((unsigned int)(righthalf), lowpass);
+    unsigned int minpass = std::min((unsigned int)(righthalf), cutoff);
     if(minpass < 1) 
         minpass = 1;
-    for(int i = 0; i < minpass; i++)
+    out[0][0] = 0;
+    out[0][1] = 0;
+    for(int i = 1; i < minpass; i++)
     {
         out[i][0] = 0;
         out[i][1] = 0;
 
-        out[(long)window_len-1-i][0] = 0;
-        out[(long)window_len-1-i][0] = 0;
+        out[(long)window_len-i][0] = 0;
+        out[(long)window_len-i][1] = 0;
 
     }
 
     return out;
 }
 
-fftw_complex *filter_lowpass(fftw_complex *in, unsigned int highpass, const unsigned int &filter_len)
+fftw_complex *filter_lowpass(fftw_complex *in, unsigned int cutoff, const unsigned int &filter_len)
 {
+    std::cerr << "LOWPASS INPUT: " << cutoff << '\n';
     fftw_complex *out = in;
 
-    if(highpass > window_half)//Yes 2
-        return out;
 
-    //The higher end sounds nicer. So lets transform it by x=y^2, y=sqrt(x) [0,1]
-    double flavor_highpass = highpass/window_len;
-    flavor_highpass= std::sqrt(flavor_highpass);
-    highpass = flavor_highpass*window_len;
-    
-    for(int i = highpass; i < window_len; i++)
+    double flavor_cutoff = cutoff/window_half;
+    flavor_cutoff*= flavor_cutoff;
+    cutoff = flavor_cutoff*window_half;
+
+    if(cutoff > window_half)
+        cutoff = window_half;
+
+    std::cerr << "LOWPASS CUTOFF: " << cutoff << '\n';
+
+    out[0][0] = 0;
+    out[0][1] = 0;
+
+    if(cutoff == 0)
+        cutoff=1;
+
+
+    for(int i = cutoff; i <= window_half; i++)
     {
         out[i][0] = 0;
         out[i][1] = 0;
 
-        out[(long)window_len-1-i][0] = 0;
-        out[(long)window_len-1-i][0] = 0;
+        out[(long)window_len-i][0] = 0;
+        out[(long)window_len-i][1] = 0;
+    }
+
+    /*
+    double window_eigth = window_half/8;
+
+    for(int i = cutoff-(window_eigth); i<cutoff; i++)
+    {
+        double taper = 1.0 - (cutoff-i)/window_eigth;
+        out[i][0]*=taper;
+        out[i][1]*=taper;
+
+        out[(long)window_len-1-i][0]*=taper;
+        out[(long)window_len-1-i][1]*=taper;
+
+    }*/
+
+    return out;
+}
+
+fftw_complex *filter_modulopass(fftw_complex *in, unsigned int mod, const unsigned int &filter_len)
+{
+    //fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
+    fftw_complex *out = in;
+   
+    double flavor_cutoff = mod/window_half;
+    flavor_cutoff*= flavor_cutoff;
+    flavor_cutoff*= flavor_cutoff;
+    mod = flavor_cutoff*window_half;
+
+    if(mod == 0)
+        mod = 1;
+ 
+
+    for(int i = 0; i < window_half; i++)
+    {
+        if((i % mod) == 0)
+        {
+            out[i][0] = 0;
+            out[i][1] = 0;
+
+
+            out[(long)window_len-1-i][0] = 0;
+            out[(long)window_len-1-i][1] = 0;
+        }
     }
 
     return out;
 }
+
+
+
 fftw_complex *fourierTransform(sample_res *bfr, const unsigned int &len)
 {
     //Copy sample data into input fft and window it with global window
@@ -133,8 +193,16 @@ sample_res *backFourierTransform(sample_res *buffer, const unsigned int &len)
     for(int i = 0; i < len; i++)
     {
         double result = (fft_result[i][0]/window_len)/window[i]+128;
-        //if(result > 255 || result < 0)
-        //    std::cerr << result << '\n';
+        if(result > 255)
+        {
+            std::cerr << "CLIPPED! " << result << '\n';
+            result = 255;
+        }
+        else if( result < 0)
+        {
+            std::cerr << "CLIPPED! " << result << '\n';
+            result = 0;
+        }
         //buffer[i] = out[i]/len_dbl;
         buffer[i] = result; 
     }
@@ -207,7 +275,7 @@ int main()
     //std::cerr << "COOKED UP A HAM FOR LATER USE\n";
 
     //How many more of the available frequencies are we removing at each iteration:
-    float filterstep = (1.25f/subdivisions)*(window_half);
+    float filterstep = (1.0f/subdivisions)*(window_half);
     //float filterstep = 45;
 
     sample_res bfr[bytes];
@@ -219,10 +287,10 @@ int main()
     }
 
     //Generate a waveform in a `bytes` long sample_res buffer
-    //genNoise_White(bfr, 256, 255, phase, bytes);
     float phase = 0;
-    //genSine(bfr, 127, 100, phase, bytes);
-    //genSine(bfr2, 60, 100, phase, bytes);
+    genSqr(bfr, 256, 140, phase, bytes);
+    //genSine(bfr2, 127, 100, phase, bytes);
+    genSine(bfr2, 60, 100, phase, bytes);
 
     for(int i = 0 ; i < bytes; i++)
     {
@@ -237,14 +305,14 @@ int main()
     for(int i = 0; i < subdivisions; i++)
     {
         int lstbfr = (i)*bytespersub;
-        std::cerr << "Iteration " << i+1 << '/' << subdivisions << " filter=" << std::sqrt((filterstep*i)/window_half) << '\n';
+        std::cerr << "Iteration " << i+1 << '/' << subdivisions << '\n';
 
 
         fourierTransform(bfr+lstbfr, bytespersub);
         
         
-        filter_highpass(fft_out, 100, bytespersub);
-        if(i == 4)
+        filter_highpass(fft_out, i*filterstep, bytespersub);
+        if(i == 29)
         {
             for(int j = 0; j < window_len; j++)
             {
@@ -267,27 +335,6 @@ int main()
 
 
 
-
-
-fftw_complex *filter_modulopass(fftw_complex *in, unsigned int mod, const unsigned int &filter_len)
-{
-    //fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
-    fftw_complex *out = in;
-    if(mod == 0)
-        mod = 1;
-    
-
-    for(int i = 1; i < window_half; i++)
-    {
-        if((i % mod) == 0)
-        {
-            out[i][0] = 0;
-            out[i][1] = 0;
-        }
-    }
-
-    return out;
-}
 
 
 
