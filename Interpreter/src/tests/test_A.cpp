@@ -43,16 +43,30 @@ void genNoise_White(sample_res *bfr, const float &period, const sample_res_unsig
 }
 
 
-fftw_complex *filter_lowpass(fftw_complex *in, unsigned int lowpass, const unsigned int &filter_len)
+void genSine(sample_res *bfr,  const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len)
+{
+    if(period == 0 || amplitude == 0)
+        return;
+
+    const float tau = (2*M_PI);
+    float halfamp = amplitude/2.0;
+    unsigned long i;
+    for(i = 0; i < len; i++)
+        bfr[i] += halfamp*std::sin(phase + (tau*i)/period);
+    phase = phase + (tau*i)/period;
+}
+
+
+fftw_complex *filter_highpass(fftw_complex *in, unsigned int lowpass, const unsigned int &filter_len)
 {
     //fftw_complex *out = (fftw_complex*)fftw_malloc ( sizeof ( fftw_complex ) * filter_len );
     fftw_complex *out = in;
     
     int righthalf=window_half+1;
 
-    double flavor_lowpass = lowpass/window_half;
-    flavor_lowpass*= flavor_lowpass;
-    lowpass = flavor_lowpass*window_half;
+    //double flavor_lowpass = lowpass/window_half;
+    //flavor_lowpass*= flavor_lowpass;
+    //lowpass = flavor_lowpass*window_half;
 
 
     unsigned int minpass = std::min((unsigned int)(righthalf), lowpass);
@@ -62,12 +76,16 @@ fftw_complex *filter_lowpass(fftw_complex *in, unsigned int lowpass, const unsig
     {
         out[i][0] = 0;
         out[i][1] = 0;
+
+        out[(long)window_len-1-i][0] = 0;
+        out[(long)window_len-1-i][0] = 0;
+
     }
 
     return out;
 }
 
-fftw_complex *filter_highpass(fftw_complex *in, unsigned int highpass, const unsigned int &filter_len)
+fftw_complex *filter_lowpass(fftw_complex *in, unsigned int highpass, const unsigned int &filter_len)
 {
     fftw_complex *out = in;
 
@@ -83,6 +101,9 @@ fftw_complex *filter_highpass(fftw_complex *in, unsigned int highpass, const uns
     {
         out[i][0] = 0;
         out[i][1] = 0;
+
+        out[(long)window_len-1-i][0] = 0;
+        out[(long)window_len-1-i][0] = 0;
     }
 
     return out;
@@ -92,7 +113,7 @@ fftw_complex *fourierTransform(sample_res *bfr, const unsigned int &len)
     //Copy sample data into input fft and window it with global window
     for(int i = 0; i < len; i++)
     {
-        fft_in[i][0] = bfr[i]*window[i];
+        fft_in[i][0] = (bfr[i]-128)*window[i];
         fft_in[i][1] = 0.0;
     }
 
@@ -111,9 +132,9 @@ sample_res *backFourierTransform(sample_res *buffer, const unsigned int &len)
     fftw_destroy_plan( plan_backward);
     for(int i = 0; i < len; i++)
     {
-        double result = (fft_result[i][0]/window_len)/window[i];
-        if(result > 255 || result < 0)
-            std::cerr << result << '\n';
+        double result = (fft_result[i][0]/window_len)/window[i]+128;
+        //if(result > 255 || result < 0)
+        //    std::cerr << result << '\n';
         //buffer[i] = out[i]/len_dbl;
         buffer[i] = result; 
     }
@@ -187,16 +208,26 @@ int main()
 
     //How many more of the available frequencies are we removing at each iteration:
     float filterstep = (1.25f/subdivisions)*(window_half);
+    //float filterstep = 45;
 
     sample_res bfr[bytes];
+    sample_res bfr2[bytes];
     for(int i = 0 ; i < bytes; i++)
+    {
         bfr[i] = 128;
+        bfr2[i] = 128;
+    }
 
     //Generate a waveform in a `bytes` long sample_res buffer
     //genNoise_White(bfr, 256, 255, phase, bytes);
     float phase = 0;
-    genSqr(bfr, 256, 100, phase, bytes);
+    //genSine(bfr, 127, 100, phase, bytes);
+    //genSine(bfr2, 60, 100, phase, bytes);
 
+    for(int i = 0 ; i < bytes; i++)
+    {
+        bfr[i] = bfr[i] + bfr2[i] - 128;
+    }
     //std::cerr << "GENERATED\n";
 
     //Loop through each subdivision cutting out the appropriate bytes
@@ -210,7 +241,17 @@ int main()
 
 
         fourierTransform(bfr+lstbfr, bytespersub);
-        filter_lowpass(fft_out, filterstep*(i), bytespersub);
+        
+        
+        filter_highpass(fft_out, 100, bytespersub);
+        if(i == 4)
+        {
+            for(int j = 0; j < window_len; j++)
+            {
+                std::cerr << '[' <<j << "] " << fft_out[j][0] << '\n';
+            }
+        }
+
         backFourierTransform(bfr+lstbfr, bytespersub);
     }
 

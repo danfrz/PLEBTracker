@@ -151,13 +151,12 @@ std::istream &Song::input(std::istream &in)
     if(patterns)
         delete [] patterns;
 
-
     in.read(songname, SONGNAME_LENGTH+1);
     in.read((char*)&bytes_per_row, sizeof(short));
     in.read((char*)&interrow_resolution, sizeof(char));
     in.read((char*)&fourier_buffer_size, sizeof(char));
-    setNumBitsFourierBufferSize(fourier_buffer_size);
     //fourier_buffer_size = 13;
+    setNumBitsFourierBufferSize(fourier_buffer_size);
 
     in.read((char*)&tracks, sizeof(char));
 
@@ -169,12 +168,12 @@ std::istream &Song::input(std::istream &in)
     in.read((char*)waveTable, waveEntries*sizeof(short));
     for(int i = waveEntries; i < 512; i++)
         waveTable[i] = 0;
-    
+
     in.read((char*)&pulseEntries, sizeof(short));
     in.read((char*)pulseTable, pulseEntries*sizeof(short));
     for(int i = pulseEntries; i < 512; i++)
         pulseTable[i] = 0;
-     
+    
     in.read((char*)&filterEntries, sizeof(short));
     in.read((char*)filterTable, filterEntries*sizeof(short));
     for(int i = filterEntries; i < 512; i++)
