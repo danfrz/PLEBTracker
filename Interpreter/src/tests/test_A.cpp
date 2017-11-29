@@ -103,12 +103,15 @@ fftw_complex *filter_lowpass(fftw_complex *in, unsigned int cutoff, const unsign
 
     std::cerr << "LOWPASS CUTOFF: " << cutoff << '\n';
 
-    out[0][0] = 0;
-    out[0][1] = 0;
+    
 
     if(cutoff == 0)
+    {
+        out[0][0] = 0;
+        out[0][1] = 0;
         cutoff=1;
 
+    }
 
     for(int i = cutoff; i <= window_half; i++)
     {
@@ -288,9 +291,9 @@ int main()
 
     //Generate a waveform in a `bytes` long sample_res buffer
     float phase = 0;
-    genSqr(bfr, 256, 140, phase, bytes);
-    //genSine(bfr2, 127, 100, phase, bytes);
-    genSine(bfr2, 60, 100, phase, bytes);
+    genSqr(bfr, 256, 34, phase, bytes);
+    genSine(bfr2, 127, 34, phase, bytes);
+    genSine(bfr2, 60, 60, phase, bytes);
 
     for(int i = 0 ; i < bytes; i++)
     {
@@ -311,7 +314,7 @@ int main()
         fourierTransform(bfr+lstbfr, bytespersub);
         
         
-        filter_highpass(fft_out, i*filterstep, bytespersub);
+        filter_lowpass(fft_out, i*filterstep, bytespersub);
         if(i == 29)
         {
             for(int j = 0; j < window_len; j++)
