@@ -1,0 +1,16 @@
+/examples/*
+\!/examples/aGNUbis.plb
+\!/examples/bloopstore.plb
+\!/examples/breakup_breakdown.plb
+\!/examples/echoes_in_the_wind.plb
+\!/examples/eclecticelectric.plb
+\!/examples/electrosmash.plb
+\!/examples/gmin.plb
+\!/examples/intrepid.plb
+\!/examples/sineways.plb
+\!/examples/stellarium_romance.plb
+\!/examples/windstone.plb
+Tracker/obj
+Interpreter/obj
+Tracker/src/plebtrkraw
+Interpreter/src/plebitp
