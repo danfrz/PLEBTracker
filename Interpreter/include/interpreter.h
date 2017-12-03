@@ -14,45 +14,21 @@
 #include "song.h"
 #include "instrument.h"
 #include "pattern.h"
+#include "track.h"
 #include "generator.h"
+#include "filters.h"
 
 #define ARPEGGIO_SPEED 6
 
 namespace itrp
 {
 
+    //Precomputed for fourier transform
+    float *window;
+    fftw_complex *fft_sample_in;
+    fftw_complex *fft_transform;
+    fftw_complex *fft_out;
 
-    struct Track
-    {
-        paramtable *ptbl;
-        float lastfrq;
-        float frq;
-        float nextfrq;
-        float phase;
-        unsigned char filters_active;
-
-        unsigned short segments;
-        unsigned char fx;
-        unsigned char fxparam;
-        Instrument *inst;
-
-        unsigned short wavei;
-        unsigned short pulsei;
-        unsigned short filteri;
-        unsigned char lastwave;
-        unsigned char waveduracc;
-        unsigned char pulseduracc;
-
-        //VOLUME
-        unsigned char ptrnvol;
-        unsigned char ptrnlastvol;
-        unsigned char voljump;
-
-        sample_res_unsigned lastvol;
-        unsigned char voli;
-        unsigned char volduracc;
-        sample_res *fourier_buffer;
-    };
 
     //not implemented yet
     char **songpaths;
@@ -64,19 +40,23 @@ namespace itrp
     Pattern *curpattern;
     unsigned char order;
     generator *generators;
+    filter *filters;
     bool trackmute[256];
     float amplifyall;
-    unsigned int fourier_buffer_size;
+   
+    unsigned int window_len;
+    unsigned int window_half;
     std::chrono::system_clock::time_point begin_time;
 
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void initializeWaveTable()
+Function: void initializeTables()
 Description:
-    Populates the wave table with wave generator functions
+    Populates the wave table with wave generator functions and
+    filter table with filter functions
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void initializeWaveTable();
+    void initializeTables();
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void initializeRender()
@@ -90,8 +70,6 @@ Postcondition:
     void initializeRender();
 
 
-
-
 /***\//////////////////////////////////////////////////////////////////////////    
     Function: ::linearize(sample_res **buffer, const unsigned int orders, unsigned int *bytes, unsigned int &total_bytes
 
@@ -101,17 +79,14 @@ Description:
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
 sample_res *linearize(sample_res **buffer, const unsigned int orders, unsigned int *bytes, unsigned int &total_bytes);
 
-fftw_complex *fourierTransform(sample_res *bfr, unsigned int &filter_len, const unsigned int &len);
+/***\//////////////////////////////////////////////////////////////////////////
+Function: void performFilter(sample_res *bfr, paramtable *ptbl, int bytes)
 
+Description:
+Delegates to the filter functions to be performed on the input signal bfr
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void performFilter(sample_res *bfr, unsigned int bfr_len, Track *seltrk);
 
-fftw_complex *filter_lowpass(fftw_complex *in, const unsigned int &lowpass, const unsigned int &filter_len);
-fftw_complex *filter_highpass(fftw_complex *in, const unsigned int &highpass, const unsigned int &filter_len);
-
-
-sample_res *backFourierTransform(fftw_complex *in, const unsigned int &filter_len, const unsigned int &len);
-
-
-void performFilter(sample_res *bfr, paramtable *ptbl, int bytes);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: bool resetsPhaseOnWave1Set(const unsigned char &wave)

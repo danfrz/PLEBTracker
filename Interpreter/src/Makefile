@@ -10,11 +10,11 @@ LDIR=../lib
 LIBS= -lfftw3
 
 #Header files that need to be tracked//////////////////////////////////////////
-_DEPS = generator.h instrument.h interpreter.h pattern.h song.h
+_DEPS = generator.h instrument.h interpreter.h pattern.h song.h track.h filters.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 #Object files that need to be made, one per each cpp///////////////////////////
-_OBJ = generator.o instrument.o interpreter.o pattern.o song.o 
+_OBJ = generator.o instrument.o interpreter.o pattern.o song.o filters.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
