@@ -5,7 +5,6 @@ Song::Song(bool fill_defaults)
 {
     bytes_per_row = 0x1CB0;
     interrow_resolution = 0x18;
-    fourier_buffer_size = 8;//13;
 
     for(int i = 9; i < SONGNAME_LENGTH+1; i++)
         songname[i] = 0;
@@ -116,7 +115,6 @@ std::ostream &Song::output(std::ostream &out) const
     out.write(songname, SONGNAME_LENGTH+1);
     out.write((char*)&bytes_per_row, sizeof(short));
     out.write((char*)&interrow_resolution, sizeof(char));
-    out.write((char*)&fourier_buffer_size, sizeof(char));
     out.write((char*)&tracks, sizeof(char));
 
     out.write((char*)&num_orders, sizeof(char));
@@ -154,9 +152,6 @@ std::istream &Song::input(std::istream &in)
     in.read(songname, SONGNAME_LENGTH+1);
     in.read((char*)&bytes_per_row, sizeof(short));
     in.read((char*)&interrow_resolution, sizeof(char));
-    in.read((char*)&fourier_buffer_size, sizeof(char));
-    //fourier_buffer_size = 13;
-    setNumBitsFourierBufferSize(fourier_buffer_size);
 
     in.read((char*)&tracks, sizeof(char));
 
@@ -222,8 +217,6 @@ void Song::copyCommutable(Song *other)
     //Copy important song data to the other song
     other->setInterRowResolution(interrow_resolution);
     other->setBytesPerRow(bytes_per_row);
-    other->setNumBitsFourierBufferSize(fourier_buffer_size);
-    //other->setBytesPerRow(fourier_buffer_size); //WHAT??
     other->setTrackNum(tracks);
     
     //Copy instruments
@@ -324,22 +317,6 @@ Song *Song::makeExcerpt(unsigned int length, unsigned char orderstart, unsigned 
     
     return makeExcerpt(orderstart, orderend, rowstart, rowend);
 }
-
-void Song::setNumBitsFourierBufferSize(const unsigned char &size){
-    fourier_buffer_size = size;
-
-    //Make sure that a BYT/SEG can fit within the buffer size
-    unsigned long sz = std::pow(2,fourier_buffer_size);
-    while(sz < bytes_per_row / interrow_resolution)
-    {
-        sz <<=1;
-        fourier_buffer_size++;
-    }
-
-    if(fourier_buffer_size > 32)
-        fourier_buffer_size = 32; //Cap at 2^32. That's big.
-}
-
 
 void Song::setName(const char *name, int length)
 {
