@@ -1240,17 +1240,9 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
     //This relies on the assumption that integer overflow for the
     //datatype of sample_res performs the modulo operation accurately
 #if SAMPLE_RES_IS_UNSIGNED
-    if( (song->numTracks() % 2) == 0)
-    {
-        const sample_res middle = std::pow(2,sizeof(sample_res)*8)/2;
-        for(int b = 0; b < bytes; b++)
-            out_buffer[b] = middle;
-    }
-    else
-    {
-        for(int b = 0; b < bytes; b++)
-            out_buffer[b] = 0;
-    }
+    const sample_res middle = std::pow(2,sizeof(sample_res)*8)/2;
+    for(int b = 0; b < bytes; b++)
+        out_buffer[b] = middle;
 #else
     for(int b = 0; b < bytes; b++)
             out_buffer[b] = 0;
