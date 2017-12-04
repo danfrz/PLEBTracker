@@ -8,14 +8,19 @@ struct paramtable
 {
     unsigned short PULSE1;
     unsigned short PULSE2;
-    unsigned short CUSTOM_JUMP, CUSTOM_JUMP2;
-    unsigned char LOOP, WAVE1, WAVE2, LOOP2, LOOP3, LOOP4;
-    sample_res CHAIN, LAST;
+    unsigned short CUSTOM_JUMP_WAV, CUSTOM_JUMP_PLS, CUSTOM_JUMP_FLT;
+    unsigned char LOOP_WAVE, LOOP_FA_WAVE, WAVE1, WAVE2, LOOP_PULSE, LOOP_FA_PULSE, LOOP_FILTER, LOOP_FA_FILTER;
 
-    
+    sample_res CHAIN, LAST; //Neither of these are implemented to good effect.
+    //Wanted to try implementing the "ring" modulation feature that C64, Goattrk has
 
+    unsigned char FILTER[0x10];
+    unsigned short FILTERP[0x10];
 
 };
+
+const char FILTER_LOWPASS = 0,
+      FILTER_HIGHPASS = 1;
 
 //Form of a wave generator function 
 typedef void (*generator)(sample_res *bfr, paramtable *ptbl, const float &period, const sample_res_unsigned &amplitude, float &phase, const unsigned long &len);

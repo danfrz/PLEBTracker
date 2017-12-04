@@ -42,6 +42,8 @@ Description:
     void chgSelPulSeg(int i);
 
     void chgSelPulRow(int i);
+    void chgSelFltRow(int i);
+    void chgSelFltSeg(int i);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void chgSelVolRow(int i)
@@ -115,6 +117,14 @@ Description:
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void displayPulse();
 
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: void displayFilter()
+
+Description:
+    Render the Filter Table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void displayFilter();
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void displayInst()
 
@@ -164,6 +174,16 @@ Description:
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void setPulseAttribs(unsigned short pulserow, unsigned char pulseseg);
 
+
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: void setFilterAttribs(unsigned short filterrow, unsigned char filterseg)
+
+Description:
+    Set ncurses attributes for this UI element of the filter table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void setFilterAttribs(unsigned short filterrow, unsigned char filterseg);
+
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void setVolAttribs(unsigned char volrow, unsigned char volseg)
 
@@ -198,9 +218,19 @@ Description:
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void processInputPulse(wint_t in)
 Description:
-   Process keyboard input for the wave table
+   Process keyboard input for the pulse table
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void processInputPulse(wint_t in);
+
+
+
+/***\//////////////////////////////////////////////////////////////////////////    
+Function: void processInputFilter(wint_t in)
+
+Description:
+   Process keyboard input for the filter table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void processInputFilter(wint_t in);
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void processInputVol(wint_t in)

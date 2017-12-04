@@ -1,7 +1,7 @@
 #include "song.h"
-//#include <iostream>
+#include <iostream>
 
-Song::Song()
+Song::Song(bool fill_defaults)
 {
     bytes_per_row = 0x1CB0;
     interrow_resolution = 0x18;
@@ -19,38 +19,65 @@ Song::Song()
     songname[7]='m';
     songname[8]='e';
 
-    num_instruments = 1;
+
     instruments = new Instrument*[256];
-    Instrument *defaultInst = new Instrument();
-    instruments[0] = defaultInst;
+    num_instruments = 0;
 
     tracks = 4;
-    num_patterns = 1;
     patterns = new Pattern*[256];
-    Pattern *defaultPat = new Pattern(tracks, 64);
-    patterns[0] = defaultPat;
+    num_patterns = 0;
 
-    for(int i = 1; i < 256; i++)
+    //Either 1 or 0; will be same as num_instruments. either work.
+    for(int i = num_patterns; i < 256; i++)
     {
         instruments[i] = NULL;
         patterns[i] = NULL;
     }
 
-    num_orders = 1;
+
     orders = new unsigned char[256];
-    orders[0] = 0;
+    num_orders=0;
 
     waveEntries = 0;
-    waveTable = new unsigned short[256];
-    for(int i = 0; i < waveEntries; i++)
+    waveTable = new unsigned short[512];
+    for(int i = 0; i < 512; i++)
         waveTable[i] = 0;
 
-    pulseEntries = 2;
-    pulseTable = new unsigned short[256];
-    pulseTable[0] = 0x0000;
-    pulseTable[1] = 0xFF00;
-    for(int i = 2; i < pulseEntries; i++)
-        pulseTable[i] = 0;
+    pulseEntries = 0;
+    pulseTable = new unsigned short[512];
+    for(int i = 0; i < 512; i++)
+            pulseTable[i] = 0;
+
+    filterEntries = 0;
+    filterTable = new unsigned short[512];
+    for(int i = 0; i < 512; i++)
+        filterTable[i] = 0;
+
+
+    if(fill_defaults)
+    {
+        num_instruments = 1;
+        Instrument *defaultInst = new Instrument();
+        instruments[0] = defaultInst;
+
+        Pattern *defaultPat = new Pattern(tracks, 64);
+        patterns[0] = defaultPat;
+        num_patterns = 1;
+
+        num_orders = 1;
+        orders[0] = 0;
+
+
+        pulseEntries = 2;
+        pulseTable[0] = 0x0000;
+        pulseTable[1] = 0xFF00;
+
+        filterEntries = 2;
+        filterTable[0] = 0x0000;
+        filterTable[1] = 0xFF00;
+    }
+
+
 }
 
 Song::Song(std::istream &in)
@@ -58,21 +85,25 @@ Song::Song(std::istream &in)
     patterns = NULL;
     instruments = NULL;
     orders = new unsigned char[256];
-    waveTable = new unsigned short[256];
-    pulseTable = new unsigned short[256];
-
-    pulseEntries = 0;
+    waveTable = new unsigned short[512];
+    pulseTable = new unsigned short[512];
+    filterTable = new unsigned short[512];
 
     input(in);
 }
 
 Song::~Song()
 {
+    for(int i = 0; i < num_instruments; i++)
+        delete instruments[i];
+    for(int i = 0; i < num_patterns; i++)
+        delete patterns[i];
     delete [] instruments;
     delete [] patterns;
     delete [] orders;
     delete [] waveTable;
     delete [] pulseTable;
+    delete [] filterTable;
 
 }
 
@@ -95,6 +126,9 @@ std::ostream &Song::output(std::ostream &out) const
     out.write((char*)&pulseEntries, sizeof(short));
     out.write((char*)pulseTable, pulseEntries*sizeof(short));
 
+    out.write((char*)&filterEntries, sizeof(short));
+    out.write((char*)filterTable, filterEntries*sizeof(short));
+
     out.write((char*)&num_instruments, sizeof(char));
     for(int i = 0; i < num_instruments; i++)
         (instruments[i])->output(out);
@@ -115,10 +149,10 @@ std::istream &Song::input(std::istream &in)
     if(patterns)
         delete [] patterns;
 
-
     in.read(songname, SONGNAME_LENGTH+1);
     in.read((char*)&bytes_per_row, sizeof(short));
     in.read((char*)&interrow_resolution, sizeof(char));
+
     in.read((char*)&tracks, sizeof(char));
 
     in.read((char*)&num_orders, sizeof(char));
@@ -127,14 +161,18 @@ std::istream &Song::input(std::istream &in)
 
     in.read((char*)&waveEntries, sizeof(short));
     in.read((char*)waveTable, waveEntries*sizeof(short));
-    for(int i = waveEntries; i < 256; i++)
+    for(int i = waveEntries; i < 512; i++)
         waveTable[i] = 0;
-    
+
     in.read((char*)&pulseEntries, sizeof(short));
     in.read((char*)pulseTable, pulseEntries*sizeof(short));
-    for(int i = pulseEntries; i < 256; i++)
+    for(int i = pulseEntries; i < 512; i++)
         pulseTable[i] = 0;
-        
+    
+    in.read((char*)&filterEntries, sizeof(short));
+    in.read((char*)filterTable, filterEntries*sizeof(short));
+    for(int i = filterEntries; i < 512; i++)
+        filterTable[i] = 0;
 
     instruments = new Instrument*[256];
     in.read((char*)&num_instruments, sizeof(char));
@@ -149,6 +187,7 @@ std::istream &Song::input(std::istream &in)
         patterns[i] = new Pattern(in);
     for(int i = num_patterns; i < 256; i++)
         patterns[i] = NULL;
+
 
     return in;
 }
@@ -170,6 +209,11 @@ void Song::copyCommutable(Song *other)
         other->setPulseEntry(i,pulseTable[i]);
     other->pulseEntries = pulseEntries;
 
+    unsigned short *otrfilterbl = other->getFilterTable();
+    for(int i = 0; i < filterEntries; i++)
+        other->setFilterEntry(i,filterTable[i]);
+    other->filterEntries = filterEntries;
+
     //Copy important song data to the other song
     other->setInterRowResolution(interrow_resolution);
     other->setBytesPerRow(bytes_per_row);
@@ -190,12 +234,8 @@ Song *Song::makeExcerpt(unsigned char orderstart, unsigned char orderend, unsign
     len -= getPatternByOrder(orderend)->numRows() - orderend+1;
 
     
-    Song *out = new Song();
+    Song *out = new Song(false);
     copyCommutable(out);
-
-
-    //Remove the default instrument installed by the default constructor
-    out->removeInstrument(0);
 
     Pattern *first, *last;
 
@@ -204,11 +244,7 @@ Song *Song::makeExcerpt(unsigned char orderstart, unsigned char orderend, unsign
         first = new Pattern(*getPatternByOrder(orderstart)); 
         first->chop(rowstart, rowend);
         out->addPattern(first);
-        out->insertOrder(0,1);
-        //Clear the default order and patterns
-        out->removeOrder(1);
-        //out->removePattern(0);
-
+        out->insertOrder(0,0);
     }
     else //play multiple orders
     {
@@ -222,11 +258,7 @@ Song *Song::makeExcerpt(unsigned char orderstart, unsigned char orderend, unsign
 
         //Add the first pattern
         out->addPattern(first);
-        out->removePattern(0);
         out->insertOrder(0,0);
-
-        //Remove the default pattern and order
-        out->removeOrder(1);//default order
 
         //Add the final pattern at the end
         out->addPattern(last);
@@ -236,7 +268,7 @@ Song *Song::makeExcerpt(unsigned char orderstart, unsigned char orderend, unsign
         for(int orderi = orderstart+1, i = 1; orderi < orderend; orderi++, i++)
         {
             //Have to create new patterns because Song will
-            //run destructor
+            //run destructor: the patters would be double-freed
             out->addPattern(new Pattern(*getPatternByOrder(orderi)));
             out->insertOrder(i,i+1);
         }
@@ -285,9 +317,6 @@ Song *Song::makeExcerpt(unsigned int length, unsigned char orderstart, unsigned 
     
     return makeExcerpt(orderstart, orderend, rowstart, rowend);
 }
-
-
-
 
 void Song::setName(const char *name, int length)
 {
@@ -814,3 +843,198 @@ bool Song::removePulseEntry(unsigned short index)
     fixPulseJumps(index, -1);
     return true;
 }
+
+
+
+
+
+
+
+
+
+
+bool Song::insertFilterEntry(unsigned short index, unsigned short entry)
+{
+    if(filterEntries == 0xFFFF)
+        return false;
+    for(unsigned short last = ++filterEntries; last > index; last--)
+        filterTable[last] = filterTable[last-1];
+
+    fixFilterJumps(index, 1);
+    
+    filterTable[index] = entry;
+    return true;
+}
+
+void Song::fixFilterJumps(const unsigned short &index, short difference)
+{
+
+    if(difference == 0) return;
+
+    //Fix instrument pulse index references
+    unsigned short instflt;
+    if(difference > 0)
+    {
+        for(unsigned char i = 0; i < num_instruments; i++)
+        {
+            instflt = instruments[i]->getFilterIndex();
+            // > 0 because the first instrument's wave pointer shouldn't
+            // realistically change due to insertions at index 0
+            if(instflt > 0 && instflt >= index && instflt < 0xFFFF-difference && instflt != 0xFFFF)
+            {
+                instruments[i]->setFilterIndex(instflt+difference);
+            }
+        }
+    }
+    else
+    {
+        for(unsigned char i = 0; i < num_instruments; i++)
+        {
+            instflt = instruments[i]->getFilterIndex();
+            if(instflt >= index && instflt != 0xFFFF)
+            {
+                if(instflt >= -difference)
+                    instruments[i]->setFilterIndex(instflt +difference);
+                else
+                    instruments[i]->setFilterIndex(0);
+            }
+        }
+    }
+
+    //Fix Pulse jumps
+    unsigned short jumptype;
+    unsigned short dest;
+    if(difference > 0)
+    {
+        for(unsigned short i = 0; i < filterEntries; i++)
+        {
+            if( isJumpFunc_Volatile(filterTable[i]))//is jump, correct it
+            {
+                jumptype = filterTable[i] & 0xFF00;
+                if( (i < filterEntries-1) && ((filterTable[i+1]&0xFF00) == jumptype))//Long jump
+                {
+                    dest = ((filterTable[i] & 0xFF) << 8) | (filterTable[i+1] & 0xFF);
+                    if(dest >= index && dest < 0xFFFF-difference) 
+                    {
+                        dest += difference;
+                        filterTable[i] = jumptype | ((dest & 0xFF00) >> 8);
+                        filterTable[i+1] = jumptype | (dest & 0xFF);
+                    }
+                    i++;
+                }
+                else
+                {
+                    dest = filterTable[i] & 0xFF;
+                    if(dest >= index)
+                    {
+                        if(dest >= 0xFF - difference)
+                        {
+
+                            if(waveEntries < 0xFFFF)
+                            {
+                                dest += difference;
+                                filterTable[i] &= 0xFF00;
+                                filterTable[i] |= ((dest & 0xFF00) >> 8);
+                                insertFilterEntry(i+1,jumptype | (dest & 0xFF));
+                            }
+                        }
+                        else
+                            filterTable[i]+=difference;
+                    }
+                }
+            }
+        }
+    }
+
+    else //difference negative
+    {
+        for(unsigned short i = 0; i < filterEntries; i++)
+        {
+            if( isJumpFunc_Volatile(filterTable[i]))//is jump, correct it
+            {
+                jumptype = filterTable[i] & 0xFF00;
+            
+                if( (i < filterEntries-1) && ((filterTable[i+1] & 0xFF00) == jumptype) )//Long jump
+                {
+                    dest = ((filterTable[i] & 0xFF) << 8) | (filterTable[i+1] & 0xFF);
+                    if(dest >= index && dest >= -difference) 
+                    {
+                        dest +=  difference;
+
+                        filterTable[i] = jumptype | ((dest & 0xFF00) >> 8);
+                        filterTable[i+1] = jumptype | (dest & 0xFF);
+                    }
+                    i++;
+                }
+                else
+                {
+                    dest = filterTable[i] & 0xFF;
+                    if(dest >= index)
+                    {
+                        if(dest >= -difference)
+                            filterTable[i]+= difference;
+                        else
+                            filterTable[i] &= 0xFF00;
+                    }
+                }
+
+            }
+        }
+    }
+
+    Pattern *p;
+    for(int i = 0; i < num_patterns; i++)
+    {
+        p = patterns[i];
+        for(int trk = 0; trk < p->numTracks(); trk++)
+        {
+            for(int row = 0; row < p->numRows(); row++)
+            {
+                unsigned int entry = p->at(trk,row);
+                if((entry & 0xF00) == 0x900)
+                {
+                    unsigned char fltjump = entry & 0xFF;
+
+                    if(difference > 0)
+                    {
+                        if(fltjump > 0 &&fltjump >= index && fltjump < 0xFF-difference)
+                        {
+                            fltjump +=difference;
+                        }
+                    }
+                    else
+                    {
+                        if(fltjump >= index)
+                        {
+                            if(fltjump >= -difference)
+                                fltjump +=difference;
+                            else
+                                fltjump = 0;
+                        }
+                    }
+                    entry &= ~0xFF;
+                    entry |= fltjump;
+                    p->setAt(trk,row,entry);
+                }
+            }
+        }
+    }
+
+}
+
+bool Song::removeFilterEntry(unsigned short index)
+{
+    if(filterEntries == 0)
+        return false;
+
+    for(unsigned short i = index+1; i < filterEntries; i++)
+        filterTable[i-1] = filterTable[i];
+    filterTable[--filterEntries] = 0;
+    fixFilterJumps(index, -1);
+    return true;
+}
+
+
+
+
+

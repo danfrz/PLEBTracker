@@ -29,6 +29,7 @@ Instrument::Instrument()
         volTable[i]=0;
     volTable[0] = 0x3F00;
     pulseIndex = 0xFFFF;
+    filterIndex = 0xFFFF;
 }
 
 Instrument::~Instrument()
@@ -46,6 +47,7 @@ Instrument::Instrument(const Instrument &other)
 {
     waveIndex        = other.waveIndex;
     pulseIndex       = other.pulseIndex;
+    filterIndex      = other.filterIndex;
     volEntries       = other.volEntries;
     volTable = new unsigned short[INST_VOL_SIZE];//64 integers worth
     for(int i = 0; i < INST_VOL_SIZE; i++) //Why was this 255 and not 256?
@@ -59,6 +61,7 @@ std::ostream &Instrument::output(std::ostream &out) const
     out.write(name, INST_NAME_SIZE);
     out.write((char*)&waveIndex, sizeof(short));
     out.write((char*)&pulseIndex, sizeof(short));
+    out.write((char*)&filterIndex, sizeof(short));
 
     out.write((char*)&volEntries, sizeof(char));
     out.write((char*)volTable, volEntries*sizeof(short));
@@ -74,6 +77,8 @@ std::istream &Instrument::input(std::istream &in)
     in.read(name, INST_NAME_SIZE);
     in.read((char*)&waveIndex, sizeof(short));
     in.read((char*)&pulseIndex, sizeof(short));
+    in.read((char*)&filterIndex, sizeof(short));
+
     in.read((char*)&volEntries, sizeof(char));
     volTable = new unsigned short[INST_VOL_SIZE];
     in.read((char*)volTable, volEntries*sizeof(short));

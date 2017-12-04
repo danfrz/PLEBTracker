@@ -756,7 +756,7 @@ void patternedtr::displayPattern()
         else
             xoff = 3+TRACK_WIDTH*maxtracksviewport-1;
 
-        int spacerwidth = w - xoff;
+        int spacerwidth = w - xoff; //Why does this 11 go here?
         char *spacebuffer = new char[spacerwidth+1];
         makeSpaceBuffer(spacebuffer, spacerwidth);
         attroff(-1);
@@ -785,6 +785,7 @@ void patternedtr::display()
     
     instedtr::displayWav();
     instedtr::displayPulse();
+    instedtr::displayFilter();
     
     //print meta after pattern so that meta tooltipts overlap pattern
     displayMeta();
@@ -1143,6 +1144,8 @@ void patternedtr::processInput(wint_t in)
         instedtr::processInputWav(in);
     else if(editor::inputwin == editor::pulsewin)
         instedtr::processInputPulse(in);
+    else if(editor::inputwin == editor::filterwin)
+        instedtr::processInputFilter(in);
 
 }
 

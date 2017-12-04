@@ -12,12 +12,15 @@ typedef unsigned char sample_res; //The sample resolution used for most of the i
 typedef unsigned char sample_res_unsigned; //The resolution that is gauranteed to be unsigned
 typedef char sample_res_signed; //The resolution that is gauranteed to be signed
 
+#define SAMPLE_RES_IS_UNSIGNED 1
+
 class Instrument
 {
     private:
         char name[INST_NAME_SIZE]{0};
         unsigned short waveIndex;
         unsigned short pulseIndex;
+        unsigned short filterIndex;
 
         
         unsigned char volEntries;
@@ -59,7 +62,7 @@ Description:
 
 
 /***\//////////////////////////////////////////////////////////////////////////        
-Function: void setWaveIndex(short i){waveIndex = i;
+Function: void setWaveIndex(short i)
 
 Description:
    Set the wave index for this instrument
@@ -67,13 +70,21 @@ Description:
         inline void setWaveIndex(short i){waveIndex = i;}
 
 /***\//////////////////////////////////////////////////////////////////////////        
-Function: void setPulseIndex(short i){pulseIndex = i;
+Function: void setPulseIndex(short i)
 
 Description:
    Set the pulse index for this instrument
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline void setPulseIndex(short i){pulseIndex = i;}
         
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void setFilterIndex(short i)
+
+Description:
+   Set the pulse index for this instrument
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        inline void setFilterIndex(short i){filterIndex = i;}
 
 
 /***\//////////////////////////////////////////////////////////////////////////        
@@ -101,7 +112,7 @@ Description:
 
 
 /***\//////////////////////////////////////////////////////////////////////////        
-Function: short getWaveIndex() const{return waveIndex;
+Function: short getWaveIndex()
 
 Description:
    Get the wave index for this instrument.
@@ -109,12 +120,22 @@ Description:
         inline unsigned short getWaveIndex() const{return waveIndex;}
 
 /***\//////////////////////////////////////////////////////////////////////////        
-Function: short getPulseIndex() const{return pulseIndex;
+Function: short getPulseIndex()
 
 Description:
    Get the pulse index for this instrument.
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         inline unsigned short getPulseIndex() const{return pulseIndex;}
+
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: short getPulseIndex() 
+
+Description:
+   Get the filter index for this instrument
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        inline unsigned short getFilterIndex() const{return filterIndex;}
+
 
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: short getVolEntry(unsigned char index) const {return volTable[index];

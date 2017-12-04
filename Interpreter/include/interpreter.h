@@ -8,46 +8,27 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <ctgmath> //logb
+#include <fftw3.h>
+#include <chrono>
 
 #include "song.h"
 #include "instrument.h"
 #include "pattern.h"
+#include "track.h"
 #include "generator.h"
+#include "filters.h"
 
 #define ARPEGGIO_SPEED 6
 
 namespace itrp
 {
 
+    //Precomputed for fourier transform
+    float *window;
+    fftw_complex *fft_sample_in;
+    fftw_complex *fft_transform;
+    fftw_complex *fft_out;
 
-    struct Track
-    {
-        paramtable *ptbl;
-        float lastfrq;
-        float frq;
-        float nextfrq;
-        float phase;
-
-        unsigned short segments;
-        unsigned char fx;
-        unsigned char fxparam;
-        Instrument *inst;
-
-        unsigned short wavei;
-        unsigned short pulsei;
-        unsigned char lastwave;
-        unsigned char waveduracc;
-        unsigned char pulseduracc;
-
-        //VOLUME
-        unsigned char ptrnvol;
-        unsigned char ptrnlastvol;
-        unsigned char voljump;
-
-        sample_res_unsigned lastvol;
-        unsigned char voli;
-        unsigned char volduracc;
-    };
 
     //not implemented yet
     char **songpaths;
@@ -59,17 +40,23 @@ namespace itrp
     Pattern *curpattern;
     unsigned char order;
     generator *generators;
+    filter *filters;
     bool trackmute[256];
     float amplifyall;
+   
+    unsigned int window_len;
+    unsigned int window_half;
+    std::chrono::system_clock::time_point begin_time;
 
 
 
 /***\//////////////////////////////////////////////////////////////////////////    
-Function: void initializeWaveTable()
+Function: void initializeTables()
 Description:
-    Populates the wave table with wave generator functions
+    Populates the wave table with wave generator functions and
+    filter table with filter functions
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-    void initializeWaveTable();
+    void initializeTables();
 
 /***\//////////////////////////////////////////////////////////////////////////    
 Function: void initializeRender()
@@ -82,6 +69,23 @@ Postcondition:
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
     void initializeRender();
 
+
+/***\//////////////////////////////////////////////////////////////////////////    
+    Function: ::linearize(sample_res **buffer, const unsigned int orders, unsigned int *bytes, unsigned int &total_bytes
+
+Description:
+   Linearizes all play buffers.
+   Returns a dynamic array of samples
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+sample_res *linearize(sample_res **buffer, const unsigned int orders, unsigned int *bytes, unsigned int &total_bytes);
+
+/***\//////////////////////////////////////////////////////////////////////////
+Function: void performFilter(sample_res *bfr, paramtable *ptbl, int bytes)
+
+Description:
+Delegates to the filter functions to be performed on the input signal bfr
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+    void performFilter(sample_res *bfr, unsigned int bfr_len, Track *seltrk);
 
 
 /***\//////////////////////////////////////////////////////////////////////////    

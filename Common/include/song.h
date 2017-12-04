@@ -3,6 +3,7 @@
 
 #include "instrument.h"
 #include "pattern.h"
+#include "math.h"
 #include <istream>
 #include <ostream>
 
@@ -40,6 +41,8 @@ class Song{
         unsigned short pulseEntries;
         unsigned short *pulseTable;
 
+        unsigned short filterEntries;
+        unsigned short *filterTable;
 
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: void copyCommutable(Song *other)
@@ -62,7 +65,7 @@ Description:
     patterns is initialized to an array of 256 pattern pointers
     and pattern 0 is set to an empty pattern
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
-        Song();
+        Song(bool fill_defaults=true);
 
 
 /***\//////////////////////////////////////////////////////////////////////////        
@@ -128,7 +131,8 @@ Function: void setInterRowResolution(unsigned char res)
 Description:
    Sets the subdivision of the bytes per row 
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\__///
-        inline void setInterRowResolution(unsigned char res){interrow_resolution = res;}
+        inline void setInterRowResolution(const unsigned char &res){interrow_resolution = res;}
+
 
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: char getInterRowResolution()
@@ -136,6 +140,8 @@ Description:
    Get the number of segments in a row
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_///
         inline unsigned char getInterRowResolution(){return interrow_resolution;}
+
+
 
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: void setTrackNum(const unsigned newtracks)
@@ -154,6 +160,7 @@ Description:
         inline unsigned char getInterrowRes() const {return interrow_resolution;}
         inline unsigned short numWaveEntries() const {return waveEntries;}
         inline unsigned short numPulseEntries() const {return pulseEntries;}
+        inline unsigned short numFilterEntries() const {return filterEntries;}
 
 
 /***\//////////////////////////////////////////////////////////////////////////        
@@ -338,7 +345,7 @@ Description:
         inline unsigned short *getPulseTable() {return pulseTable;}
 
 /***\//////////////////////////////////////////////////////////////////////////        
-Function: short getPulseEntry(unsigned short index) {return pulseTable[index];
+Function: short getPulseEntry(unsigned short index) 
 
 Description:
    Get the `index` entry of this song's pulse table
@@ -347,7 +354,7 @@ Description:
 
 
 /***\//////////////////////////////////////////////////////////////////////////        
-Function: void setPulseEntry(unsigned short index, unsigned short entry){pulseTable[index] = entry;
+Function: void setPulseEntry(unsigned short index, unsigned short entry)
 
 Description:
    Set the `index` entry of this song's pulse table with `entry`
@@ -356,6 +363,7 @@ Description:
 
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: bool insertPulseEntry(unsigned short index, unsigned short entry)
+
 Description:
    Insert a new pulse entry at the specified location.
    Pushed back entries that come after index
@@ -373,11 +381,60 @@ Description:
 /***\//////////////////////////////////////////////////////////////////////////        
 Function: void fixPulseJumps(const unsigned short &index, short difference)
 Description:
-    Fixes indicies that point to positions in the pusle table.
+    Fixes indicies that point to positions in the pulse table.
     Fired after rows are inserted or removed from the pulse table
 *////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
         void fixPulseJumps(const unsigned short &index, short difference);
 
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: getFilterTable() 
+
+Description:
+   Get a pointer to this song's filter table.
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        inline unsigned short *getFilterTable() {return filterTable;}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: short getFilterEntry(unsigned short index) 
+
+Description:
+   Get the `index` entry of this song's filter table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        inline unsigned short getFilterEntry(unsigned short index) {return filterTable[index];}
+
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void setFilterEntry(unsigned short index, unsigned short entry)
+
+Description:
+   Set the `index` entry of this song's filter table with `entry`
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        inline void setFilterEntry(unsigned short index, unsigned short entry){filterTable[index] = entry;}
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: bool insertFilterEntry(unsigned short index, unsigned short entry)
+Description:
+   Insert a new filter entry at the specified location.
+   Pushed back entries that come after index
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        bool insertFilterEntry(unsigned short index, unsigned short entry);
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: bool removeFilterEntry(unsigned short index)
+Description:
+    Remove a filter entry at the specified location
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        bool removeFilterEntry(unsigned short index);
+
+
+/***\//////////////////////////////////////////////////////////////////////////        
+Function: void fixFilterJumps(const unsigned short &index, short difference)
+Description:
+    Fixes indicies that point to positions in the filter table.
+    Fired after rows are inserted or removed from the filter table
+*////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___///
+        void fixFilterJumps(const unsigned short &index, short difference);
 
 
 

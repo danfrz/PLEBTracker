@@ -67,6 +67,7 @@ namespace editor
     extern WIN *volwin;
     extern WIN *wavewin;
     extern WIN *pulsewin;
+    extern WIN *filterwin;
     extern WIN *dialog;
 
 
@@ -378,6 +379,7 @@ namespace instedtr
         VOLSEG_NUM = 2;
     extern unsigned short waveclipboard;
     extern unsigned short pulseclipboard;
+    extern unsigned short filterclipboard;
     extern unsigned short volclipboard;
 
     extern unsigned short selwavrow;
@@ -386,6 +388,8 @@ namespace instedtr
     extern unsigned short selpulrow;
     extern unsigned char selpulseg;
 
+    extern unsigned short selfltrow;
+    extern unsigned char selfltseg;
 
 
     extern  bool instobjedit;
@@ -394,6 +398,7 @@ namespace instedtr
 
     extern unsigned short viewportwave;
     extern unsigned short viewportpulse;
+    extern unsigned short viewportfilter;
     extern unsigned char viewportvol;
 
 

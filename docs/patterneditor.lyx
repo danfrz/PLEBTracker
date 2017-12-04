@@ -4,7 +4,7 @@
 \begin_header
 \save_transient_properties true
 \origin unavailable
-\textclass report
+\textclass article
 \use_default_options true
 \begin_modules
 theorems-ams
@@ -35,7 +35,7 @@ figs-within-sections
 \spacing single
 \use_hyperref false
 \papersize default
-\use_geometry false
+\use_geometry true
 \use_package amsmath 1
 \use_package amssymb 1
 \use_package cancel 1
@@ -59,6 +59,10 @@ figs-within-sections
 \shortcut idx
 \color #008000
 \end_index
+\leftmargin 3cm
+\topmargin 2cm
+\rightmargin 3cm
+\bottommargin 2cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
@@ -80,6 +84,17 @@ figs-within-sections
 Pattern Editor
 \end_layout
 
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename /home/taak/2017-12-03-165049_1600x900_scrot.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section*
 \begin_inset CommandInset label
 LatexCommand label
@@ -90,28 +105,28 @@ name "sec:Introduction"
 Introduction
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 The pattern editor is the window in the center of the terminal when you
  start PLEBTracker.
  This window displays one pattern of song data.
- You can see four vertical 'tracks' seperated by vertical bars 
-\begin_inset Quotes eld
-\end_inset
-
-||
-\begin_inset Quotes erd
-\end_inset
-
-.
- When this pattern is played, it is played from top to bottom.
+ Tracks are the vertical columns.
+ When a pattern is played, it is played from top to bottom.
+ Within a track in the pattern editor, there are 4 fields to edit.
 \end_layout
 
-\begin_layout Paragraph*
-Within a track there are 4 fields to edit.
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
-\begin_layout Paragraph*
-An entry in a track may look like this: ||C-4 00 
+\begin_layout Standard
+
+\family typewriter
+\series bold
+\size larger
+||C-4 00 
 \color green
 3F
 \color inherit
@@ -122,45 +137,88 @@ An entry in a track may look like this: ||C-4 00
 ||
 \end_layout
 
-\begin_layout Enumerate
-Note [C-4], A musical note, and its octave.
+\begin_layout Description
+Note 
+\family typewriter
+\series bold
+[C-4]
+\family default
+\series default
+ A musical note, and its octave.
 \end_layout
 
-\begin_layout Enumerate
-Instrument [00], Which instrument to play from the instrument list.
+\begin_layout Description
+Instrument 
+\family typewriter
+\series bold
+[00]
+\family default
+\series default
+ Which instrument to play from the instrument list.
 \end_layout
 
-\begin_layout Enumerate
-Volume [
+\begin_layout Description
+Volume 
+\family typewriter
+\series bold
+[
 \color green
 3F
 \color inherit
-], How loud this instrument should be playing on this note.
+]
+\family default
+\series default
+ How loud this note should be.
 \end_layout
 
-\begin_layout Enumerate
-Effect [
+\begin_layout Description
+Effect 
+\family typewriter
+\series bold
+[
 \color orange
 204
+\family default
+\series default
 \color inherit
-], Does any number of things.
+] Function changes between different effects.
  See the section titled Effects.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection*
 Notes
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 The first field in a track is the note and octave.
- || 
+ 
+\family typewriter
+\series bold
+||
+\size large
 \bar under
 C-2
+\size default
 \bar default
- 00 3F 444 ||
+ 00 
+\color green
+3F
+\color inherit
+ 
+\color orange
+444
+\color inherit
+||
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 To change octaves within the pattern editor press SHIFT and the number key
  of which octave to change to.
  When you press SHIFT + 2 the interface will say OCT: 1, this is correct.
@@ -169,7 +227,7 @@ To change octaves within the pattern editor press SHIFT and the number key
  The number row and row beginning with 'q' will play notes in octave 2.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 The default key signature of the tracker is Chromatic C, which means when
  the tracker populates the keyboard bindings to the notes they represent.
  'q' and 'z' will be C (because the key is C,) and each key as you go along
@@ -180,7 +238,7 @@ The default key signature of the tracker is Chromatic C, which means when
  etc.)
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 There are two options when choosing a scale, if you choose to use one (you
  can still just use the Chromatic C bindings and just choose the notes of
  that key yourself if you want.) There are two options when changing scale.
@@ -203,22 +261,35 @@ scale construction
 Instrument
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 The second field in a track is the Instrument.
- ||C-2 
+ 
+\family typewriter
+\series bold
+||C-2 
+\size large
 \bar under
 00
+\size default
 \bar default
- 3F 444||
+ 
+\color green
+3F
+\color inherit
+ 
+\color orange
+444
+\color inherit
+||
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 The instrument can not be set to an instrument that does not yet exist,
  so when you begin the tracker for the first time, this can't be anything
  but 00 until a new instrument is made.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 When the instrument for an entry within a track is set, the instrument is
  played.
  This means that the volume envelope begins again at the first index, and
@@ -226,32 +297,34 @@ When the instrument for an entry within a track is set, the instrument is
  fields.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 If the pulse index for an instrument is set to [____], (by pressing Space
  or Del when editing an instrument's pulse index) then the iteration of
  the pulse table will continue uninterrupted when this instrument played.
  Therefore if you have an instrument that starts a loop in the pulse table,
  then you want to use this instrument, the previous instrument's pulse iteration
  will continue unaffected, which may have desired or undesired effects.
- It's good practice to have:
+ It's common to have:
 \end_layout
 
-\begin_layout Paragraph*
-\begin_inset Formula $\begin{array}{cc}
-00| & 0000\\
-01| & FF00
+\begin_layout Standard
+
+\family typewriter
+\begin_inset Formula $\begin{array}{c|c}
+00 & 0000\\
+01 & FF00
 \end{array}$
 \end_inset
 
 
 \end_layout
 
-\begin_layout Paragraph*
-at the top of the pulse table for instruments that don't want to change
- the pulse parameter.
+\begin_layout Standard
+at the top of the pulse table for instruments that don't change the pulse
+ parameter.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 If the FA function in the wave table is used for an instrument, and then
  another instrument is played, the Wave Repeat parameter is unset before
  processing the next instrument's parameters.
@@ -268,22 +341,36 @@ doesn't
 Volume
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 The third field in a track is the Volume.
- ||C-2 00 
+ 
+\family typewriter
+\series bold
+||C-2 00 
+\size large
 \bar under
+\color green
 3F
+\size default
 \bar default
- 444||
+\color inherit
+ 
+\color orange
+444
+\color inherit
+||
 \end_layout
 
-\begin_layout Paragraph*
-The range of volume that is possible to be enterred within the pattern editor
- is 00 to 3F hexadecimal.
+\begin_layout Standard
+This volume specifies the volume of individual notes in a pattern.
+ The range of volume within a pattern is 00 to 3F in hexadecimal.
  3F is full volume and 00 is silent.
- If a sound must be louder, consider increasing the volume of the instrument
- (in the instrument's Volume Table, TAB + a) and lowering the volume of
- that instrument within the song's patterns where appropriate.
+\end_layout
+
+\begin_layout Standard
+If a sound must be louder, consider increasing the volume of the instrument
+ in the instrument's Volume Table (TAB + a) or lowering the volume within
+ the song's patterns where appropriate.
  Another solution is to create a copy of that instrument at a higher volume
  and use that instrument when you need a louder version of the original.
 \end_layout
@@ -298,31 +385,50 @@ name "sec:Effects"
 Effects
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 The fourth field in a track is the Effect.
- ||C-2 00 3F 
+ 
+\family typewriter
+\series bold
+||C-2 00 
+\color green
+3F
+\color inherit
+ 
+\size large
 \bar under
+\color orange
 444
+\size default
 \bar default
- ||
+\color inherit
+||
 \end_layout
 
-\begin_layout Paragraph*
-Effects change how sounds produced in that track sound.
- There are two types of effects:
+\begin_layout Standard
+Effects modify how sounds are produced in that track.
+ There are two types of effects.
 \end_layout
 
-\begin_layout Paragraph*
-On-row effects [R] perform an action once as soon as the tracker reaches
- that row.
+\begin_layout Standard
+
+\shape italic
+On-row effects
+\shape default
+ [R] perform an action once as soon as the tracker reaches that row.
 \end_layout
 
-\begin_layout Paragraph*
-Per-segment effects [S] continue to be applied throughout the row that it
- is applied (and subsequent rows if the effect continues to be applied).
+\begin_layout Standard
+
+\shape italic
+Per-segment effects
+\shape default
+ [S] continue to be applied throughout the row that it is applied (and subsequen
+t rows if the effect continues to be applied).
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="16" columns="2">
 <features tabularvalignment="middle">
@@ -333,7 +439,11 @@ Per-segment effects [S] continue to be applied throughout the row that it
 \begin_inset Text
 
 \begin_layout Plain Layout
-0XY [S]
+
+\series bold
+0XY
+\series default
+ [S]
 \end_layout
 
 \end_inset
@@ -353,7 +463,11 @@ Arpeggio up (0,X,Y,0,X,...)
 \begin_inset Text
 
 \begin_layout Plain Layout
-1XX [S]
+
+\series bold
+1XX
+\series default
+ [S]
 \end_layout
 
 \end_inset
@@ -373,7 +487,11 @@ Portamento up by factor of XX
 \begin_inset Text
 
 \begin_layout Plain Layout
-2XX [S]
+
+\series bold
+2XX
+\series default
+ [S]
 \end_layout
 
 \end_inset
@@ -393,7 +511,11 @@ Portamento down by factor of XX
 \begin_inset Text
 
 \begin_layout Plain Layout
-3XX [S]
+
+\series bold
+3XX
+\series default
+ [S]
 \end_layout
 
 \end_inset
@@ -413,7 +535,11 @@ Portamento to note by a factor of XX
 \begin_inset Text
 
 \begin_layout Plain Layout
-4XY [S]
+
+\series bold
+4XY
+\series default
+ [S]
 \end_layout
 
 \end_inset
@@ -433,7 +559,11 @@ Vibrato (X=Speed, Y=Depth)
 \begin_inset Text
 
 \begin_layout Plain Layout
-5XX [R]
+
+\series bold
+5XX
+\series default
+ [R]
 \end_layout
 
 \end_inset
@@ -453,7 +583,11 @@ Set wave parameter 1 to XX
 \begin_inset Text
 
 \begin_layout Plain Layout
-6XX [R]
+
+\series bold
+6XX
+\series default
+ [R]
 \end_layout
 
 \end_inset
@@ -473,7 +607,11 @@ Set wave parameter 2 to XX
 \begin_inset Text
 
 \begin_layout Plain Layout
-7XX [R]
+
+\series bold
+7XX
+\series default
+ [R]
 \end_layout
 
 \end_inset
@@ -493,7 +631,11 @@ Set wave index of track to XX
 \begin_inset Text
 
 \begin_layout Plain Layout
-8XX [R]
+
+\series bold
+8XX
+\series default
+ [R]
 \end_layout
 
 \end_inset
@@ -513,7 +655,11 @@ Set pulse parameter to XX00
 \begin_inset Text
 
 \begin_layout Plain Layout
-9XX [R]
+
+\series bold
+9XX
+\series default
+ [R]
 \end_layout
 
 \end_inset
@@ -533,7 +679,11 @@ Set pulse index of track to XX
 \begin_inset Text
 
 \begin_layout Plain Layout
-AXX [S]
+
+\series bold
+AXX
+\series default
+ [S]
 \end_layout
 
 \end_inset
@@ -553,7 +703,11 @@ Volume slide up by rate (XX+FF) / FF
 \begin_inset Text
 
 \begin_layout Plain Layout
-BXX [S]
+
+\series bold
+BXX
+\series default
+ [S]
 \end_layout
 
 \end_inset
@@ -573,7 +727,59 @@ Volume slide down by rate (XX+FF)/FF
 \begin_inset Text
 
 \begin_layout Plain Layout
-CXX [R]
+
+\series bold
+CXX
+\series default
+ [R]
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Set filter index of track to XX
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+DXY
+\series default
+ [R]
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Set filter X to Y000
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+EXX
+\series default
+ [R]
 \end_layout
 
 \end_inset
@@ -589,51 +795,15 @@ Set volume index of track to XX
 </cell>
 </row>
 <row>
-<cell alignment="right" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-D__ [_]
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Undefined
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-E__ [_]
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Undefined
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
 <cell alignment="right" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
-F__ [_]
+
+\series bold
+F__
+\series default
+ [_]
 \end_layout
 
 \end_inset
@@ -655,11 +825,15 @@ Undefined
 
 \end_layout
 
+\begin_layout Standard
+Feel free to ignore the paragraphs marked [Technical].
+\end_layout
+
 \begin_layout Subsection*
 0XY Arpeggio up
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 This effect affects the frequency of the waveform currently playing in its
  track.
  The effect rapidly alternates 3 different frequencies within one row.
@@ -667,7 +841,14 @@ This effect affects the frequency of the waveform currently playing in its
  X semi-tones (half-steps) above the base, then Y semi-tones above the base.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 [Technical] The sound of 0XY can sound differently based on whether the
  value you set for the amount of segments within a row (SEG) is less than
  the value of ARPEGGIO_SPEED (default 6.) However for all SEG values above
@@ -678,7 +859,7 @@ This effect affects the frequency of the waveform currently playing in its
 1xx Portamento up
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 This effect increases the frequency of the sound in this track upwards.
  Every increase of 6 will have an increase of 1 semitone by the end of that
  row.
@@ -686,7 +867,14 @@ This effect increases the frequency of the sound in this track upwards.
  will modulate the frequency by two semitones.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 [Technical] If you want to know precisely how the sound changes, every segment
  it performs
 \begin_inset Formula $frq=frq\text{∕}(\sqrt[12]{2})^{(6.0\text{∙}XX\text{∕}SEG)}$
@@ -700,12 +888,19 @@ This effect increases the frequency of the sound in this track upwards.
 2xx Portamento down
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 This effect decreases the frequency of the sound in this track downwards.
  This works in the same way as 1xx Portamento up.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 [Technical] Same as 1xx, but multiplies 
 \begin_inset Formula $frq=frq\text{∙}(\sqrt[12]{2})^{(6.0\text{∙}XX/SEG)}$
 \end_inset
@@ -717,7 +912,7 @@ This effect decreases the frequency of the sound in this track downwards.
 3xx Portamento to note
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 This effect modulates the frequency that the track was already at to the
  frequency of the last note specified in this track.
  The parameters on this effect are very fine and 300 
@@ -730,7 +925,14 @@ does not perform no portamento
  sounds good.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 [Technical] My implementation of this I dont feel confident of, and that
  is why I can't provide quantitative information on its use.
  The frequency is exponentially interpolated between frq and nextfrq.
@@ -753,7 +955,7 @@ frq=(\sqrt[12]{2})^{note+dif}
 4xy Vibrato
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 This effect vibrates a track's frequency upward and downward rapidly within
  the range of one semi-tone.
  The X parameter defines the speed and Y parameter defines the depth.
@@ -767,7 +969,7 @@ This effect vibrates a track's frequency upward and downward rapidly within
 5xx Set Wave Parameter
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 This sets the Wave parameter utilized by some certain waveforms in the wave
  table.
  Sets the wave parameter to XX.
@@ -777,7 +979,7 @@ This sets the Wave parameter utilized by some certain waveforms in the wave
 6xx Set Wave Parameter 2
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 This sets the second Wave parameter utilized by some certain waveforms in
  the wave table to XX.
 \end_layout
@@ -786,10 +988,14 @@ This sets the second Wave parameter utilized by some certain waveforms in
 7xx Set Wave Index
 \end_layout
 
-\begin_layout Paragraph*
-Sets the operating position in the wave table to XX.
- Notice that not all XXXX possible indicies of the wave table can be reached
- with this effect.
+\begin_layout Standard
+Sets the operating position for this track in the wave table to XX.
+ 
+\end_layout
+
+\begin_layout Standard
+Caveat: Notice that not all possible indicies of the wave table (0-FFFF)
+ can be reached with this effect.
  If this actually becomes a problem, you could insert some jumps within
  the wavetable and point to those jumps.
  Not ideal, but 7xx is more or less a convenience function.
@@ -799,7 +1005,7 @@ Sets the operating position in the wave table to XX.
 8xx Set Pulse Parameter
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
 Sets the pulse parameter to XX00.
  This is helpful for using an instrument whose pulse effect does not set
  (only adds) to the pulse parameter.
@@ -809,8 +1015,8 @@ Sets the pulse parameter to XX00.
 9xx Set Pulse Index
 \end_layout
 
-\begin_layout Paragraph*
-Sets the operating position in the pulse table to XX.
+\begin_layout Standard
+Sets the operating position for this track in the pulse table to XX.
  Same caveat as 7xx.
 \end_layout
 
@@ -818,69 +1024,62 @@ Sets the operating position in the pulse table to XX.
 Axx Volume slide up
 \end_layout
 
-\begin_layout Paragraph*
-Increases the volume of the instrument playing in this track.
- In actuality, this increases what the tracker thinks the volume of the
- track in the 
+\begin_layout Standard
+Gradually increases the volume of the instrument playing in this track.
+ In actuality, this increases the volume of the track in the 
 \emph on
 pattern
 \emph default
- is (as opposed to the volume of the Instrument in the volume window.) Because
- of this, effect Axx will never make an instrument louder than how loud
- it is when listened to at volume 3F in the pattern window.
-\end_layout
-
-\begin_layout Paragraph*
-The volume is increased by a rate of 
-\begin_inset Formula $1+(XX/255)$
+, opposed to the volume of the Instrument in the volume table.
+ Because of this, Axx will never make an instrument louder than 3F in the
+ pattern window.
+ By the end of the row, the volume will be increased by 
+\begin_inset Formula $3F*\frac{XX}{255}$
 \end_inset
 
-, so by the end of that row the volume should be at 
-\begin_inset Formula $volume*(1+XX/255)$
-\end_inset
-
-
+.
 \end_layout
 
 \begin_layout Subsection*
 Bxx Volume slide down
 \end_layout
 
-\begin_layout Paragraph*
-Decreases the volume of the instrument playing in this track.
- 
-\end_layout
-
-\begin_layout Paragraph*
-The volume is decreased by a rate of 
-\begin_inset Formula $(XX/255)$
-\end_inset
-
-, so by the end of the row the volume should be at 
-\begin_inset Formula $volume*(XX/255)$
+\begin_layout Standard
+Gradually decreases the volume of the instrument playing in this track.
+ By the end of the row, the volume will be decreased by 
+\begin_inset Formula $3F*\frac{XX}{255}$
 \end_inset
 
 
 \end_layout
 
 \begin_layout Subsection*
-Cxx Set Volume Index
+Cxx Set Filter index
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
+Sets the operating position for this track in the filter table to XX.
+ Same caveat as 7xx.
+\end_layout
+
+\begin_layout Subsection*
+Dxy Set Filter Parameter
+\end_layout
+
+\begin_layout Standard
+Sets the filter parameter of the X'th filter to Y000.
+\end_layout
+
+\begin_layout Subsection*
+Exx Set Volume Index
+\end_layout
+
+\begin_layout Standard
 Sets the current volume index of the track to xx.
  The Volume index is the index that points to an entry in the volume table
  of the selected instrument.
  If the index provided exceeds the length of the volume table of this instrument
 , the index is set to the last index of the table.
-\end_layout
-
-\begin_layout Subsection*
-D__ Undefined
-\end_layout
-
-\begin_layout Subsection*
-E__ Undefined
 \end_layout
 
 \begin_layout Subsection*

@@ -3,6 +3,8 @@
 TEMPDIR="/var/tmp/plebtrk"
 LOGPATH="$TEMPDIR/trklog.log"
 
+mkdir $TEMPDIR 2>/dev/null
+
 echo "" > "$LOGPATH"
 plebtrkdaemon $$ 2>"$LOGPATH" & #Run the daemon in the background
 sleep 0.1 # the daemon do its thing for a moment

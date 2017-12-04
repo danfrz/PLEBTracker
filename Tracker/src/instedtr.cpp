@@ -96,6 +96,51 @@ void instedtr::chgSelPulRow(int i)
 
 }
 
+void instedtr::chgSelFltSeg(int i)
+{
+    selfltseg += i;
+    if(selfltseg > 1)
+        if(i > 0)
+            selfltseg = 1; 
+        else
+            selfltseg = 0;
+}
+
+void instedtr::chgSelFltRow(int i)
+{
+    using namespace editor;
+    selfltrow += i;
+    if(selfltrow > song->numFilterEntries()) 
+        if(i > 0)
+            selfltrow = song->numFilterEntries(); //not -1! 
+        else
+            selfltrow = 0;
+
+    unsigned short height;
+    if(editor::wingroup == editor::instwin)
+    {
+        height = editor::WIN_HEIGHT - 4-1; //-1 for the header
+    }
+    else if(editor::wingroup ==editor::ptrnwin)
+    {
+        height = editor::WIN_HEIGHT - 3-1;
+    }
+
+    //Change viewport
+    if(selfltrow >= viewportfilter + height)
+    {
+        viewportfilter += 4;
+        if(viewportfilter > song->numFilterEntries())
+            viewportfilter = song->numFilterEntries()-1;
+    }
+    else if(selfltrow < viewportfilter)
+    {
+        viewportfilter -=4;
+        if(viewportfilter > song->numFilterEntries())
+            viewportfilter = 0;
+    }
+
+}
 
 
 void instedtr::chgSelVolSeg(int i)
@@ -140,9 +185,9 @@ void instedtr::chgSelVolRow(int i)
 void instedtr::chgSelInstRow(int i)
 {
     selinstrow += i;
-    if(selinstrow > 2)
+    if(selinstrow > 3)
         if(i > 0)
-            selinstrow = 2;
+            selinstrow = 3;
         else selinstrow =0;
     chgSelInstObj(0);
     return;
@@ -158,11 +203,7 @@ void instedtr::chgSelInstObj(int i)
             else
                 selinstobj = 0;
     }
-    else if(selinstrow == 1)
-    {
-        selinstobj = 0;
-    }
-    else if(selinstrow == 2)
+    else if(selinstrow > 0)
     {
         selinstobj = 0;
     }
@@ -199,6 +240,7 @@ void instedtr::display()
     displayInst();
     displayWav();
     displayPulse();
+    displayFilter();
     displayVol();
 
     //Print metaobjedit information
@@ -221,13 +263,13 @@ void instedtr::displayWav()
     if(editor::wingroup == editor::instwin)
     {
         y = 2;
-        x = (editor::WIN_WIDTH-13)-11;
+        x = (editor::WIN_WIDTH-13)-11*2;
         height = editor::WIN_HEIGHT - 4-1; //-1 for the header
     }
     else if(editor::wingroup ==editor::ptrnwin)
     {
         y = 3;
-        x = editor::WIN_WIDTH-11*2;
+        x = editor::WIN_WIDTH-11*3;
         height = editor::WIN_HEIGHT - 3-1;
     }
 
@@ -332,18 +374,18 @@ void instedtr::displayPulse()
     if(editor::wingroup == editor::instwin)
     {
         y = 2;
-        x = editor::WIN_WIDTH-13;
+        x = editor::WIN_WIDTH-13-11;
         height = editor::WIN_HEIGHT - 4-1; //-1 for the header
     }
     else if(editor::wingroup ==editor::ptrnwin)
     {
         y = 3;
-        x = editor::WIN_WIDTH-11;
+        x = editor::WIN_WIDTH-11*2;
         height = editor::WIN_HEIGHT - 3-1;
     }
     attron(A_UNDERLINE);
 
-    mvprintw(y++, x, "|PULS TABLE",editor::pulsewin);
+    mvprintw(y++, x, "|PULSE TABL",editor::pulsewin);
     unsigned short * pulseTable = editor::song->getPulseTable();
     //Print the wave table entries
     bool emptyvisible = true;
@@ -436,6 +478,120 @@ void instedtr::displayPulse()
 
 
 
+void instedtr::displayFilter()
+{
+    attroff(-1);
+    unsigned int y;
+    unsigned int x;
+    unsigned int height;
+    if(editor::wingroup == editor::instwin)
+    {
+        y = 2;
+        x = editor::WIN_WIDTH-13;
+        height = editor::WIN_HEIGHT - 4-1; //-1 for the header
+    }
+    else if(editor::wingroup ==editor::ptrnwin)
+    {
+        y = 3;
+        x = editor::WIN_WIDTH-11;
+        height = editor::WIN_HEIGHT - 3-1;
+    }
+    attron(A_UNDERLINE);
+
+    mvprintw(y++, x, "|FILTER TBL",editor::filterwin);
+    unsigned short * filterTable = editor::song->getFilterTable();
+    //Print the wave table entries
+    bool emptyvisible = true;
+    bool lastselected = false;
+
+    int entries = editor::song->numFilterEntries();
+
+    //If the last entry is visible but not selected, print it dashes
+    //otherwise print it with the numbers stored in it
+
+
+    if(selfltrow == entries && editor::filterwin == editor::filterwin)
+        lastselected = true;
+
+    entries -= viewportfilter; //Put in reference of viewport
+    if (entries > height)
+    {
+        entries = height;
+        emptyvisible = false;
+    }
+    else
+        if(lastselected)
+            entries++;
+
+    using editor::charBuffer;
+    charBuffer[5] = '|';
+    charBuffer[6] = 0;
+    int i;
+    for(i = 0; i < entries; i++)
+    {
+        charBuffer[0] ='|';
+        
+        //vvvvvv
+        //|0000|00 00
+        setFilterAttribs(viewportfilter+i, 2);
+        editor::shortString(charBuffer+1, viewportfilter + i,4);
+        mvprintw(y+i, x, charBuffer, editor::filterwin);
+
+        //         vv
+        //|0000|00 00
+        charBuffer[4] = 0;
+        editor::shortString(charBuffer, filterTable[viewportfilter+i],4);
+        setFilterAttribs(viewportfilter+i, 1);
+        mvprintw(y+i, x+9, charBuffer+2, editor::filterwin);
+
+        //      vvv
+        //|0000|00 00
+        charBuffer[2] = ' ';
+        charBuffer[3] = 0;
+        setFilterAttribs(viewportfilter+i, 0);
+        mvprintw(y+i, x+6, charBuffer, editor::filterwin);
+    }
+
+    if(emptyvisible)
+    {
+        if(!lastselected && i < height)
+        {
+            charBuffer[0] = '|';
+            editor::shortString(charBuffer + 1, viewportfilter + i, 4);
+            charBuffer[5] = '|';
+            charBuffer[6] = '-';
+            charBuffer[7] = '-';
+            charBuffer[8] = ' ';
+            charBuffer[9] = '-';
+            charBuffer[10] = '-';
+            charBuffer[11] = 0;
+
+            setFilterAttribs(viewportfilter+i, 2);
+            mvprintw(y+i++,x, charBuffer);
+        }
+
+        setFilterAttribs(entries+1,0);
+        charBuffer[0] = '|';
+        charBuffer[5]='|';
+        for(int j=6; j < 11; j++)
+            charBuffer[j] = ' ';
+        charBuffer[11]=0;
+
+        while(i < height)
+        {
+            editor::shortString(charBuffer + 1, viewportfilter + i, 4);
+            mvprintw(y+i, x, charBuffer, editor::filterwin);
+            i++;
+        }
+        attroff(-1);
+    }
+
+}
+
+
+
+
+
 
 
 
@@ -493,8 +649,9 @@ void instedtr::displayInst()
 
     attroff(-1);
     mvprintw(2, x+1, "[NCX]", editor::instwin);
-    mvprintw(3, x+2, "WAVE :", editor::instwin);
-    mvprintw(4, x+2, "PULSE:", editor::instwin);
+    mvprintw(3, x+2, "  WAVE INDEX:", editor::instwin);
+    mvprintw(4, x+2, " PULSE INDEX:", editor::instwin);
+    mvprintw(5, x+2, "FILTER INDEX:", editor::instwin);
     setInstAttribs(0,0);
     mvprintw(2, x+2, "N", editor::instwin);
     setInstAttribs(0,1);
@@ -531,6 +688,7 @@ void instedtr::displayInst()
         mvprintw(2, x+10, charBuffer, editor::instwin);
     }
 
+    //SELECTED INSTRUMENT
     charBuffer[2] = 0;
     isselected = setInstAttribs(0, 6);
     if(isselected && instobjedit)
@@ -539,15 +697,17 @@ void instedtr::displayInst()
         byteString(charBuffer, patternedtr::selinstrument);
     mvprintw(2, x+33, charBuffer, editor::instwin);
 
+    //WAVE INDEX
     charBuffer[4] = 0;
     isselected = setInstAttribs(1,0);
     if(isselected && instobjedit)
         editor::shortString(charBuffer, numBuffer, 4);
     else
         editor::shortString(charBuffer, selinst->getWaveIndex(), 4);
-    mvprintw(3, x+9, charBuffer, editor::instwin);
+    mvprintw(3, x+9+6, charBuffer, editor::instwin);
 
 
+    //PULSE INDEX
     isselected = setInstAttribs(2,0);
     if(isselected && instobjedit)
     {
@@ -573,7 +733,36 @@ void instedtr::displayInst()
             charBuffer[3]='_';
         }
     }
-    mvprintw(4, x+9, charBuffer, editor::instwin);
+    mvprintw(4, x+9+6, charBuffer, editor::instwin);
+
+    //FILTER INDEX
+    isselected = setInstAttribs(3,0);
+    if(isselected && instobjedit)
+    {
+        if(numBuffer != 0xFFFF)
+            editor::shortString(charBuffer, numBuffer, 4);
+        else
+        {
+            charBuffer[0]='_';
+            charBuffer[1]='_';
+            charBuffer[2]='_';
+            charBuffer[3]='_';
+        }
+    }
+    else
+    {
+        if(selinst->getFilterIndex() != 0xFFFF)
+            editor::shortString(charBuffer, selinst->getFilterIndex(), 4);
+        else
+        {
+            charBuffer[0]='_';
+            charBuffer[1]='_';
+            charBuffer[2]='_';
+            charBuffer[3]='_';
+        }
+    }
+    mvprintw(5, x+9+6, charBuffer, editor::instwin);
+
 
     displayEnvelope();
 }
@@ -584,7 +773,7 @@ void instedtr::displayEnvelope()
     int x = 11;
     int y = 8;
     int height = editor::WIN_HEIGHT - 4  - y;
-    int width = editor::WIN_WIDTH   - 12 - 13 - 11;
+    int width = editor::WIN_WIDTH   - 12 - 13 - 11*2;
 
     int bot = editor::WIN_HEIGHT - 2;
     int div = editor::WIN_WIDTH / 11 - 1;
@@ -794,6 +983,9 @@ void instedtr::processInput(wint_t in)
         processInputVol(in);
     else if(editor::inputwin == editor::pulsewin)
         processInputPulse(in);
+    else if(editor::inputwin == editor::filterwin)
+        processInputFilter(in);
+
 }
 
 
@@ -1192,6 +1384,131 @@ void instedtr::processInputPulse(wint_t in)
 
 }
 
+
+
+void instedtr::processInputFilter(wint_t in)
+{
+    using editor::song;
+    bool ishex = editor::validateHexChar(in);
+    unsigned short entries = song->numFilterEntries();
+        switch(in)
+        {
+            case KEY_LEFT:
+                chgSelFltSeg(-1);
+                return;
+            case KEY_RIGHT:
+                chgSelFltSeg(1);
+                return;
+            case KEY_UP:
+                chgSelFltRow(-1);
+                return;
+            case KEY_DOWN:
+                chgSelFltRow(1);
+                return;
+            case KEY_PPAGE:
+                chgSelFltRow(-8);
+                return;
+            case KEY_NPAGE:
+                chgSelFltRow(8);
+                return;
+            case KEY_HOME:
+                selpulrow = 0;
+                chgSelFltRow(0); //updates GUI
+                return;
+            case KEY_END:
+                selfltrow = entries; 
+                chgSelFltRow(0); //update GUI
+                return;
+            case KEY_IC:
+                if(entries == 0xFFFF)
+                    return;
+
+                if(isJumpFunc_Volatile(song->getFilterEntry(selfltrow)))
+                    song->insertFilterEntry(selfltrow, 0);
+                else
+                    song->insertFilterEntry(selfltrow, song->getFilterEntry(selfltrow));
+                return;
+            case KEY_DC: 
+                if(selfltrow >= entries)
+                    return;
+                if(entries != 0)
+                    song->removeFilterEntry(selfltrow);
+                chgSelFltRow(0);
+                return;
+            case ALT_BACKSPACE:
+                if(selfltrow >= entries)
+                    return;
+                if(entries != 0)
+                    song->removeFilterEntry(selfltrow);
+                chgSelFltRow(-1);
+                return;
+            case  '\n':
+                filterclipboard = song->getFilterEntry(selfltrow);
+                chgSelFltRow(1);
+                return;
+            case ' ':
+                if(selfltrow == song->numFilterEntries())
+                    song->insertFilterEntry(selfltrow, filterclipboard);
+                else
+                    song->setFilterEntry(selfltrow,filterclipboard);
+                chgSelFltRow(1);
+                return;
+            case 'n':
+            case 'N':
+                {
+                    unsigned short entry = song->getFilterEntry(selfltrow);
+                    char left = (entry & 0xFF00);
+                    if(left < 0xE000)
+                    {
+                        if(left >= 0x7000)
+                        {
+                            entry += 0x2000;
+                            entry = -entry;
+                        }
+                        else
+                        {
+                            entry = -entry;
+                            entry -= 0x2000;
+                        }
+                        song->setFilterEntry(selfltrow, entry);
+                    }
+                    
+                }
+                return;
+            default:
+                if(ishex)
+                {
+                    char hexnum = editor::charHex(in);
+                    unsigned short entry = song->getFilterEntry(selfltrow);
+                    if(selfltseg == 0)
+                    {
+                        unsigned char val = (entry & 0xFF00) >> 8;
+                        entry &= 0x00FF;
+                        val *= 0x10;
+                        val += hexnum;
+                        entry |= ((short(val)) << 8);
+                    }
+                    else if(selfltseg == 1)
+                    {
+                        unsigned char val = (entry & 0x00FF);
+                        entry &= 0xFF00;
+                        val *= 0x10;
+                        val += hexnum;
+                        entry |= val;
+                    }
+
+                    if(selfltrow == song->numFilterEntries())
+                        song->insertFilterEntry(selfltrow, entry);
+                    else
+                        song->setFilterEntry(selfltrow,entry);
+                }
+        }
+
+
+
+}
+
+
 bool isJumpFunc(const unsigned short &wave)
 {
     unsigned short func = (wave & 0xFF00);
@@ -1367,6 +1684,50 @@ void instedtr::setPulseAttribs(unsigned short pulserow, unsigned char pulseseg)
 }
 
 
+void instedtr::setFilterAttribs(unsigned short filterrow, unsigned char filterseg)
+{
+    attroff(-1);
+
+    unsigned short entry;
+    bool isJump;
+    if(filterrow < editor::song->numFilterEntries())
+    {
+        entry = editor::song->getFilterEntry(filterrow);
+        isJump = isJumpFunc(entry);
+    }
+    else
+        isJump = false;
+
+    if(editor::inputwin == editor::filterwin)
+    {
+        if(filterrow == selfltrow)
+        {
+            attron(A_BOLD);
+            if(filterseg == selfltseg)
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_SSS));
+            else
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_SSU));
+        }
+        else
+            if(filterrow > editor::song->numFilterEntries())
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
+            else
+                if(isJump)
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                else
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU));
+    }
+    else
+        if(filterrow == selfltrow)
+            attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
+        else
+            if(isJump)
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
+            else
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
+}
+
+
 void instedtr::startInstEditing()
 {
     if(selinstrow == 0)
@@ -1424,6 +1785,14 @@ void instedtr::startInstEditing()
         if(selinstobj == 0)
         {
             editor::numBuffer = editor::selinst->getPulseIndex();
+            instobjedit = true;
+        }
+    }
+    else if(selinstrow == 3)
+    {
+        if(selinstobj == 0)
+        {
+            editor::numBuffer = editor::selinst->getFilterIndex();
             instobjedit = true;
         }
     }
@@ -1648,7 +2017,56 @@ void instedtr::instEdit(wint_t in)
                 numBuffer = 0;
         }
     }
+    else if(selinstrow == 3)
+    {
+        //FILTER index
+        if(selinstobj == 0)
+        {
+            switch(in)
+            {
+                case KEY_UP:
+                    numBuffer++;
+                    break;
+                case KEY_LEFT:
+                    numBuffer -= 8;
+                    break;
+                case KEY_DOWN:
+                    numBuffer--;
+                    break;
+                case KEY_RIGHT:
+                    numBuffer += 8;
+                    break;
+                case KEY_END:
+                    numBuffer = 0;
+                    break;
+                case KEY_HOME:
+                    numBuffer = song->numFilterEntries()-1;
+                    break;
+                case KEY_DC:
+                case ALT_BACKSPACE:
+                case ' ':
+                    numBuffer = 0xFFFF;
+                    break;
+                default:
+                    if(ishex)
+                    {
+                        numBuffer *= 0x10;
+                        if(numBuffer > editor::song->numFilterEntries())
+                        {
+                            //chop off digits until it isnt greater
+                            for(int i = 3; (numBuffer %= int(std::pow(0x10,i))) > editor::song->numFilterEntries(); i--);
 
+                        }
+                        numBuffer += hexnum;
+                    }
+            }
+
+            if(numBuffer > editor::song->numFilterEntries() && numBuffer != 0xFFFF)
+                for(int i = 3; (numBuffer %= int(std::pow(0x10,i))) > editor::song->numFilterEntries(); i--);
+            if(numBuffer < 0) //not possible btw
+                numBuffer = 0;
+        }
+    }
 
 
 
@@ -1691,6 +2109,18 @@ void instedtr::doneInstEditing()
             {
                 instedtr::selpulrow = editor::numBuffer;
                 chgSelPulRow(0);
+            }
+        }
+    }
+    else if(selinstrow == 3)
+    {
+        if(selinstobj == 0)
+        {
+            editor::selinst->setFilterIndex(editor::numBuffer);
+            if(editor::song->numFilterEntries() >= editor::numBuffer)
+            {
+                instedtr::selfltrow = editor::numBuffer;
+                chgSelFltRow(0);
             }
         }
     }
