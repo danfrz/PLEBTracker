@@ -925,7 +925,7 @@ void itrp::renderTick(sample_res *buffer, const unsigned char &track, const unsi
                 {
                     seltrk->segments %=  song->getInterrowRes();
                     seltrk->ptrnvol = (0x3f*seltrk->segments*(seltrk->fxparam / 255.0)) / song->getInterrowRes();
-                    if(seltrk->ptrnvol > seltrk->ptrnlastvol)
+                    if(seltrk->ptrnvol > seltrk->ptrnlastvol)//Overflow
                         seltrk->ptrnvol = 0;
                     else
                         seltrk->ptrnvol = -int(seltrk->ptrnvol) + seltrk->ptrnlastvol;
@@ -1108,6 +1108,7 @@ void itrp::initializeTables()
     
     filters = new filter[0x10];
     filters[0] = itrp::filter_lowpass;
+    filters[1] = itrp::filter_highpass;
 }
 
 
@@ -1418,23 +1419,40 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
             for(unsigned int subi = 0; subi < subdiv; subi++)
             {
 
-#if SAMPLE_RES_IS_UNSIGNED
-                const sample_res middle = std::pow(2,sizeof(sample_res)*8)/2;
-                for(int b = 0; b < segment; b++)
-                    seltrk->temp_bfr[b] = middle;
-#else
-                for(int b = 0; b < segment; b++)
-                    seltrk->temp_bfr[b] = 0;
-#endif
+                if(seltrk->filters_active)
+                {
 
-                renderTick(seltrk->temp_bfr,  tracki, segment);
-                if (seltrk->filters_active)
+#if SAMPLE_RES_IS_UNSIGNED
+                    const sample_res middle = std::pow(2,sizeof(sample_res)*8)/2;
+                    for(int b = 0; b < segment; b++)
+                        seltrk->temp_bfr[b] = middle;
+                    renderTick(seltrk->temp_bfr,  tracki, segment);
                     performFilter(seltrk->temp_bfr, segment, seltrk);
 
-                sample_res *cur_tick = out_buffer + (rowi - start)*bytesperrow + subi*segment;
-                for(unsigned int i = 0; i < segment; i++)
-                    cur_tick[i] += seltrk->temp_bfr[i];
+                    sample_res *cur_tick = out_buffer + (rowi - start)*bytesperrow + subi*segment;
+                    for(unsigned int i = 0; i < segment; i++)
+                        cur_tick[i] += (sample_res_signed)(seltrk->temp_bfr[i] - middle);
+
+#else
+                    for(int b = 0; b < segment; b++)
+                        seltrk->temp_bfr[b] = 0;
+                    renderTick(seltrk->temp_bfr,  tracki, segment);
+                    performFilter(seltrk->temp_bfr, segment, seltrk);
+
+                    sample_res *cur_tick = out_buffer + (rowi - start)*bytesperrow + subi*segment;
+                    for(unsigned int i = 0; i < segment; i++)
+                        cur_tick[i] += seltrk->temp_bfr[i];
+
+#endif
+
+                }
+                else
+                {
+                    sample_res *cur_tick = out_buffer + (rowi - start)*bytesperrow + subi*segment;
+                    renderTick(cur_tick,  tracki, segment);
+                }
             }
+
 
             //std::cerr << "renderSong4 starting segloop subdiv=" << int(subdiv) << " segment=" << segment << '\n';
             
