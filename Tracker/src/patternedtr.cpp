@@ -848,6 +848,9 @@ void patternedtr::processPatternInput(wint_t in)
                     instedtr::selwavrow = editor::selinst->getWaveIndex(); 
                     if(editor::selinst->getPulseIndex() != 0xFFFF)
                         instedtr::selpulrow = editor::selinst->getPulseIndex(); 
+                    if(editor::selinst->getFilterIndex() != 0xFFFF)
+                        instedtr::selfltrow = editor::selinst->getFilterIndex(); 
+
                 }
                 if((patternedtr::entryclipboard & R_PITCHSEG) != R_PITCHSEG)
                 {
@@ -868,6 +871,14 @@ void patternedtr::processPatternInput(wint_t in)
                     if((patternedtr::entryclipboard & 0xFF) < editor::song->numPulseEntries())
                     {
                         instedtr::selpulrow = patternedtr::entryclipboard & 0xFF; 
+                    }
+
+                }
+                else if((patternedtr::entryclipboard & 0xF00) == 0xC00)
+                {
+                    if((patternedtr::entryclipboard & 0xFF) < editor::song->numFilterEntries())
+                    {
+                        instedtr::selfltrow = patternedtr::entryclipboard & 0xFF; 
                     }
 
                 }
