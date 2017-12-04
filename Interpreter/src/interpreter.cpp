@@ -1343,7 +1343,6 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
 
             }
             seltrk->ptrnlastvol = seltrk->ptrnvol;
-            std::cerr << "meow \n";
 
             //Handle instant effects that happen once immediately per row
             if(row & R_EFFECTSEG) // Handle effects seperately
