@@ -1816,7 +1816,7 @@ int main(int argc, const char* argv[])
     else
         exit_status = EXIT_FAILURE;
     
-    std::cerr << "Exit fialed = " << (exit_status==EXIT_FAILURE) << "\n";
+    std::cerr << "Exit failed = " << (exit_status==EXIT_FAILURE) << "\n";
     delete [] itrp::songpaths;
     
     //double in[] = {1,2,3,4,5,6,7,8};
