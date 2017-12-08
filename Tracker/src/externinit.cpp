@@ -187,7 +187,7 @@ void editor::inform(const char *message)
     if(length < 64)
         length = 64;
     attroff(-1);
-    attron(COLOR_PAIR(patternedtr::COL_META_SSU));
+    attron(COLOR_PAIR(patternedtr::COL_META_US));
     mvprintw(3,4,"+--------------------------------------------------------------+",stdscr);
 
     mvprintw(8,4,"+--------------------------------------------------------------+",stdscr);
@@ -213,7 +213,7 @@ bool editor::confirm(const char *message)
     if(length < 64)
         length = 64;
     attroff(-1);
-    attron(COLOR_PAIR(patternedtr::COL_META_SSU));
+    attron(COLOR_PAIR(patternedtr::COL_META_US));
     //modify these to output to the length
     mvprintw(3,4,"+--------------------------------------------------------------+",stdscr);
     mvprintw(8,4,"+--------------------------------------------------------------+",stdscr);
@@ -239,7 +239,7 @@ bool editor::confirm(const char *message)
 void editor::displayAbout()
 {
     attroff(-1);
-    attron(COLOR_PAIR(patternedtr::COL_META_SSU));
+    attron(COLOR_PAIR(patternedtr::COL_META_US));
     mvprintw(3,4, "+---------------------------------+",stdscr);
     mvprintw(15,4,"+---------------------------------+",stdscr);
     attroff(-1);
