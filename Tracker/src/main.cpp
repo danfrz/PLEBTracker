@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
     patternedtr::selorder = 0;
 
     patternedtr::selinstrument = 0;
-    patternedtr::edit_step = 1;
+    patternedtr::edit_step = 0;
     patternedtr::row_underline = 0;
     patternedtr::octave = 3;
     patternedtr::entryclipboard = R_EMPTY;

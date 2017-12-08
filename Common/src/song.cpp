@@ -67,6 +67,8 @@ Song::Song(bool fill_defaults)
         num_orders = 1;
         orders[0] = 0;
 
+        waveEntries = 1;
+        waveTable[0] = 0x0100;
 
         pulseEntries = 2;
         pulseTable[0] = 0x0000;
@@ -502,6 +504,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
 
     if(difference == 0) return;
 
+    //FIX WAVE INDEXES FOR INSTRUMENTS
     unsigned char instwav;
     if(difference > 0)
     {
@@ -510,7 +513,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
             instwav = instruments[i]->getWaveIndex();
             // > 0 because the first instrument's wave pointer shouldn't
             // realistically change due to insertions at index 0
-            if(instwav > 0 && instwav >= index && instwav < 0xFFFF-difference)
+            if(instwav > 0 && instwav > index && instwav < 0xFFFF-difference)
             {
                 instruments[i]->setWaveIndex(instwav+difference);
             }
@@ -521,7 +524,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
         for(unsigned char i = 0; i < num_instruments; i++)
         {
             instwav = instruments[i]->getWaveIndex();
-            if(instwav >= index)
+            if(instwav > index)
             {
                 if(instwav >= -difference)
                     instruments[i]->setWaveIndex(instwav +difference);
@@ -531,6 +534,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
         }
     }
 
+    //FIX WAVE JUMPS IN WAVE TABLE
     unsigned short jumptype;
     unsigned short dest;
     if(difference > 0)
@@ -543,7 +547,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
                 if( (i < waveEntries-1) && ((waveTable[i+1]&0xFF00) == jumptype))//Long jump
                 {
                     dest = ((waveTable[i] & 0xFF) << 8) | (waveTable[i+1] & 0xFF);
-                    if(dest >= index && dest < 0xFFFF-difference) 
+                    if(dest > index && dest < 0xFFFF-difference) 
                     {
                         dest += difference;
                         waveTable[i] = jumptype | ((dest & 0xFF00) >> 8);
@@ -554,7 +558,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
                 else
                 {
                     dest = waveTable[i] & 0xFF;
-                    if(dest >= index)
+                    if(dest > index)
                     {
                         if(dest >= 0xFF - difference)
                         {
@@ -586,7 +590,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
                 if( (i < waveEntries-1) && ((waveTable[i+1] & 0xFF00) == jumptype) )//Long jump
                 {
                     dest = ((waveTable[i] & 0xFF) << 8) | (waveTable[i+1] & 0xFF);
-                    if(dest >= index && dest >= -difference) 
+                    if(dest > index && dest >= -difference) 
                     {
                         dest +=  difference;
 
@@ -598,7 +602,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
                 else
                 {
                     dest = waveTable[i] & 0xFF;
-                    if(dest >= index)
+                    if(dest > index)
                     {
                         if(dest >= -difference)
                             waveTable[i]+= difference;
@@ -611,6 +615,8 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
         }
     }
 
+
+    //FIX WAVE JUMPS IN PATTERNS: 7XX
     Pattern *p;
     for(int i = 0; i < num_patterns; i++)
     {
@@ -633,7 +639,7 @@ void Song::fixWaveJumps(const unsigned short &index, short difference)
                     }
                     else
                     {
-                        if(wavejump >= index)
+                        if(wavejump > index)
                         {
                             if(wavejump >= -difference)
                                 wavejump +=difference;
@@ -691,7 +697,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
             instpls = instruments[i]->getPulseIndex();
             // > 0 because the first instrument's wave pointer shouldn't
             // realistically change due to insertions at index 0
-            if(instpls > 0 && instpls >= index && instpls < 0xFFFF-difference && instpls != 0xFFFF)
+            if(instpls > 0 && instpls > index && instpls < 0xFFFF-difference && instpls != 0xFFFF)
             {
                 instruments[i]->setPulseIndex(instpls+difference);
             }
@@ -702,7 +708,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
         for(unsigned char i = 0; i < num_instruments; i++)
         {
             instpls = instruments[i]->getPulseIndex();
-            if(instpls >= index && instpls != 0xFFFF)
+            if(instpls > index && instpls != 0xFFFF)
             {
                 if(instpls >= -difference)
                     instruments[i]->setPulseIndex(instpls +difference);
@@ -725,7 +731,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
                 if( (i < pulseEntries-1) && ((pulseTable[i+1]&0xFF00) == jumptype))//Long jump
                 {
                     dest = ((pulseTable[i] & 0xFF) << 8) | (pulseTable[i+1] & 0xFF);
-                    if(dest >= index && dest < 0xFFFF-difference) 
+                    if(dest > index && dest < 0xFFFF-difference) 
                     {
                         dest += difference;
                         pulseTable[i] = jumptype | ((dest & 0xFF00) >> 8);
@@ -736,7 +742,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
                 else
                 {
                     dest = pulseTable[i] & 0xFF;
-                    if(dest >= index)
+                    if(dest > index)
                     {
                         if(dest >= 0xFF - difference)
                         {
@@ -768,7 +774,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
                 if( (i < pulseEntries-1) && ((pulseTable[i+1] & 0xFF00) == jumptype) )//Long jump
                 {
                     dest = ((pulseTable[i] & 0xFF) << 8) | (pulseTable[i+1] & 0xFF);
-                    if(dest >= index && dest >= -difference) 
+                    if(dest > index && dest >= -difference) 
                     {
                         dest +=  difference;
 
@@ -780,7 +786,7 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
                 else
                 {
                     dest = pulseTable[i] & 0xFF;
-                    if(dest >= index)
+                    if(dest > index)
                     {
                         if(dest >= -difference)
                             pulseTable[i]+= difference;
@@ -808,14 +814,14 @@ void Song::fixPulseJumps(const unsigned short &index, short difference)
 
                     if(difference > 0)
                     {
-                        if(plsjump > 0 &&plsjump >= index && plsjump < 0xFF-difference)
+                        if(plsjump > 0 && plsjump > index && plsjump < 0xFF-difference)
                         {
                             plsjump +=difference;
                         }
                     }
                     else
                     {
-                        if(plsjump >= index)
+                        if(plsjump > index)
                         {
                             if(plsjump >= -difference)
                                 plsjump +=difference;
@@ -881,7 +887,7 @@ void Song::fixFilterJumps(const unsigned short &index, short difference)
             instflt = instruments[i]->getFilterIndex();
             // > 0 because the first instrument's wave pointer shouldn't
             // realistically change due to insertions at index 0
-            if(instflt > 0 && instflt >= index && instflt < 0xFFFF-difference && instflt != 0xFFFF)
+            if(instflt > 0 && instflt > index && instflt < 0xFFFF-difference && instflt != 0xFFFF)
             {
                 instruments[i]->setFilterIndex(instflt+difference);
             }
@@ -892,7 +898,7 @@ void Song::fixFilterJumps(const unsigned short &index, short difference)
         for(unsigned char i = 0; i < num_instruments; i++)
         {
             instflt = instruments[i]->getFilterIndex();
-            if(instflt >= index && instflt != 0xFFFF)
+            if(instflt > index && instflt != 0xFFFF)
             {
                 if(instflt >= -difference)
                     instruments[i]->setFilterIndex(instflt +difference);
@@ -915,7 +921,7 @@ void Song::fixFilterJumps(const unsigned short &index, short difference)
                 if( (i < filterEntries-1) && ((filterTable[i+1]&0xFF00) == jumptype))//Long jump
                 {
                     dest = ((filterTable[i] & 0xFF) << 8) | (filterTable[i+1] & 0xFF);
-                    if(dest >= index && dest < 0xFFFF-difference) 
+                    if(dest > index && dest < 0xFFFF-difference) 
                     {
                         dest += difference;
                         filterTable[i] = jumptype | ((dest & 0xFF00) >> 8);
@@ -926,7 +932,7 @@ void Song::fixFilterJumps(const unsigned short &index, short difference)
                 else
                 {
                     dest = filterTable[i] & 0xFF;
-                    if(dest >= index)
+                    if(dest > index)
                     {
                         if(dest >= 0xFF - difference)
                         {
@@ -958,7 +964,7 @@ void Song::fixFilterJumps(const unsigned short &index, short difference)
                 if( (i < filterEntries-1) && ((filterTable[i+1] & 0xFF00) == jumptype) )//Long jump
                 {
                     dest = ((filterTable[i] & 0xFF) << 8) | (filterTable[i+1] & 0xFF);
-                    if(dest >= index && dest >= -difference) 
+                    if(dest > index && dest >= -difference) 
                     {
                         dest +=  difference;
 
@@ -970,7 +976,7 @@ void Song::fixFilterJumps(const unsigned short &index, short difference)
                 else
                 {
                     dest = filterTable[i] & 0xFF;
-                    if(dest >= index)
+                    if(dest > index)
                     {
                         if(dest >= -difference)
                             filterTable[i]+= difference;
@@ -998,14 +1004,14 @@ void Song::fixFilterJumps(const unsigned short &index, short difference)
 
                     if(difference > 0)
                     {
-                        if(fltjump > 0 &&fltjump >= index && fltjump < 0xFF-difference)
+                        if(fltjump > 0 &&fltjump > index && fltjump < 0xFF-difference)
                         {
                             fltjump +=difference;
                         }
                     }
                     else
                     {
-                        if(fltjump >= index)
+                        if(fltjump > index)
                         {
                             if(fltjump >= -difference)
                                 fltjump +=difference;
