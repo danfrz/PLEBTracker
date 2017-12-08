@@ -115,15 +115,15 @@ sample_res *itrp::backFourierTransform(sample_res *bfr, const unsigned int &bfr_
     {
         double result;
         result = (fft_out[i][0]/window_len)/window[i];
-        if(result > middle-1)
+        if(result < minimum)
         {
             std::cerr << "CLIPPED! " << result << '\n';
-            result = middle-1;
+            result = minimum;
         }
-        else if( result < -middle)
+        else if( result > maximum)
         {
             std::cerr << "CLIPPED! " << result << '\n';
-            result = -middle;
+            result = maximum;
         }
         bfr[i] = result; 
     }
