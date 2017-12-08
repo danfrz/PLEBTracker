@@ -72,9 +72,10 @@ Song::Song(bool fill_defaults)
         pulseTable[0] = 0x0000;
         pulseTable[1] = 0xFF00;
 
-        filterEntries = 2;
-        filterTable[0] = 0x0000;
-        filterTable[1] = 0xFF00;
+        filterEntries = 3;
+        filterTable[0] = 0xF000;
+        filterTable[1] = 0x0000;
+        filterTable[2] = 0xFF01;
     }
 
 
@@ -991,7 +992,7 @@ void Song::fixFilterJumps(const unsigned short &index, short difference)
             for(int row = 0; row < p->numRows(); row++)
             {
                 unsigned int entry = p->at(trk,row);
-                if((entry & 0xF00) == 0x900)
+                if((entry & 0xF00) == 0xC00)
                 {
                     unsigned char fltjump = entry & 0xFF;
 
