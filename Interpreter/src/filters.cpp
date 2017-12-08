@@ -95,7 +95,7 @@ sample_res *itrp::backFourierTransform(sample_res *bfr, const unsigned int &bfr_
     {
         double result;
         result = (fft_out[i][0]/window_len)/window[i]+middle;
-        if(result > maximum)
+        if(result >= maximum)
         {
             std::cerr << "CLIPPED! " << result << '\n';
             result = maximum-1;
@@ -109,8 +109,8 @@ sample_res *itrp::backFourierTransform(sample_res *bfr, const unsigned int &bfr_
     }
 #else
     //[-128,127] [-1-(2^8/2-1), 2^8/2-1] [-2^8/2, 2^8/2-1]
-    const unsigned long maximum = std::pow(2,sizeof(sample_res)*8)/2 - 1;
-    const unsigned long minimum = -1-maximum;
+    const long maximum = std::pow(2,sizeof(sample_res)*8-1) - 1;
+    const long minimum = -1-maximum;
     for(int i = 0; i < bfr_len; i++)
     {
         double result;
