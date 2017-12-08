@@ -278,9 +278,11 @@ namespace patternedtr
         COL_TABLE_SSU = 2,
         COL_TABLE_SU  = 3,
         COL_TABLE_SU_JUMP  = 29,
+        COL_TABLE_SU_FUNC  = 31,
         COL_TABLE_US  = 4,
         COL_TABLE_UU  = 5,
         COL_TABLE_UU_JUMP  = 30,
+        COL_TABLE_UU_FUNC  = 32,
 
         COL_CMDBAR_U  = 28,
         COL_CMDBAR_S  = 31;

@@ -92,6 +92,25 @@ int main(int argc, char *argv[])
     getch();
     clear();
 
+    if(can_change_color())
+    {
+        //These color changes don't seem to change color _all_ the time
+        //They don't change when text is bolded
+        //R, G, B [0,1000]
+        //init_color(COLOR_BLACK, 90, 86, 203);
+        //init_color(COLOR_BLACK, 39, 39, 98);
+        init_color(COLOR_BLACK, 90, 105, 109);
+        init_color(COLOR_RED, 1000, 0, 0);
+        init_color(COLOR_GREEN, 117, 1000, 27);
+        init_color(COLOR_YELLOW, 898, 560, 180);
+        init_color(COLOR_BLUE, 121, 105, 384);
+        init_color(COLOR_MAGENTA, 1000, 662, 270);
+        init_color(COLOR_CYAN, 31, 478, 820);
+        init_color(COLOR_WHITE, 1000, 1000, 1000);
+
+    }
+    
+
     {
         using namespace patternedtr;
         //META color mappings for metadata window
@@ -137,6 +156,11 @@ int main(int argc, char *argv[])
         init_pair(COL_TABLE_SU_JUMP , COLOR_GREEN  , COLOR_BLACK);
         init_pair(COL_TABLE_UU_JUMP , COLOR_GREEN  , COLOR_BLACK);
 
+        init_pair(COL_TABLE_SU_FUNC , COLOR_MAGENTA  , COLOR_BLACK);
+        init_pair(COL_TABLE_UU_FUNC , COLOR_MAGENTA  , COLOR_BLACK);
+        
+        //COL_TABLE_SSS is COL_META_SSS;
+        //COL_TABLE_SSU is COL_META_SSU;
 
 
     }

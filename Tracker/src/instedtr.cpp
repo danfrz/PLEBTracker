@@ -306,7 +306,7 @@ void instedtr::displayWav()
     for(i = 0; i < entries; i++)
     {
         charBuffer[0] ='|';
-        
+
         //vvvvvv
         //|0000|00 00
         setWaveAttribs(viewportwave+i, WAVSEG_NUM);
@@ -417,7 +417,7 @@ void instedtr::displayPulse()
     for(i = 0; i < entries; i++)
     {
         charBuffer[0] ='|';
-        
+
         //vvvvvv
         //|0000|00 00
         setPulseAttribs(viewportpulse+i, 2);
@@ -530,7 +530,7 @@ void instedtr::displayFilter()
     for(i = 0; i < entries; i++)
     {
         charBuffer[0] ='|';
-        
+
         //vvvvvv
         //|0000|00 00
         setFilterAttribs(viewportfilter+i, 2);
@@ -641,7 +641,7 @@ void instedtr::displayInst()
     int x = 11;
 
     //Selected Instrument
-    
+
 
     //ROW 0
     //DOWN
@@ -1155,108 +1155,108 @@ void instedtr::processInputWav(wint_t in)
     using editor::song;
     bool ishex = editor::validateHexChar(in);
     unsigned short entries = song->numWaveEntries();
-        switch(in)
-        {
-            case KEY_LEFT:
-                chgSelWavSeg(-1);
-                return;
-            case KEY_RIGHT:
-                chgSelWavSeg(1);
-                return;
-            case KEY_UP:
-                chgSelWavRow(-1);
-                return;
-            case KEY_DOWN:
-                chgSelWavRow(1);
-                return;
-            case KEY_PPAGE:
-                chgSelWavRow(-8);
-                return;
-            case KEY_NPAGE:
-                chgSelWavRow(8);
-                return;
-            case KEY_HOME:
-                selwavrow = 0;
-                chgSelWavRow(0); //updates GUI
-                return;
-            case KEY_END:
-                selwavrow = entries; 
-                chgSelWavRow(0); //update GUI
-                return;
-            case KEY_IC:
-                if(entries == 0xFFFF)
-                    return;
-
-                if(isJumpFunc_Volatile(song->getWaveEntry(selwavrow)))
-                    song->insertWaveEntry(selwavrow, 0);
-                else
-                    song->insertWaveEntry(selwavrow, song->getWaveEntry(selwavrow));
-                return;
-            case KEY_DC: 
-
-                if(selwavrow >= entries)
-                    return;
-                if(entries != 0)
-                    song->removeWaveEntry(selwavrow);
-                chgSelWavRow(0);
-                return;
-            case ALT_BACKSPACE: 
-                if(selwavrow >= entries)
-                    return;
-                if(entries != 0)
-                    song->removeWaveEntry(selwavrow);
-                chgSelWavRow(-1);
+    switch(in)
+    {
+        case KEY_LEFT:
+            chgSelWavSeg(-1);
+            return;
+        case KEY_RIGHT:
+            chgSelWavSeg(1);
+            return;
+        case KEY_UP:
+            chgSelWavRow(-1);
+            return;
+        case KEY_DOWN:
+            chgSelWavRow(1);
+            return;
+        case KEY_PPAGE:
+            chgSelWavRow(-8);
+            return;
+        case KEY_NPAGE:
+            chgSelWavRow(8);
+            return;
+        case KEY_HOME:
+            selwavrow = 0;
+            chgSelWavRow(0); //updates GUI
+            return;
+        case KEY_END:
+            selwavrow = entries; 
+            chgSelWavRow(0); //update GUI
+            return;
+        case KEY_IC:
+            if(entries == 0xFFFF)
                 return;
 
-            case  '\n':
-                waveclipboard = song->getWaveEntry(selwavrow);
-                chgSelWavRow(1);
+            if(isJumpFunc_Volatile(song->getWaveEntry(selwavrow)))
+                song->insertWaveEntry(selwavrow, 0);
+            else
+                song->insertWaveEntry(selwavrow, song->getWaveEntry(selwavrow));
+            return;
+        case KEY_DC: 
+
+            if(selwavrow >= entries)
                 return;
-            case ' ':
+            if(entries != 0)
+                song->removeWaveEntry(selwavrow);
+            chgSelWavRow(0);
+            return;
+        case ALT_BACKSPACE: 
+            if(selwavrow >= entries)
+                return;
+            if(entries != 0)
+                song->removeWaveEntry(selwavrow);
+            chgSelWavRow(-1);
+            return;
+
+        case  '\n':
+            waveclipboard = song->getWaveEntry(selwavrow);
+            chgSelWavRow(1);
+            return;
+        case ' ':
+            if(selwavrow == song->numWaveEntries())
+                song->insertWaveEntry(selwavrow, waveclipboard);
+            else
+                song->setWaveEntry(selwavrow,waveclipboard);
+            chgSelWavRow(1);
+            return;
+        case 'n':
+        case 'N':
+            {
+                unsigned short entry = song->getWaveEntry(selwavrow);
+                char right = (entry & 0xFF);
+                right = -right;
+                entry = (entry & 0xFF00) | (unsigned char)right;
+                song->setWaveEntry(selwavrow, entry);
+            }
+            return;
+        default:
+            if(ishex)
+            {
+                char hexnum = editor::charHex(in);
+                unsigned short entry = song->getWaveEntry(selwavrow);
+                if(selwavseg == WAVSEG_WAVE)
+                {
+                    unsigned char val = (entry & 0xFF00) >> 8;
+                    entry &= 0x00FF;
+                    val *= 0x10;
+                    val += hexnum;
+                    entry |= ((short(val)) << 8);
+                }
+                else if(selwavseg == WAVSEG_TONE)
+                {
+                    unsigned char val = (entry & 0x00FF);
+                    entry &= 0xFF00;
+                    val *= 0x10;
+                    val += hexnum;
+                    entry |= val;
+                }
+
                 if(selwavrow == song->numWaveEntries())
-                    song->insertWaveEntry(selwavrow, waveclipboard);
+                    song->insertWaveEntry(selwavrow, entry);
                 else
-                    song->setWaveEntry(selwavrow,waveclipboard);
-                chgSelWavRow(1);
-                return;
-            case 'n':
-            case 'N':
-                {
-                    unsigned short entry = song->getWaveEntry(selwavrow);
-                    char right = (entry & 0xFF);
-                    right = -right;
-                    entry = (entry & 0xFF00) | (unsigned char)right;
-                    song->setWaveEntry(selwavrow, entry);
-                }
-                return;
-            default:
-                if(ishex)
-                {
-                    char hexnum = editor::charHex(in);
-                    unsigned short entry = song->getWaveEntry(selwavrow);
-                    if(selwavseg == WAVSEG_WAVE)
-                    {
-                        unsigned char val = (entry & 0xFF00) >> 8;
-                        entry &= 0x00FF;
-                        val *= 0x10;
-                        val += hexnum;
-                        entry |= ((short(val)) << 8);
-                    }
-                    else if(selwavseg == WAVSEG_TONE)
-                    {
-                        unsigned char val = (entry & 0x00FF);
-                        entry &= 0xFF00;
-                        val *= 0x10;
-                        val += hexnum;
-                        entry |= val;
-                    }
-
-                    if(selwavrow == song->numWaveEntries())
-                        song->insertWaveEntry(selwavrow, entry);
-                    else
-                        song->setWaveEntry(selwavrow,entry);
-                }
-        }
+                    song->setWaveEntry(selwavrow,entry);
+            }
+    }
 
 
 
@@ -1267,118 +1267,118 @@ void instedtr::processInputPulse(wint_t in)
     using editor::song;
     bool ishex = editor::validateHexChar(in);
     unsigned short entries = song->numPulseEntries();
-        switch(in)
-        {
-            case KEY_LEFT:
-                chgSelPulSeg(-1);
+    switch(in)
+    {
+        case KEY_LEFT:
+            chgSelPulSeg(-1);
+            return;
+        case KEY_RIGHT:
+            chgSelPulSeg(1);
+            return;
+        case KEY_UP:
+            chgSelPulRow(-1);
+            return;
+        case KEY_DOWN:
+            chgSelPulRow(1);
+            return;
+        case KEY_PPAGE:
+            chgSelPulRow(-8);
+            return;
+        case KEY_NPAGE:
+            chgSelPulRow(8);
+            return;
+        case KEY_HOME:
+            selpulrow = 0;
+            chgSelPulRow(0); //updates GUI
+            return;
+        case KEY_END:
+            selpulrow = entries; 
+            chgSelPulRow(0); //update GUI
+            return;
+        case KEY_IC:
+            if(entries == 0xFFFF)
                 return;
-            case KEY_RIGHT:
-                chgSelPulSeg(1);
-                return;
-            case KEY_UP:
-                chgSelPulRow(-1);
-                return;
-            case KEY_DOWN:
-                chgSelPulRow(1);
-                return;
-            case KEY_PPAGE:
-                chgSelPulRow(-8);
-                return;
-            case KEY_NPAGE:
-                chgSelPulRow(8);
-                return;
-            case KEY_HOME:
-                selpulrow = 0;
-                chgSelPulRow(0); //updates GUI
-                return;
-            case KEY_END:
-                selpulrow = entries; 
-                chgSelPulRow(0); //update GUI
-                return;
-            case KEY_IC:
-                if(entries == 0xFFFF)
-                    return;
 
-                if(isJumpFunc_Volatile(song->getPulseEntry(selpulrow)))
-                    song->insertPulseEntry(selpulrow, 0);
-                else
-                    song->insertPulseEntry(selpulrow, song->getPulseEntry(selpulrow));
+            if(isJumpFunc_Volatile(song->getPulseEntry(selpulrow)))
+                song->insertPulseEntry(selpulrow, 0);
+            else
+                song->insertPulseEntry(selpulrow, song->getPulseEntry(selpulrow));
+            return;
+        case KEY_DC: 
+            if(selpulrow >= entries)
                 return;
-            case KEY_DC: 
-                if(selpulrow >= entries)
-                    return;
-                if(entries != 0)
-                    song->removePulseEntry(selpulrow);
-                chgSelPulRow(0);
+            if(entries != 0)
+                song->removePulseEntry(selpulrow);
+            chgSelPulRow(0);
+            return;
+        case ALT_BACKSPACE:
+            if(selpulrow >= entries)
                 return;
-            case ALT_BACKSPACE:
-                if(selpulrow >= entries)
-                    return;
-                if(entries != 0)
-                    song->removePulseEntry(selpulrow);
-                chgSelPulRow(-1);
-                return;
-            case  '\n':
-                pulseclipboard = song->getPulseEntry(selpulrow);
-                chgSelPulRow(1);
-                return;
-            case ' ':
-                if(selpulrow == song->numPulseEntries())
-                    song->insertPulseEntry(selpulrow, pulseclipboard);
-                else
-                    song->setPulseEntry(selpulrow,pulseclipboard);
-                chgSelPulRow(1);
-                return;
-            case 'n':
-            case 'N':
+            if(entries != 0)
+                song->removePulseEntry(selpulrow);
+            chgSelPulRow(-1);
+            return;
+        case  '\n':
+            pulseclipboard = song->getPulseEntry(selpulrow);
+            chgSelPulRow(1);
+            return;
+        case ' ':
+            if(selpulrow == song->numPulseEntries())
+                song->insertPulseEntry(selpulrow, pulseclipboard);
+            else
+                song->setPulseEntry(selpulrow,pulseclipboard);
+            chgSelPulRow(1);
+            return;
+        case 'n':
+        case 'N':
+            {
+                unsigned short entry = song->getPulseEntry(selpulrow);
+                char left = (entry & 0xFF00);
+                if(left < 0xE000)
                 {
-                    unsigned short entry = song->getPulseEntry(selpulrow);
-                    char left = (entry & 0xFF00);
-                    if(left < 0xE000)
+                    if(left >= 0x7000)
                     {
-                        if(left >= 0x7000)
-                        {
-                            entry += 0x2000;
-                            entry = -entry;
-                        }
-                        else
-                        {
-                            entry = -entry;
-                            entry -= 0x2000;
-                        }
-                        song->setPulseEntry(selpulrow, entry);
+                        entry += 0x2000;
+                        entry = -entry;
                     }
-                    
-                }
-                return;
-            default:
-                if(ishex)
-                {
-                    char hexnum = editor::charHex(in);
-                    unsigned short entry = song->getPulseEntry(selpulrow);
-                    if(selpulseg == 0)
-                    {
-                        unsigned char val = (entry & 0xFF00) >> 8;
-                        entry &= 0x00FF;
-                        val *= 0x10;
-                        val += hexnum;
-                        entry |= ((short(val)) << 8);
-                    }
-                    else if(selpulseg == 1)
-                    {
-                        unsigned char val = (entry & 0x00FF);
-                        entry &= 0xFF00;
-                        val *= 0x10;
-                        val += hexnum;
-                        entry |= val;
-                    }
-
-                    if(selpulrow == song->numPulseEntries())
-                        song->insertPulseEntry(selpulrow, entry);
                     else
-                        song->setPulseEntry(selpulrow,entry);
+                    {
+                        entry = -entry;
+                        entry -= 0x2000;
+                    }
+                    song->setPulseEntry(selpulrow, entry);
                 }
-        }
+
+            }
+            return;
+        default:
+            if(ishex)
+            {
+                char hexnum = editor::charHex(in);
+                unsigned short entry = song->getPulseEntry(selpulrow);
+                if(selpulseg == 0)
+                {
+                    unsigned char val = (entry & 0xFF00) >> 8;
+                    entry &= 0x00FF;
+                    val *= 0x10;
+                    val += hexnum;
+                    entry |= ((short(val)) << 8);
+                }
+                else if(selpulseg == 1)
+                {
+                    unsigned char val = (entry & 0x00FF);
+                    entry &= 0xFF00;
+                    val *= 0x10;
+                    val += hexnum;
+                    entry |= val;
+                }
+
+                if(selpulrow == song->numPulseEntries())
+                    song->insertPulseEntry(selpulrow, entry);
+                else
+                    song->setPulseEntry(selpulrow,entry);
+            }
+    }
 
 
 
@@ -1391,127 +1391,130 @@ void instedtr::processInputFilter(wint_t in)
     using editor::song;
     bool ishex = editor::validateHexChar(in);
     unsigned short entries = song->numFilterEntries();
-        switch(in)
-        {
-            case KEY_LEFT:
-                chgSelFltSeg(-1);
+    switch(in)
+    {
+        case KEY_LEFT:
+            chgSelFltSeg(-1);
+            return;
+        case KEY_RIGHT:
+            chgSelFltSeg(1);
+            return;
+        case KEY_UP:
+            chgSelFltRow(-1);
+            return;
+        case KEY_DOWN:
+            chgSelFltRow(1);
+            return;
+        case KEY_PPAGE:
+            chgSelFltRow(-8);
+            return;
+        case KEY_NPAGE:
+            chgSelFltRow(8);
+            return;
+        case KEY_HOME:
+            selpulrow = 0;
+            chgSelFltRow(0); //updates GUI
+            return;
+        case KEY_END:
+            selfltrow = entries; 
+            chgSelFltRow(0); //update GUI
+            return;
+        case KEY_IC:
+            if(entries == 0xFFFF)
                 return;
-            case KEY_RIGHT:
-                chgSelFltSeg(1);
-                return;
-            case KEY_UP:
-                chgSelFltRow(-1);
-                return;
-            case KEY_DOWN:
-                chgSelFltRow(1);
-                return;
-            case KEY_PPAGE:
-                chgSelFltRow(-8);
-                return;
-            case KEY_NPAGE:
-                chgSelFltRow(8);
-                return;
-            case KEY_HOME:
-                selpulrow = 0;
-                chgSelFltRow(0); //updates GUI
-                return;
-            case KEY_END:
-                selfltrow = entries; 
-                chgSelFltRow(0); //update GUI
-                return;
-            case KEY_IC:
-                if(entries == 0xFFFF)
-                    return;
 
-                if(isJumpFunc_Volatile(song->getFilterEntry(selfltrow)))
-                    song->insertFilterEntry(selfltrow, 0);
-                else
-                    song->insertFilterEntry(selfltrow, song->getFilterEntry(selfltrow));
+            if(isJumpFunc_Volatile(song->getFilterEntry(selfltrow)))
+                song->insertFilterEntry(selfltrow, 0);
+            else
+                song->insertFilterEntry(selfltrow, song->getFilterEntry(selfltrow));
+            return;
+        case KEY_DC: 
+            if(selfltrow >= entries)
                 return;
-            case KEY_DC: 
-                if(selfltrow >= entries)
-                    return;
-                if(entries != 0)
-                    song->removeFilterEntry(selfltrow);
-                chgSelFltRow(0);
+            if(entries != 0)
+                song->removeFilterEntry(selfltrow);
+            chgSelFltRow(0);
+            return;
+        case ALT_BACKSPACE:
+            if(selfltrow >= entries)
                 return;
-            case ALT_BACKSPACE:
-                if(selfltrow >= entries)
-                    return;
-                if(entries != 0)
-                    song->removeFilterEntry(selfltrow);
-                chgSelFltRow(-1);
-                return;
-            case  '\n':
-                filterclipboard = song->getFilterEntry(selfltrow);
-                chgSelFltRow(1);
-                return;
-            case ' ':
-                if(selfltrow == song->numFilterEntries())
-                    song->insertFilterEntry(selfltrow, filterclipboard);
-                else
-                    song->setFilterEntry(selfltrow,filterclipboard);
-                chgSelFltRow(1);
-                return;
-            case 'n':
-            case 'N':
+            if(entries != 0)
+                song->removeFilterEntry(selfltrow);
+            chgSelFltRow(-1);
+            return;
+        case  '\n':
+            filterclipboard = song->getFilterEntry(selfltrow);
+            chgSelFltRow(1);
+            return;
+        case ' ':
+            if(selfltrow == song->numFilterEntries())
+                song->insertFilterEntry(selfltrow, filterclipboard);
+            else
+                song->setFilterEntry(selfltrow,filterclipboard);
+            chgSelFltRow(1);
+            return;
+        case 'n':
+        case 'N':
+            {
+                unsigned short entry = song->getFilterEntry(selfltrow);
+                char left = (entry & 0xFF00);
+                if(left < 0xE000)
                 {
-                    unsigned short entry = song->getFilterEntry(selfltrow);
-                    char left = (entry & 0xFF00);
-                    if(left < 0xE000)
+                    if(left >= 0x7000)
                     {
-                        if(left >= 0x7000)
-                        {
-                            entry += 0x2000;
-                            entry = -entry;
-                        }
-                        else
-                        {
-                            entry = -entry;
-                            entry -= 0x2000;
-                        }
-                        song->setFilterEntry(selfltrow, entry);
+                        entry += 0x2000;
+                        entry = -entry;
                     }
-                    
-                }
-                return;
-            default:
-                if(ishex)
-                {
-                    char hexnum = editor::charHex(in);
-                    unsigned short entry = song->getFilterEntry(selfltrow);
-                    if(selfltseg == 0)
-                    {
-                        unsigned char val = (entry & 0xFF00) >> 8;
-                        entry &= 0x00FF;
-                        val *= 0x10;
-                        val += hexnum;
-                        entry |= ((short(val)) << 8);
-                    }
-                    else if(selfltseg == 1)
-                    {
-                        unsigned char val = (entry & 0x00FF);
-                        entry &= 0xFF00;
-                        val *= 0x10;
-                        val += hexnum;
-                        entry |= val;
-                    }
-
-                    if(selfltrow == song->numFilterEntries())
-                        song->insertFilterEntry(selfltrow, entry);
                     else
-                        song->setFilterEntry(selfltrow,entry);
+                    {
+                        entry = -entry;
+                        entry -= 0x2000;
+                    }
+                    song->setFilterEntry(selfltrow, entry);
                 }
-        }
+
+            }
+            return;
+        default:
+            if(ishex)
+            {
+                char hexnum = editor::charHex(in);
+                unsigned short entry = song->getFilterEntry(selfltrow);
+                if(selfltseg == 0)
+                {
+                    unsigned char val = (entry & 0xFF00) >> 8;
+                    entry &= 0x00FF;
+                    val *= 0x10;
+                    val += hexnum;
+                    entry |= ((short(val)) << 8);
+                }
+                else if(selfltseg == 1)
+                {
+                    unsigned char val = (entry & 0x00FF);
+                    entry &= 0xFF00;
+                    val *= 0x10;
+                    val += hexnum;
+                    entry |= val;
+                }
+
+                if(selfltrow == song->numFilterEntries())
+                    song->insertFilterEntry(selfltrow, entry);
+                else
+                    song->setFilterEntry(selfltrow,entry);
+            }
+    }
 
 
 
 }
-
-
-bool isJumpFunc(const unsigned short &wave)
+bool isFuncEntry(const unsigned short &entry)
 {
-    unsigned short func = (wave & 0xFF00);
+    return (entry & 0xF000) == 0xF000;
+}
+
+bool isJumpEntry(const unsigned short &entry)
+{
+    unsigned short func = (entry & 0xFF00);
     switch(func)
     {
         case 0xFF00:
@@ -1535,7 +1538,7 @@ bool instedtr::setInstAttribs(unsigned char instrow, unsigned char instobj)
                 attron(COLOR_PAIR(patternedtr::COL_META_SSSE));
             else
                 attron(COLOR_PAIR(patternedtr::COL_META_SSS));
-                return true;
+            return true;
         }
         else
             attron(COLOR_PAIR(patternedtr::COL_META_SU));
@@ -1552,14 +1555,15 @@ void instedtr::setVolAttribs(unsigned char volrow, unsigned char volseg)
 {
     attroff(-1);
     unsigned short entry;
-    bool isJump;
+    bool isFunc= false;
+    bool isJump = false;
     if(volrow < editor::selinst->numVolEntries())
     {
         entry = editor::selinst->getVolEntry(volrow);
-        isJump = isJumpFunc(entry);
+        isFunc = isFuncEntry(entry);
+        if(isFunc)
+            isJump = isJumpEntry(entry);
     }
-    else
-        isJump = false;
 
     if(editor::inputwin == editor::volwin)
     {
@@ -1576,10 +1580,16 @@ void instedtr::setVolAttribs(unsigned char volrow, unsigned char volseg)
             if(volrow > editor::selinst->numVolEntries())
                 attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
             else
-                if(isJump)
-                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                if(isFunc)
+                {
+                    if(isJump)
+                        attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                    else
+                        attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_FUNC));
+                }
                 else
                     attron(COLOR_PAIR(patternedtr::COL_TABLE_SU));
+
         }
     }
     else
@@ -1601,14 +1611,15 @@ void instedtr::setWaveAttribs(unsigned short waverow, unsigned char waveseg)
 {
     attroff(-1);
     unsigned short entry;
-    bool isJump;
+    bool isFunc = false;
+    bool isJump = false;
     if(waverow < editor::song->numWaveEntries())
     {
         entry = editor::song->getWaveEntry(waverow);
-        isJump = isJumpFunc(entry);
+        isFunc = isFuncEntry(entry);
+        if(isFunc)
+            isJump = isJumpEntry(entry);
     }
-    else
-        isJump = false;
 
     if(editor::inputwin == editor::wavewin)
     {
@@ -1624,8 +1635,13 @@ void instedtr::setWaveAttribs(unsigned short waverow, unsigned char waveseg)
             if(waverow > editor::song->numWaveEntries())
                 attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
             else
-                if(isJump)
-                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                if(isFunc)
+                {
+                    if(isJump)
+                        attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                    else
+                        attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_FUNC));
+                }
                 else
                     attron(COLOR_PAIR(patternedtr::COL_TABLE_SU));
     }
@@ -1633,10 +1649,15 @@ void instedtr::setWaveAttribs(unsigned short waverow, unsigned char waveseg)
         if(waverow == selwavrow)
             attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
         else
-             if(isJump)
-            attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
-             else
-            attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
+            if(isFunc && (entry & 0xFF00) != 0xF400) //F4 (finetune) consumes a tick
+            {
+                if(isJump)
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
+                else
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_FUNC));
+            }
+            else
+                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
 }
 
 
@@ -1645,14 +1666,15 @@ void instedtr::setPulseAttribs(unsigned short pulserow, unsigned char pulseseg)
     attroff(-1);
 
     unsigned short entry;
-    bool isJump;
+    bool isFunc = false;
+    bool isJump = false;
     if(pulserow < editor::song->numPulseEntries())
     {
         entry = editor::song->getPulseEntry(pulserow);
-        isJump = isJumpFunc(entry);
+        isFunc = isFuncEntry(entry);
+        if(isFunc)
+            isJump = isJumpEntry(entry);
     }
-    else
-        isJump = false;
 
     if(editor::inputwin == editor::pulsewin)
     {
@@ -1668,19 +1690,31 @@ void instedtr::setPulseAttribs(unsigned short pulserow, unsigned char pulseseg)
             if(pulserow > editor::song->numPulseEntries())
                 attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
             else
-                if(isJump)
-                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                if(isFunc)
+                {
+                    if(isJump)
+                        attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                    else
+                        attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_FUNC));
+                }
                 else
                     attron(COLOR_PAIR(patternedtr::COL_TABLE_SU));
     }
     else
+    {
         if(pulserow == selpulrow)
             attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
         else
-            if(isJump)
-                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
+            if(isFunc)
+            {
+                if(isJump)
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
+                else
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_FUNC));
+            }
             else
                 attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
+    }
 }
 
 
@@ -1689,14 +1723,15 @@ void instedtr::setFilterAttribs(unsigned short filterrow, unsigned char filterse
     attroff(-1);
 
     unsigned short entry;
-    bool isJump;
+    bool isFunc = false;
+    bool isJump = false;
     if(filterrow < editor::song->numFilterEntries())
     {
         entry = editor::song->getFilterEntry(filterrow);
-        isJump = isJumpFunc(entry);
+        isFunc = isFuncEntry(entry);
+        if(isFunc)
+            isJump = isJumpEntry(entry);
     }
-    else
-        isJump = false;
 
     if(editor::inputwin == editor::filterwin)
     {
@@ -1712,8 +1747,13 @@ void instedtr::setFilterAttribs(unsigned short filterrow, unsigned char filterse
             if(filterrow > editor::song->numFilterEntries())
                 attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
             else
-                if(isJump)
-                    attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                if(isFunc)
+                {
+                    if(isJump)
+                        attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_JUMP));
+                    else
+                        attron(COLOR_PAIR(patternedtr::COL_TABLE_SU_FUNC));
+                }
                 else
                     attron(COLOR_PAIR(patternedtr::COL_TABLE_SU));
     }
@@ -1721,8 +1761,13 @@ void instedtr::setFilterAttribs(unsigned short filterrow, unsigned char filterse
         if(filterrow == selfltrow)
             attron(COLOR_PAIR(patternedtr::COL_TABLE_US));
         else
-            if(isJump)
-                attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
+            if(isFunc)
+            {
+                if(isJump)
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_JUMP));
+                else
+                    attron(COLOR_PAIR(patternedtr::COL_TABLE_UU_FUNC));
+            }
             else
                 attron(COLOR_PAIR(patternedtr::COL_TABLE_UU));
 }
@@ -1761,7 +1806,7 @@ void instedtr::startInstEditing()
             if(patternedtr::selinstrument < editor::song->numInstruments()-1)
                 patternedtr::selinstrument++;
             editor::selinst = editor::song->getInstrument(patternedtr::selinstrument);
-            
+
         }
         else if(selinstobj == 5)
         {
@@ -1817,7 +1862,7 @@ void instedtr::instEdit(wint_t in)
                 {
                     if(textCursorPos > 0)
                         textCursorPos--;
-                    }
+                }
                 else if(in == KEY_RIGHT)
                 {
                     int length = strlen(charInputBuffer);
@@ -2085,7 +2130,7 @@ void instedtr::doneInstEditing()
         {
             patternedtr::selinstrument = editor::numBuffer;
             editor::selinst = editor::song->getInstrument(patternedtr::selinstrument);
-        
+
         }
     }
     else if(selinstrow == 1)
