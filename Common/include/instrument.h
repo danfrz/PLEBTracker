@@ -8,11 +8,11 @@
 #define INST_VOL_SIZE 256
 #define INST_VOL_LOOP_MAX_JUMPS 64
 
-typedef short sample_res; //The sample resolution used for most of the interpreter
-typedef unsigned short sample_res_unsigned; //The resolution that is gauranteed to be unsigned
-typedef short sample_res_signed; //The resolution that is gauranteed to be signed
+typedef unsigned char sample_res; //The sample resolution used for most of the interpreter
+typedef unsigned char sample_res_unsigned; //The resolution that is gauranteed to be unsigned
+typedef char sample_res_signed; //The resolution that is gauranteed to be signed
 
-#define SAMPLE_RES_IS_UNSIGNED 0
+#define SAMPLE_RES_IS_UNSIGNED 1
 
 class Instrument
 {
