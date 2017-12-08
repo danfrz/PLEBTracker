@@ -23,5 +23,5 @@ then
     fi
 fi
 
-plebitp 4800 "$@" 2>>$LOGPATH | flac -f -o "$renderfolder/$songname.flac" --sign=unsigned --endian=big --bps=8 --channels=1 --sample-rate=48000 -
+plebitp 4800 "$@" 2>>$LOGPATH | flac -f -o "$renderfolder/$songname.flac" --sign=signed --endian=little --bps=16 --channels=1 --sample-rate=48000 -
 
