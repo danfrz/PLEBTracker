@@ -62,7 +62,7 @@ fftw_complex *itrp::fourierTransform(sample_res *bfr, const unsigned int &bfr_le
 #endif
 
 
-    fftw_plan plan_forward = fftw_plan_dft_1d (window_len, fft_sample_in, fft_transform, FFTW_FORWARD, FFTW_ESTIMATE );
+    fftw_plan plan_forward = fftw_plan_dft_1d (window_len, fft_sample_in, fft_transform, FFTW_FORWARD, FFTW_MEASURE );
     fftw_execute ( plan_forward );
     fftw_destroy_plan( plan_forward );
 
@@ -82,7 +82,7 @@ sample_res *itrp::backFourierTransform(sample_res *bfr, const unsigned int &bfr_
         fft_out = (fftw_complex *)fftw_malloc ( sizeof ( fftw_complex ) * window_len );
     }
     //double *out = (double*)fftw_malloc ( sizeof ( double ) * len);
-    fftw_plan plan_backward = fftw_plan_dft_1d (window_len, fft_transform, fft_out, FFTW_BACKWARD, FFTW_ESTIMATE );
+    fftw_plan plan_backward = fftw_plan_dft_1d (window_len, fft_transform, fft_out, FFTW_BACKWARD, FFTW_MEASURE );
     fftw_execute ( plan_backward );
 
     fftw_destroy_plan( plan_backward);
