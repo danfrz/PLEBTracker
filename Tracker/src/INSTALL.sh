@@ -13,15 +13,21 @@ esac
 
 fi
 
-
-
-mkdir /var/tmp/plebtrk 2>/dev/null
-
 echo "Dependencies include:"
 echo "   ncurses"     #trk
 echo "   aplay"       #itp
 echo "   inotifywait" #trkdaemon
 echo ""
+
+
+echo "Creating log files"
+userName=$USER
+primaryGrp=`id -gn`
+
+sudo mkdir /var/tmp/plebtrk 2>/dev/null
+sudo chmod 755 /var/tmp/plebtrk
+sudo chgrp $primaryGrp /var/tmp/plebtrk
+sudo chown $userName /var/tmp/plebtrk
 
 touch /var/tmp/plebtrk/itplog.log
 touch /var/tmp/plebtrk/trklog.log
