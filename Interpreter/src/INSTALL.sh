@@ -45,7 +45,12 @@ sudo cp ./plebrender /usr/bin/plebrender$postfix
 echo "/usr/bin/plebrender$postfix"
 echo ""
 
-mkdir /usr/local/man/man1 2>/dev/null
+if [ ! -d /usr/local/man ]; then
+	sudo mkdir /usr/local/man	
+fi
+if [ ! -d /usr/local/man/man1 ]; then
+	sudo mkdir /usr/local/man/man1/
+fi
 
 echo "Copying man pages into /usr/local/man/man1/..."
 sudo cp ../doc/plebitp.1 /usr/local/man/man1/

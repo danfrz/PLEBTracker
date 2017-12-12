@@ -15,14 +15,43 @@ All of the sounds produced in this tracker are synthesized, meaning there are no
 In order to run and build PLEBTracker the following programs and libraries are required.
    program/library... (package...   )
 
-   ncurses     (ncurses)
-   fftw3        (fftw)
-   aplay       (alsa-utils) 
-   inotifywait (inotify-tools)
-   sudo        (sudo)
+
+On Arch and Debian (at least) these packages are sufficient to get it working
+* ncurses     (**ncurses**)
+* fftw3        (**fftw**)
+* aplay       (**alsa-utils**) 
+* inotifywait (**inotify-tools**)
+* sudo        (**sudo**)
 
 Some distributions may not have these exact package names but
 these names should work for at least Archlinux and Debian.
+
+Right now, to get this working on **ubuntu 16.04** (and probably variants?) you need
+* inotifywait (**inotify-tools**)
+* ncurses (**libncursesw5** and **libncursesw5-dev**)
+* fftw3 (**libfftw3** and **libfftw3-dev**)
+
+(sudo and aplay are already installed, or were when I tested them)
+
+Unfortunately, when **libncursesw5** is installed on ubuntu, the headers are placed within */usr/lib/ncursesw/*, 
+therefore each of the header files within *Tracker/include/* and *Tracker/src/main.cpp* need to be modified so that
+
+> #include <ncurses.h>
+
+becomes
+
+> #include <ncursesw/ncurses.h>
+
+and in the *Tracker/src/Makefile* change the LIBS line so that
+
+> LIBS=-lncurses
+
+becomes
+
+> LIBS=-lncursesw
+
+Sorry about this badness, hopefully in a future (or current?) version of Ubuntu **get_wch** will be included within regular (*ncurses.h*)
+
 
 ## Installation
 Clone this project from git
@@ -65,9 +94,9 @@ And probably not a very popular option but to have the raw byte data go directly
 Example songs can be found in ./examples and their respective flac renderings in ./examples/render.
 
 All of the programs that are installed have manual pages with important information on using the tracker.
-Most importantly, see the plebitp and plebtrkraw manual pages.
+Most importantly, see the plebtrk manual page.
 
 The most efficient and effective way to perform actions in the tracker's interface is by using the vim-like command bar, which is shown by pressing ':'.
-Those commands and other binds can be reviewed on the plebtrkraw(1) man page.
+Those commands and other binds can be reviewed on the plebtrk man page.
 
 If you're interested, look through the docs folder, the manual provides a good introduction to the tracker (I hope) and wavetable.pdf details what synths/wave generators have been implemented so far. patternedtr.pdf has information on the effects that are available in the pattern editor as well as going over some of its' quirks.

@@ -40,6 +40,14 @@ echo "/usr/bin/plebtrkdaemon"
 sudo cp ./plebtrkraw /usr/bin/plebtrkraw
 echo "/usr/bin/plebtrkraw"
 echo ""
+
+if [ ! -d /usr/local/man ]; then
+	sudo mkdir /usr/local/man	
+fi
+if [ ! -d /usr/local/man/man1 ]; then
+	sudo mkdir /usr/local/man/man1/
+fi
+
 echo "Copying man pages into /usr/local/man/man1/..."
 sudo cp ../doc/plebtrk.1 /usr/local/man/man1/
 echo "/usr/local/man/man1/plebtrk.1"
