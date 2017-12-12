@@ -30,16 +30,24 @@ Right now, to get this working on **ubuntu 16.04** (and probably variants?) you 
 * inotifywait (**inotify-tools**)
 * ncurses (**libncursesw5** and **libncursesw5-dev**)
 * fftw3 (**libfftw3** and **libfftw3-dev**)
+
 (sudo and aplay are already installed, or were when I tested them)
 
-Unfortunately, when **libncursesw5** is installed on ubuntu, the headers are placed within */usr/lib/ncursesw/*
+Unfortunately, when **libncursesw5** is installed on ubuntu, the headers are placed within */usr/lib/ncursesw/*, 
 therefore each of the header files within *Tracker/include/* and *Tracker/src/main.cpp* need to be modified so that
+
 > #include <ncurses.h>
+
 becomes
+
 > #include <ncursesw/ncurses.h>
+
 and in the *Tracker/src/Makefile* change the LIBS line so that
+
 > LIBS=-lncurses
+
 becomes
+
 > LIBS=-lncursesw
 
 Sorry about this badness, hopefully in a future (or current?) version of Ubuntu **get_wch** will be included within regular (*ncurses.h*)
