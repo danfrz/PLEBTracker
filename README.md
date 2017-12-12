@@ -4,6 +4,11 @@ PLEBTracker is a linux console based audio tracker program inspired by goattrack
 
 *Pattern editor, main song editor window*
 
+On the right are the *Wave*, *Pulse*, and *Filter tables*. (described in *docs/manual.txt*). The sound an instrument makes is determined by the indicies it points to in these tables.
+* The **WAVE** table determines the waveform used for the instrument. 
+* The **PULSE** table determines *pulse width modulation* (described in *docs/wavetable.pdf* and *docs/manual.txt*) of waveforms that use pulse width modulation.
+* The **FILTER** table allows tracks to filter out certain frequencies. How this works is not described in documentation yet. (I'll get to it soon!)
+
 ![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/images/PLEBTracker_InstrumentEditor.png)
 
 *Instrument Editor, with volume envelope visualization. The Volume table on the left determines the shape of the envelope*
