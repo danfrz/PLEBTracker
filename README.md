@@ -33,7 +33,7 @@ Right now, to get this working on **ubuntu 16.04** (and probably variants?) you 
 
 (sudo and aplay are already installed, or were when I tested them)
 
-Unfortunately, when **libncursesw5** is installed on ubuntu, the headers are placed within */usr/lib/ncursesw/*, 
+Unfortunately, when **libncursesw5** is installed on ubuntu, the headers are placed within */usr/include/ncursesw/*, 
 therefore each of the header files within *Tracker/include/* and *Tracker/src/main.cpp* need to be modified so that
 
 > #include <ncurses.h>
