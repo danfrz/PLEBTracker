@@ -9,16 +9,37 @@ first audio program, and I wanted some experience writing an audio program.
 /////////////////////       INTRODUCTION         //////////////////////////////
 
   --Using the interpreter
-At this time PLEBTracker does not produce any sound, it produces a song (.plb)
-file. PLEBInterpreter reads the song file and outputs the raw data of the 
-interpretted song to stdout. To play the song you must have aplay (ALSA play)
-or some equivalent and run "./PLEBInterpreter song.plb | aplay".
+PLEBTracker consists of two programs and four scripts.
+plebtrk, plebtrkdaemon, plebtrkraw
+plebplay, plebitp, plebrender
 
-Update:
-There is now a bashscript `plebtrk` that allows for playback within the tracker,
-but I won't go into the details of that in this document, just know: run plebtrk,
-not plebtrkraw.
+PLEBTracker is designed in c++ but uses bash scripts to play audio.
+Thus, it is split into two parts, the Tracker and the Interpreter.
+The tracker is the interface you use to compose the music and the interpreter
+takes a composed song (.plb file) and produces audio from it.
 
+plebtrk
+    Begins the main tracker interface.
+
+plebrender
+    Renders a .plb song to .flac audio
+
+plebplay
+    Plays a .plb song using aplay (default speaker)
+
+#########################################################################
+For more detailed information on how plebtrk runs:
+
+plebtrkraw is the raw is the interface program, but you can not play audio within it.
+plebitp is the raw interpreter program, it reads a song file and outputs audio data
+to stdout.
+
+plebplay is a script that wraps around plebitp and pipes its output to aplay to play
+the audio on the primary audio device recognized by ALSA.
+
+plebtrk is a wrapper around plebtrkraw which also runs a daemon that waits for the
+tracker to tell it to play a song or excerpt of a song using plebplay.
+#########################################################################
 
   --Navigating the tracker
 To select another window press TAB, then
@@ -28,38 +49,137 @@ To select another window press TAB, then
  + s   | Instrument window
  + e/d | Wave table
  + r/f | Pulse table
+ + t/g | Filter table
 
+///////////////////////////////////////////////////////////////////////////////
+/////////////////////      METADATA WINDOW       //////////////////////////////
+
+Metadata window, located at the top of the screen, allows you to change the form
+and metadata about a song. To edit an element, move to it with the arrow keys and either
+type or use the arrow keys, HOME, END, PGUP, PGDN, DEL. To finalize a change press enter
+otherwise cancel changes by pressing TAB. Keep in mind all numerical fields are hexadecimal.
+
+ROW 1: [NSO] song name__________ TRACKS:XX ROWS:YY BYT/SEG:XXXX/YY
+
+- [NSO]
+N "Zaps" the song, clears all data.
+S saves the song. If a name isn't provided, it saves as song.plb.
+O opens the command bar with the open command pre-typed. Type the path to the song to open.
+
+- song name__________ is a textfield. Use it however you see fit.
+
+- TRACKS:XX ROWS:YY
+Patterns can be thought of as a measure of a song. The number of tracks in a song represent
+the number of instruments that can be playing at the same time (polyphony). The number of
+rows define how many entries (note, instrument, volume, and effect changes) there are in a
+pattern.
+
+-BYT/SEG:XXXX/YY
+BYT corresponds to the number of samples there are within a row. For example, if you are
+using the 8 bit version, one row will produce XXXX bytes. Or XXXX shorts for the 16 bit
+version. SEG corresponds to the number of times tables (volume, wave, pulse, filter tables)
+iterate within a row or "segments" or "ticks" in a row. XXXX should really be divisible by YY.
+
+Segments (sometimes called subdivisions) are the smallest division of data(or time) that you
+have control over. Each track contains a bunch of indexes that refer to different tables
+(current waveform in wave table, pulse index in pulse table, filter index in filter table,
+volume index in the volume table of current instrument). After each segment these indexes are
+iterated by 1 (unless manually overridden, see func FA in wavetable.pdf). 
+
+ROWS and BYT together are responsible for how much time a pattern takes.
+Keeping BYT the same but increasing SEG increases the number of times that table indexes
+iterate within the same time period. Say the volume table in an instrument made it fade out.
+Doubling SEG would make the instrument fade twice as fast.
+
+ROW 2: INSTR instrument name_______ [NCX] XX STEP:X  OCT:X BEAT:X
+
+- instrument name_____ and the number to the right of [NCX] correspond to the currently
+selected instrument.
+
+- [NCX]
+N create a New instrument
+C Clone selected instrument and set as selected
+X Remove selected instrument
+
+- STEP:X
+When you write a note in the pattern editor the cursor can be set to move X entries down.
+
+- BEAT:X
+Changes how rows appear in the interface. Every X row is underlined
+
+- OCT:X
+Changes the octave of notes bound to keys.
+
+ROW 3: ORDER [XX-YY] [v^ NCX v^ NCQX]
+
+Patterns hold a measure of song data. In order for a song to play a pattern more than once,
+a song plays "orders". Each Order points to a pattern. To illustrate, let's say we have
+three patterns of a song. Say the song's orders look like this:
+ORDER# PATTERN#
+1      1
+2      2
+3      1
+4      3
+5      1
+It will play pattern 1 three times, playing patterns 2 and 3 between them.
+
+The first v^ change the selected order. The pattern editor changes focus to the pattern
+pointed to by the order. N (New) creates a new order with a new empty pattern after the
+selected pattern. C (Clone) creates a new order after this order that points to the
+same pattern. X removes the order but does not remove the pattern.
+
+The second v^ changes what pattern the current order points to. N (New) creates a new pattern
+and sets the current order to point to this new pattern. C Clones the selected pattern and sets
+the current order to point to this new pattern. Q clears data in the current pattern.
+X removes the pattern and sets the current order to the pattern before this pattern.
+
+///////////////////////////////////////////////////////////////////////////////
+/////////////////////       PATTERN EDITOR       //////////////////////////////
+
+
+Within the pattern editor, notes are bound to keys of the keyboard.
+In the metadata window you can see what octave is set right now (OCT)
+    Keys are bound according to a QWERTY keyboard.
+    Keys [z to /] and [a to '] are bound to notes of the selected octave.
+    Keys [q to ]] and [1 to =] are bound to notes of the selected octave + 1
+
+    Each progressing note is chosen as the next note of the currently selected
+    scale and key signature. Chromatic C allows you to play all keys and is
+    recommended for people who can intuit notes of key signatures as all
+    notes of an octave are bound to keys, so accidentals are still choosable.
+
+    Choosing key signature in the interface changes nothing about the song,
+    it only changes how notes are bound to keys.
+    
 To change octave, hold SHIFT and press the number key according to the octave
-e.g. SHIFT + 1 = Octave 1
-
-
-
+e.g. SHIFT + 3 = Octave 2
 
 
   --Songs
 Songs contain the following
 fields:
-  | Bytes Per Row
-  | Inter-row Resolution
+  | number of Tracks
+  | number of Rows
+  | number of Bytes Per Row
+  | number of Segments, subdivisions per Row
   | 
 structures:
   | Pattern list
   | Order list
   | Wave table
+  | Pulse table
+  | Filter table
   | Instrument list
   |
 
-  BPR, Bytes per row determines the duration of one row in terms of bytes.
-
-  DIV,`segments`, or `inter-row resolution` subdivides each row into multiple
-  segments, which effectively controls how fast instruments progress on the
-  wave table and volume table. The higher DIV gets, tracks iterate through the
-  tables faster within the duration of a single row.
-
-///////////////////////////////////////////////////////////////////////////////
-  --Pattern Editor
 Patterns contain the data used to determine what notes are played by what
 instruments at what time.
+At the top of the pattern editor you can see labels above a number of TRACKs and
+on the left are row numbers starting from [0, number of rows per pattern)
+
+Next to the track number you can see <), this means that the track is not muted.
+To mute a track, type ":mute 3 4 5..." where the numbers are the tracks to be muted,
+the icon will turn to <X denoting it is muted.
 
 note
 |   instrument
@@ -71,51 +191,18 @@ C-1 00 3F 303
 [HOME]/[END]  focusses the prev/next track
 [PGUP]/[PGDN] focusses 8 rows above/below
 
+ENTER stores the highlighted entry and SPACE will paste it.
+
 The max volume in the pattern editor is 0x3F.
 
-///////////////////////////////////////////////////////////////////////////////
-  --Instrument
-fields:
-  | Wave index
-  |
-structures:
-  | Volume table
-  |
+press SHIFT+M to set the playback mark in the pattern editor. Whenever you place a
+new note, the tracker will automatically play between the cursor and
+the playback mark.
 
-  An instrument's Wave index points to the index
-  in the Wave table that this instrument corresponds to
+See patterneditor.pdf for more information on what things you can do in the pattern
+editor.
 
-  --Volume Table
-  The volume table produces this instrument's volume envelope.
-
-     volume
-     |  segment duration 
-     v  v
-  00|VV DD|
-
-  The first entry in the volume table is the initial volume and has no duration
-  a volume of FF is reserved for jumps, so for instance a volume table like the following:
-
-  00|3f 00|
-  01|00 0F|
-  02|10 01|
-  03|06 01|
-  04|FF 02|
-
-  Would start out at 3F volume, decay to a volume of 0 after F segments,
-  (see BPR/DIV.) then it will loop...
-  02|10 01|
-  03|06 01|
-  forever, producing a Tremor effect
-
-  FA to FF are reserved for functions,
-  |FA XX| is Set Repeat, following volume entries will be repeated XX times before iterating
-  |FB XX| is Set loop counter
-  |FC XX| is Decrement loop counter, then jump if loop counter isn't 0
-  |FF XX| is Jump
-
-///////////////////////////////////////////////////////////////////////////////
-  --Wave Table
+ --Wave Table [TAB + e] or [TAB + d]
   The wave table selects the sounds used by different instruments
 
         Waveform
@@ -123,11 +210,37 @@ structures:
         v  v
   |0000|WW TT|
 
+  Waveforms are listed in waveforms.pdf and are responsible for the timbre of an instrument.
+  While WW are waveforms there are a couple predefined functions, many of which are different
+  kinds of loops. Loops are very important for composing in PLEBTracker.
+  FF XX is the most important and most basic loop.
+
+  After every segment or tick is produced, the table indexes change (including the wave index).
+  Therefore if the wave table contained only one entry  |0000|01 00|  sound will only be
+  produced for a very short time. Placing a loop afterwards that points back to that index
+  will make that sound repeat forever.
+  |0000|01 00|
+  |0001|FF 00|
+
   progressing semitone offsets can produce an arpeggio effect:
   |0000|01 00|
   |0001|01 04|
   |0002|01 07|
   |0003|FF 00|
+
+  The FA loop type can be combined with other loops to make life easier. To slow down
+  an arpeggio effect you can do
+
+  |0000|FA 02|
+  |0001|01 00|
+  |0002|01 04|
+  |0003|01 07|
+  |0004|FF 01|
+
+  And each line after 0000 (besides "non-tick-consuming" functions) will be played twice.
+  To say it consumes a tick is to say it interacts with the wave index in the same way a
+  normal wave entry does and iterates forward normally. At this time only one wave
+  function consumes a tick and it is F4 (see wavetable.pdf).
 
   --Waveforms
   00 - Silence
@@ -137,10 +250,11 @@ structures:
   04 - Sine
   05 - Random
 
-  06 - Square (with duty)
+  06, 0E - Square (with duty)
 
-    These are the basic waveforms, as of now there are around 32 waveforms
-    all of which are detailed in the wavetable.pdf document.
+These are the basic waveforms. As of now there are around 32 waveforms all of which are
+detailed in the wavetable.pdf document.
+
 The wave table also has functions:
   |FF XX| - Jump
 
@@ -173,24 +287,23 @@ The wave table also has functions:
   Akin to a procedure in assembly programming.
   Take for example this pulse procedure
 
-  Instrument with WaveIndex [0008]
+  FD-FE Example Instrument with WaveIndex [0000]
 
-  |0002|.. ..| //Run something here
-  |0003|FE 00| //Jumps back to wherever custom jump was set 
+  |0000|FD 01| //Set custom jump to 01, instrument will return here after a procedure
+  |0001|01 00| //play arpeggio
+  |0002|01 03|
+  |0003|01 07|
+  |0004|FF 08|
   ...
-  |0008|FD 08| //Set base to 08, instrument will return here after a procedure
-  |0009|01 00| //play arpeggio
-  |000A|01 03|
-  |000B|01 07|
-  |000C|FF 02|
-
+  |0008|.. ..| //Run something here
+  |0009|FE XX| //Jumps back to wherever custom jump was set + XX (set it to 0)
+  
   --IMPORTANT--
-  Functions F0 - FF are evaluated instantly! So it is possible to make an
-  infinite loop that will freeze or crash the interpreter.
-  As long as a waveform is played, the wavetable won't get stuck.
+  Functions F0 - FF besides F4 are evaluated instantly! 
+  As long as a waveform is played,
 
-  !] This is no longer entirely true. Now instead of an infinite loop, if the interpreter goes through
-  upwards of some amount of jumps (64 wave function calls) it will give up and choose waveform 0, silence.
+  Instead of an infinite loop, if the interpreter goes through upwards of 64 jumps it will give up
+  and choose waveform 0, silence until the instrument is reset.
 
 the [>] in these examples shows where the instrument enters the wave table
 
@@ -202,7 +315,7 @@ the [>] in these examples shows where the instrument enters the wave table
  >|0003|FD 20| //Also not safe, FD is instantaneous
   |0004|FF 03|
 
-  |0001|01 00| //Is safe, but weird.
+  |0001|01 00| //Is safe, but weird and unnecessary
   |0002|FE 00|
  >|0003|FD 01|
   |0004|FF 01|
@@ -245,26 +358,97 @@ The pulse table has the same jump functions as the wave table.
   |FE XX| - Jump to custom jump location (offset by XX)
   |FF XX| - Jump to XX
 
+///////////////////////////////////////////////////////////////////////////////
+  --Filter Table
+ The filter table is like the pulse table in that non-functional entries only change
+ a parameter. But instead there are 15 different filter parameters where each
+ correspond to a different filter. A track can support up to 15 filters to be
+ executed at the same time. Tracks start out with 0 active filters.
+
+ The F0 function defines the number of active filters. Filters are defaulted to
+ low pass filter (00).
+ 
+ //Decreasing lowpass filter
+ |0000|F0 01| //One active filter (default to low-pass)
+ |0001|EF FF| //Set filter parameter 0 to FFF0
+ |0002|DF F1| //Add -1 to filter parameter 0
+ |0003|FF 02| //Continue to fade low-pass to only allow lower and lower frequencies
+
+ F4 XY allows you to set filter X to the Y type of filter.
+ Types of Filters
+    0 Low Pass
+    1 High Pass
+ 
+ Increasing highpass filter
+ |0000|F0 01| //One active filter
+ |0001|F4 01| //Set to high pass
+ |0002|E0 00| //Set filter parameter 0 to 0000
+ |0003|00 01| //Add 1 to filter parameter 0
+ |0004|FF 03| //Continue to fade high-pass to only allow higher and higher frequencies
+
+ Narrowing boxcar filter
+ |0000|F0 02| //Two active filters, both default to low-pass
+ |0001|F4 11| //Set filter 1 to high pass
+ |0002|EF FF| //Set filter parameter 0 (was defaulted to low pass) to FFF0
+ |0003|E0 00| //Set filter parameter 1 (was set to high pass) to 0000
+ |0004|DF F1| //Add -1 to filter parameter 0 (low pass)
+ |0005|00 01| //Add  1 to filter parameter 1 (high pass)
+ |0006|FF 04| //Continue to fade low and high-pass to only allow narrower frequencies
+
+ Moving boxcar filter
+ |0000|F0 02| 
+ |0001|F4 01| 
+ |0002|E1 00| 
+ |0003|E0 00| 
+ |0004|00 10| //Both filter parameters are increased by 10
+ |0005|FF 04| //Continue to move both filter parameters
+
+///////////////////////////////////////////////////////////////////////////////
+/////////////////////     INSTRUMENT EDITOR      //////////////////////////////
+  --Instrument
+fields:
+  | Wave index
+  |
+structures:
+  | Volume table
+  |
+
+  An instrument's Wave index points to the index in the wave table that this
+  instrument will play first. See wavetable.pdf to see available waveforms to
+  choose from and how they are effected by certain parameters.
 
 
+  --Volume Table
+  The volume table produces this instrument's volume envelope.
 
+     volume
+     |  segment duration 
+     v  v
+  00|VV DD|
 
+  The first entry in the volume table is the initial volume and has no duration
+  a volume of FF is reserved for jumps, so for instance a volume table like the following:
 
+  00|3f 00|
+  01|00 0F|
+  02|10 01|
+  03|06 01|
+  04|FF 02|
 
+  Would start out at 3F volume, decay to a volume of 0 after F segments,
+  (see BPR/DIV.) then it will loop...
+  02|10 01|
+  03|06 01|
+  forever, producing a Tremor effect
 
+  FA to FF are reserved for functions,
+  |FA XX| is Set Repeat, following volume entries will be repeated XX times before iterating
+  |FB XX| is Set loop counter
+  |FC XX| is Decrement loop counter, then jump if loop counter isn't 0
+  |FF XX| is Jump
 
-
-
-
-
-
-
-
-
-
-
-
-
+///////////////////////////////////////////////////////////////////////////////
+ 
 
 
 

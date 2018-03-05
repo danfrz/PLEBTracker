@@ -1,5 +1,4 @@
-This document is currently out of date.
-To see a more exhaustive and descriptive list, see the plebtrkraw(1) man page.
+To see a more exhaustive and descriptive list, see the plebtrk man page
 In the manual is also a list of commands that you can run in the
 vim-bar/command line.
 
@@ -7,19 +6,31 @@ vim-bar/command line.
 [TAB] +   Select...
  ..q    Metadata window
  ..w    Pattern window
+
  ..a    Volume table
  ..s    Instrument window
+
  ..e/d  Wave table
+ ..r/f  Pulse table
+ ..t/g  Filter table
 
-The number spinners support PGUP, PGDOWN, HOME, END
-The textboxes support HOME, END, INS, DEL
+Use the arrow keys to navigate within a window.
+Within many of the PGUP, PGDOWN, HOME, END, INS, DEL, and
+BACKSPACE are supported.
 
-To edit a UI element, press ENTER, to cancel press TAB
+To edit a field in the metadata and instrument windows,
+navigate to the field and press ENTER to begin editing it. 
+ENTER confirms the edit, TAB cancels it.
 
+Here are some other important binds:
 SHIFT +
  .._    Previous Instrument
  ..+    Next Instrument
  ..k    Quick Change Instrument
+
+ ..{    Previous Order
+ ..}    Next Order
+
  ..l    Quick Change Wave Index
  ..j    Quick Change Pattern
  
@@ -31,8 +42,6 @@ SHIFT +
 SHIFT +
  ..{1..7} to Select Octave {1..7}
 
- ..{    Previous Order
- ..}    Next Order
  ..>    Previous Pattern
  ..?    Next Pattern
  ..m    Set Playback Mark
