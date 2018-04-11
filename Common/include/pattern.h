@@ -4,8 +4,8 @@
 #include<istream>
 #include<ostream>
 
-//twelvth root of 2
-#define NOTEMULT 1.05946309435929526456f
+#define NOTEMULT 1.05946309435929526456f //12th root of 2 (12 note chromatic scale)
+//#define NOTEMULT 1.04427378242741384032f //16th root of 2 (16 note chromatic scale)
 #define CHROMATIC_NOTES 12
 //more or less arbitrary
 //44100 (hz) / 10

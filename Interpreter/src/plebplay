@@ -6,8 +6,9 @@ if [[ ("$#" < 1) ]] ; then
 fi
 
 LOGPATH="/var/tmp/plebtrk/itplog.log"
-
+plebplayName=`basename "$0"`
+suffix=${plebplayName#*y} #Text after first y plebpla<y>
 echo "" >"$LOGPATH"
-plebitp 4800 2>>"$LOGPATH" "$@"  | aplay --rate=48000 --format=S16_LE 2>>"$LOGPATH"
+plebitp$suffix 4800 2>>"$LOGPATH" "$@"  | aplay --rate=48000 --format=S16_LE 2>>"$LOGPATH"
 
 

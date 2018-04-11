@@ -44,6 +44,9 @@ fi
 
 echo "" > "$TEMPDIR"signal
 
+plebtrkDaemonName=`basename "$0"`
+suffix=${plebtrkDaemonName#*n} #Text after first n plebtrkdaemo<n>
+
 #make sure the process cleans up
 #catch termination call and break
 #from loop when caught
@@ -58,7 +61,7 @@ while inotifywait -qqe close_write "$TEMPDIR"signal ; do
             stop_playback
             #When plebitp is killed bash outputs "job killed! :D"
             #so silence it by piping cerr to null
-            plebplay "$TEMPDIR"playback.plb $AMP $MUTE  2>/dev/null &
+            plebplay$suffix "$TEMPDIR"playback.plb $AMP $MUTE  2>/dev/null &
             ;;
         x) #Stop
             stop_playback
@@ -73,7 +76,7 @@ while inotifywait -qqe close_write "$TEMPDIR"signal ; do
             AMP=$FULLCMD
             ;;
         r) #render
-            plebrender "$TEMPDIR"playback.plb $AMP $MUTE 2>/dev/null &
+            plebrender$suffix "$TEMPDIR"playback.plb $AMP $MUTE 2>/dev/null &
             mv "/var/tmp/plebtrk/render/$1"playback.flac .
             ;;
 

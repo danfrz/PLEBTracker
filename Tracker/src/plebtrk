@@ -3,12 +3,16 @@
 TEMPDIR="/var/tmp/plebtrk"
 LOGPATH="$TEMPDIR/trklog.log"
 
+plebtrkName=`basename "$0"`
+suffix=${plebtrkName#*k} #Text after first k plebtr<k>
+
+
 mkdir $TEMPDIR 2>/dev/null
 
 echo "" > "$LOGPATH"
-plebtrkdaemon $$ 2>"$LOGPATH" & #Run the daemon in the background
-sleep 0.1 # the daemon do its thing for a moment
-plebtrkraw 2>"$LOGPATH" "$@"
+plebtrkdaemon$suffix $$ 2>"$LOGPATH" & #Run the daemon in the background
+sleep 0.1 #let the daemon do its thing for a moment
+plebtrkraw$suffix 2>"$LOGPATH" "$@"
 
 #kill plebtrkdaemon's aplay process so it stops
 aplaypid=`ps | grep aplay`

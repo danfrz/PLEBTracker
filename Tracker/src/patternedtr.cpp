@@ -125,10 +125,10 @@ unsigned int patternedtr::addNotes(const unsigned int &n1, const unsigned int &n
     unsigned int out = (n1 & R_OCTAVE) + (n2 & R_OCTAVE);
     unsigned int notes = (n1 & R_NOTE) + (n2 & R_NOTE);
 
-    while(notes > 0x16000000)
+    while(notes > (CHROMATIC_NOTES-1)*0x02000000)
     {
-        out += 0x20000000;
-        notes -= 0x18000000;
+        out += 0x20000000;//Add an octave
+        notes -= CHROMATIC_NOTES*0x02000000;
     }
     out |= notes;
     return out;
@@ -149,11 +149,11 @@ unsigned int patternedtr::subNotes(const unsigned int &n1, const unsigned int &n
     unsigned int note1 = (n1 & R_NOTE);
     unsigned int note2 = (n2 & R_NOTE);
 
-    while(note2 > 0x16000000)
+    while(note2 > (CHROMATIC_NOTES-1)*0x02000000)
     {
         std::cerr << "subtracting: " << out << "--" << (out-0x20000000) << '\n';
         out -= 0x20000000;
-        note2 =(note2 - 0x18000000);
+        note2 =(note2 - CHROMATIC_NOTES*0x02000000);
     }
 
     std::cerr << "out=" << std::hex << out << " note1=" << note1 << " note2=" << note2 << '\n';
@@ -162,7 +162,7 @@ unsigned int patternedtr::subNotes(const unsigned int &n1, const unsigned int &n
     {
         out -= 0x20000000;
         std::cerr << "case1, " << out;
-        out += (12*0x02000000 - note2) + note1;
+        out += (CHROMATIC_NOTES*0x02000000 - note2) + note1;
         std::cerr << ":" << out << '\n';
     }
     else
@@ -181,7 +181,7 @@ void patternedtr::populateNoteMap()
 {
     //int numkeys = strlen(whitekeys);
     int acc, i;
-    for(acc = 0, i = 0; acc < 12 && i < 11 && scaleconst[i] != 0; i++)
+    for(acc = 0, i = 0; acc < CHROMATIC_NOTES && i < CHROMATIC_NOTES-1 && scaleconst[i] != 0; i++)
         acc += scaleconst[i];
 
     unsigned int base = 0x02000000*key,
@@ -337,49 +337,119 @@ char *editor::noteString(char *string, unsigned int entry)
 
     string[1]='-';
     string[2]='0' + oct;
-    switch(note)
+    if(CHROMATIC_NOTES == 12)
     {
-        case 0:
-            string[0]='C';
-            break;
-        case 1:
-            string[0]='C';
-            string[1]='#';
-            break;
-        case 2:
-            string[0]='D';
-            break;
-        case 3:
-            string[0]='D';
-            string[1]='#';
-            break;
-        case 4:
-            string[0]='E';
-            break;
-        case 5:
-            string[0]='F';
-            break;
-        case 6:
-            string[0]='F';
-            string[1]='#';
-            break;
-        case 7:
-            string[0]='G';
-            break;
-        case 8:
-            string[0]='G';
-            string[1]='#';
-            break;
-        case 9:
-            string[0]='A';
-            break;
-        case 10:
-            string[0]='A';
-            string[1]='#';
-            break;
-        case 11:
-            string[0]='B';
-            break;
+        switch(note)
+        {
+            case 0:
+                string[0]='C';
+                break;
+            case 1:
+                string[0]='C';
+                string[1]='#';
+                break;
+            case 2:
+                string[0]='D';
+                break;
+            case 3:
+                string[0]='D';
+                string[1]='#';
+                break;
+            case 4:
+                string[0]='E';
+                break;
+            case 5:
+                string[0]='F';
+                break;
+            case 6:
+                string[0]='F';
+                string[1]='#';
+                break;
+            case 7:
+                string[0]='G';
+                break;
+            case 8:
+                string[0]='G';
+                string[1]='#';
+                break;
+            case 9:
+                string[0]='A';
+                break;
+            case 10:
+                string[0]='A';
+                string[1]='#';
+                break;
+            case 11:
+                string[0]='B';
+                break;
+        }
+    }
+    else if (CHROMATIC_NOTES == 16)
+    {
+        //H to P
+        switch(note)
+        {
+            case 0:
+                string[0]='H';
+                break;
+            case 1:
+                string[0]='H';
+                string[1]='#';
+                break;
+            case 2:
+                string[0]='I';
+                break;
+            case 3:
+                string[0]='I';
+                string[1]='#';
+                break;
+            case 4:
+                string[0]='J';
+                break;
+            case 5:
+                string[0]='K';
+                break;
+            case 6:
+                string[0]='K';
+                string[1]='#';
+                break;
+            case 7:
+                string[0]='L';
+                break;
+            case 8:
+                string[0]='L';
+                string[1]='#';
+                break;
+            case 9:
+                string[0]='M';
+                break;
+            case 10:
+                string[0]='N';
+                break;
+            case 11:
+                string[0]='N';
+                string[1]='#';
+                break;
+            case 12:
+                string[0]='O';
+                break;
+            case 13:
+                string[0]='O';
+                string[1]='#';
+                break;
+            case 14:
+                string[0]='P';
+                break;
+            case 15:
+                string[0]='P';
+                string[1]='#';
+                break;
+        }
+    }
+    else
+    {
+        //CHROMATIC_NOTES can not be above 16 because of self-imposed space requirements
+        string[0] = 'A' + ((note+2)%CHROMATIC_NOTES);
     }
     return string;
 }

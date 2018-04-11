@@ -1279,9 +1279,9 @@ sample_res *itrp::renderPattern(int start, int end, unsigned int &bytes)
                         _oct  = (row & R_OCTAVE) >> RI_OCTAVE;
                         _note = (row & R_NOTE) >> RI_NOTE;
                         if(_fx != 0x3)
-                            seltrk->frq = BASEFRQ/std::pow(NOTEMULT, 12*_oct+_note);
+                            seltrk->frq = BASEFRQ/std::pow(NOTEMULT, double(CHROMATIC_NOTES)*_oct+_note);
                         else
-                            seltrk->nextfrq = BASEFRQ/std::pow(NOTEMULT, 12*_oct+_note);
+                            seltrk->nextfrq = BASEFRQ/std::pow(NOTEMULT, double(CHROMATIC_NOTES)*_oct+_note);
                     }
 
                     //If instrument changes

@@ -18,7 +18,11 @@ echo "   ncurses"     #trk
 echo "   aplay"       #itp
 echo "   inotifywait" #trkdaemon
 echo ""
-
+suffix=""
+if [ $# -eq 1 ]
+then
+suffix=$1
+fi
 
 echo "Creating log files"
 userName=$USER
@@ -33,12 +37,12 @@ touch /var/tmp/plebtrk/itplog.log
 touch /var/tmp/plebtrk/trklog.log
 
 echo "Copying executables into /usr/bin/..."
-sudo cp ./plebtrk /usr/bin/plebtrk
-echo "/usr/bin/plebtrk"
-sudo cp ./plebtrkdaemon /usr/bin/plebtrkdaemon
-echo "/usr/bin/plebtrkdaemon"
-sudo cp ./plebtrkraw /usr/bin/plebtrkraw
-echo "/usr/bin/plebtrkraw"
+sudo cp ./plebtrk "/usr/bin/plebtrk$1"
+echo "/usr/bin/plebtrk$1"
+sudo cp ./plebtrkdaemon "/usr/bin/plebtrkdaemon$1"
+echo "/usr/bin/plebtrkdaemon$1"
+sudo cp ./plebtrkraw "/usr/bin/plebtrkraw$1"
+echo "/usr/bin/plebtrkraw$1"
 echo ""
 
 if [ ! -d /usr/local/man ]; then
