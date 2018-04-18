@@ -7,7 +7,7 @@ PLEBTracker is a linux console based audio tracker program inspired by goattrack
 On the right are the *Wave*, *Pulse*, and *Filter tables*. (described in *docs/manual.txt*). The sound an instrument makes is determined by the indicies it points to in these tables.
 * The **WAVE** table determines the waveform used for the instrument. 
 * The **PULSE** table determines *pulse width modulation* (described in *docs/wavetable.pdf* and *docs/manual.txt*) of waveforms that use pulse width modulation.
-* The **FILTER** table allows tracks to filter out certain frequencies. How this works is not described in documentation yet. (I'll get to it soon!)
+* The **FILTER** table allows tracks to filter out certain frequencies (described in *docs/manual.txt*) .
 
 ![ScreenShot](https://github.com/danfrz/PLEBTracker/blob/master/docs/images/PLEBTracker_InstrumentEditor.png)
 
@@ -18,6 +18,8 @@ and wanted to implement what I've been learning by using other trackers and stud
 
 With this program, like other trackers, you can compose music (.plb modules) and listen to them.
 All of the sounds produced in this tracker are synthesized, meaning there are no samples.
+
+If anyone is having trouble installing or compiling I'd be happy to hear about it! Make an issue or email me.
 
 ## Requirements
 In order to run and build PLEBTracker the following programs and libraries are required.
@@ -108,3 +110,7 @@ The most efficient and effective way to perform actions in the tracker's interfa
 Those commands and other binds can be reviewed on the plebtrk man page.
 
 If you're interested, look through the docs folder, the manual provides a good introduction to the tracker (I hope) and wavetable.pdf details what synths/wave generators have been implemented so far. patternedtr.pdf has information on the effects that are available in the pattern editor as well as going over some of its' quirks.
+
+## Custom Chromatic Scales
+
+It is now possible to compile PLEBTracker to use arbitrary chromatic scales with the change of just two preprocessor directives! (so long as the notes you want in the scale are exponentially interpolated between octaves, not arbitrary.) The notes in the chromatic scale is 12 by default (C C# D D# E F F# G G# A A# B) this can be changed in *Common/include/pattern.h* Only values between 0 and 16 will work due to space restrictions of the module file. Change **CHROMATIC_NOTES** to 0 to 16, change **NOTEMULT** to the CHROMATIC_NOTES root of 2, e.g. if CHROMATIC_NOTES is 12, NOTEMULT = the twelvth root of two. The interface will automatically bind your new scale to the keys on your keyboard. Chromatic scales that aren't 12 or 16 are assigned letters starting from A and on, but placing C as the lowest in the octave regardless of scale.
