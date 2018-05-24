@@ -39,6 +39,25 @@ the audio on the primary audio device recognized by ALSA.
 
 plebtrk is a wrapper around plebtrkraw which also runs a daemon that waits for the
 tracker to tell it to play a song or excerpt of a song using plebplay.
+
+Plans:
+I am strongly considering changing the structure of this project. When I began
+I didn't think I'd really get this far and so I put up with piping to aplay in
+plebplay as the way that audio was going to work. I ran into issues trying OpenAL
+and I just wanted to get on making the interface so I stuck with it.
+
+Plan is to change Interpreter to play using OpenAL, which is what I wanted in the first place.
+After that is done, migrate interpreter code from the interpreter program into a class that both
+the interpreter program and tracker program will use. Cutting out the unnecessary bash script nonsense.
+Using OpenAL instead of the akward daemon stuff also opens the door for possibly a
+native Windows client using pdcurses?
+
+Another thing that would be cool to improve is efficiency of filtering. It's really slow.
+But that's not something I have the time or knowhow of how to improve so that's going to
+be that for the forseeable future unless someone can help me out.
+
+These changes aren't probably going to happen at all fast as I'm working full time now and
+doing other things with my free time for the moment.
 #########################################################################
 
   --Navigating the tracker
