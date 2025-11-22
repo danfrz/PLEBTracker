@@ -193,7 +193,7 @@ bool editor::getCommand(const char * autocmd)
                     charInputBuffer[textCursorPos] = ' ';
                 }
             case KEY_DC://Move the rest of the characters in the inout buffer downwrds
-            case ALT_BACKSPACE:
+            case KEY_BACKSPACE:
                 {
                     int length = strlen(charInputBuffer);
                     for(int i = textCursorPos+1; i < length; i++)

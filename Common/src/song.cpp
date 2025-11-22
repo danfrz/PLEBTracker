@@ -1,5 +1,6 @@
 #include "song.h"
 #include <iostream>
+#include <cstring>
 
 Song::Song(bool fill_defaults)
 {
@@ -9,16 +10,7 @@ Song::Song(bool fill_defaults)
     for(int i = 9; i < SONGNAME_LENGTH+1; i++)
         songname[i] = 0;
 
-    songname[0]='s';
-    songname[1]='o';
-    songname[2]='n';
-    songname[3]='g';
-    songname[4]=' ';
-    songname[5]='n';
-    songname[6]='a';
-    songname[7]='m';
-    songname[8]='e';
-
+    std::memcpy(songname, "song name", 9);
 
     instruments = new Instrument*[256];
     num_instruments = 0;
@@ -67,8 +59,9 @@ Song::Song(bool fill_defaults)
         num_orders = 1;
         orders[0] = 0;
 
-        waveEntries = 1;
+        waveEntries = 2;
         waveTable[0] = 0x0100;
+        waveTable[1] = 0xFF00;
 
         pulseEntries = 2;
         pulseTable[0] = 0x0000;

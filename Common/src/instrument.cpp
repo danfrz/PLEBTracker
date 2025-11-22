@@ -27,7 +27,7 @@ Instrument::Instrument()
     volTable = new unsigned short[INST_VOL_SIZE];//64 integers worth
     for(int i = 0; i < INST_VOL_SIZE; i++)
         volTable[i]=0;
-    volTable[0] = 0x3F00;
+    volTable[0] = 0x1800;
     pulseIndex = 0xFFFF;
     filterIndex = 0xFFFF;
 }
